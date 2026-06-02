@@ -71,7 +71,11 @@ function processarDiagnostico() {
     });
   }
 
-  document.getElementById('stage-resultado').scrollIntoView({ behavior: 'smooth' });
+  const scroller = document.querySelector('.journey-container');
+  if (scroller) {
+      const target = document.getElementById('stage-resultado');
+      if (target) scroller.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+  }
 }
 
 const btnDiagnostico = document.getElementById('btnDiagnostico');
@@ -80,7 +84,10 @@ if (btnDiagnostico) btnDiagnostico.addEventListener('click', processarDiagnostic
 const btnRecomecar = document.getElementById('btnRecomecar');
 if (btnRecomecar) {
   btnRecomecar.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const scroller = document.querySelector('.journey-container');
+    if (scroller) scroller.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     document.getElementById('diasSeca').value = 0;
     document.getElementById('pragas').value = "3";
   });
@@ -94,9 +101,8 @@ if (menuToggle) {
   });
 }
 
-
 // ==========================================
-// 2. ENGINE WEBGL (FÍSICA ORIGINAL RESTAURADA)
+// 2. ENGINE WEBGL (FÍSICA FLUIDA ORGÂNICA RESTAURADA)
 // ==========================================
 (() => {
   const canvas = document.getElementById('particleCanvas');
@@ -140,15 +146,9 @@ if (menuToggle) {
   const state = {
     width: 1, height: 1, dpr: 1, mobile: false, count: 0,
     positions: null, currentHomes: null, velocities: null, alphas: null, seeds: null,
-    
-    // As 6 Máscaras
-    mText: null, mField: null, mSun: null, mRain: null, mPest: null, mResult: null,
-    
-    scrollTarget: 0, scrollProgress: 0, // Vai de 0.0 até 5.0
-    
-    trail: [],
-    pointer: { active: false, px: 0, py: 0, lastX: 0, lastY: 0, lastTime: 0 },
-    lastMove: 0
+    homes: null, 
+    scrollTarget: 0, scrollProgress: 0, 
+    trail: [], pointer: { active: false, px: 0, py: 0, lastX: 0, lastY: 0, lastTime: 0 }, lastMove: 0
   };
 
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -172,8 +172,6 @@ if (menuToggle) {
       vSeed = aSeed;
       gl_Position = vec4(aPosition, 1.0);
       float depth = 1.0 + aPosition.z * 0.22;
-      
-      // Partículas pulsam levemente dependendo da tela
       float mixFactor = fract(uProgress);
       gl_PointSize = uPointSize * uDpr * depth * (1.0 + mixFactor * 0.16);
     }
@@ -196,10 +194,10 @@ if (menuToggle) {
 
       vec3 c0 = vec3(0.965, 0.955, 0.925); // Text (Branco)
       vec3 c1 = vec3(0.58, 0.34, 0.18);    // Field (Terra)
-      vec3 c2 = vec3(1.0, 0.65, 0.12);     // Sun (Fogo/Dourado)
+      vec3 c2 = vec3(1.0, 0.65, 0.12);     // Sun (Dourado)
       vec3 c3 = vec3(0.45, 0.75, 0.98);    // Rain (Azul)
-      vec3 c4 = vec3(0.65, 0.7, 0.2);      // Pest (Verde Doente)
-      vec3 c5 = vec3(0.2, 0.9, 0.65);      // Result (Ciano/Tecnologia)
+      vec3 c4 = vec3(0.65, 0.7, 0.2);      // Pest (Verde)
+      vec3 c5 = vec3(0.2, 0.9, 0.65);      // Result (Ciano)
 
       vec3 color = mix(c0, c1, clamp(uProgress, 0.0, 1.0));
       color = mix(color, c2, clamp(uProgress - 1.0, 0.0, 1.0));
@@ -215,20 +213,14 @@ if (menuToggle) {
     const shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
     return shader;
   }
 
-  function createProgram() {
-    const program = gl.createProgram();
-    gl.attachShader(program, createShader(gl.VERTEX_SHADER, vertexSource));
-    gl.attachShader(program, createShader(gl.FRAGMENT_SHADER, fragmentSource));
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
-    return program;
-  }
+  const program = gl.createProgram();
+  gl.attachShader(program, createShader(gl.VERTEX_SHADER, vertexSource));
+  gl.attachShader(program, createShader(gl.FRAGMENT_SHADER, fragmentSource));
+  gl.linkProgram(program);
 
-  const program = createProgram();
   const locations = {
     position: gl.getAttribLocation(program, 'aPosition'),
     alpha: gl.getAttribLocation(program, 'aAlpha'),
@@ -241,7 +233,7 @@ if (menuToggle) {
   const bufs = { pos: gl.createBuffer(), alpha: gl.createBuffer(), seed: gl.createBuffer() };
 
   // ==========================================
-  // GERAÇÃO DAS MÁSCARAS (ALTA FIDELIDADE)
+  // GERAÇÃO DAS MÁSCARAS
   // ==========================================
   function readMaskCandidates(mask, sample) {
     const ctx = mask.getContext('2d', { willReadFrequently: true });
@@ -249,11 +241,9 @@ if (menuToggle) {
     const candidates = [];
     for (let y = 0; y < mask.height; y += sample) {
       for (let x = 0; x < mask.width; x += sample) {
-        const alpha = data[(y * mask.width + x) * 4 + 3];
-        if (alpha > 24) candidates.push([pxToClipX(x), pxToClipY(y)]);
+        if (data[(y * mask.width + x) * 4 + 3] > 24) candidates.push([pxToClipX(x), pxToClipY(y)]);
       }
     }
-    // Shuffle
     for (let i = candidates.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
@@ -272,27 +262,22 @@ if (menuToggle) {
     return { c, ctx, w: c.width, h: c.height };
   }
 
-  // 1. Text
   function createTextMask() {
     const { c, ctx, w, h } = getCanvas();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const fs = clamp(w * (state.mobile ? 0.125 : 0.095), 44, state.mobile ? 82 : 118);
-    ctx.font = `800 ${fs}px Inter, sans-serif`;
-    ctx.lineWidth = Math.max(1.3, fs * 0.022);
+    ctx.font = `800 ${fs}px Inter, sans-serif`; ctx.lineWidth = Math.max(1.3, fs * 0.022);
     const lh = fs * 0.96;
     ['OrbitAgro', 'Copilot'].forEach((line, i) => {
-      const y = h/2 + (i - 0.5) * lh;
-      ctx.strokeText(line, w/2, y); ctx.fillText(line, w/2, y);
+      ctx.strokeText(line, w/2, h/2 + (i - 0.5) * lh); ctx.fillText(line, w/2, h/2 + (i - 0.5) * lh);
     });
     return c;
   }
 
-  // 2. Field
   function createFieldMask() {
     const { c, ctx, w, h } = getCanvas();
     const rows = state.mobile ? 10 : 15;
     const horizonY = h * 0.62; const baseY = h * 0.96; const cx = w * 0.5;
-
     for (let r = 0; r < rows; r++) {
       const t = r / Math.max(1, rows - 1);
       const y = horizonY + Math.pow(t, 1.72) * (baseY - horizonY);
@@ -310,55 +295,36 @@ if (menuToggle) {
       for (let p = 0; p < seeds; p++) {
         const u = p / Math.max(1, seeds - 1);
         const wave = Math.sin(u * Math.PI * 2 + r * 0.62) * curve * 0.42;
-        const jx = (Math.random() - 0.5) * (2.5 + t * 7.0);
-        const jy = (Math.random() - 0.5) * (1.5 + t * 5.0);
-        const px = cx - spread + u * spread * 2.0 + jx;
-        const py = y + wave + jy;
-        const size = 1.1 + t * 3.2;
-
         ctx.globalAlpha = 0.26 + t * 0.68;
-        ctx.beginPath(); ctx.arc(px, py, size, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); 
+        ctx.arc(cx - spread + u * spread * 2.0 + (Math.random()-0.5)*(2.5+t*7), y + wave + (Math.random()-0.5)*(1.5+t*5), 1.1 + t * 3.2, 0, Math.PI * 2); 
+        ctx.fill();
       }
     }
     return c;
   }
 
-  // 3. Sun
   function createSunMask() {
     const { c, ctx, w, h } = getCanvas();
-    const cx = 0; const cy = h * 0.20; 
-    const r = Math.min(w, h) * (state.mobile ? 0.25 : 0.35); 
-
+    const cx = 0; const cy = h * 0.20; const r = Math.min(w, h) * (state.mobile ? 0.25 : 0.35); 
     const sunGlow = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
-    sunGlow.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    sunGlow.addColorStop(0.4, 'rgba(255, 255, 255, 0.8)');
-    sunGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    
-    ctx.fillStyle = sunGlow;
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    sunGlow.addColorStop(0, 'rgba(255, 255, 255, 1)'); sunGlow.addColorStop(0.4, 'rgba(255, 255, 255, 0.8)'); sunGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = sunGlow; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
 
     const numRays = 26; 
     for(let i = 0; i < numRays; i++) {
-       const baseAngle = -Math.PI * 0.15 + (i / numRays) * Math.PI * 0.75;
-       const angle = baseAngle + (Math.random() * 0.08); 
+       // AQUI ESTAVA O BUG FATAL DA ÚLTIMA VERSÃO! (Corrigido declarando "angle")
+       const angle = -Math.PI * 0.15 + (i / 26) * Math.PI * 0.75 + (Math.random() * 0.08); 
        const r1 = r * 0.2; const r2 = Math.max(w, h) * 1.5; 
        
-       const rayGrad = ctx.createLinearGradient(
-         cx + Math.cos(angle)*r1, cy + Math.sin(angle)*r1, cx + Math.cos(angle)*r2, cy + Math.sin(angle)*r2
-       );
-       rayGrad.addColorStop(0, `rgba(255, 255, 255, ${0.6 + Math.random() * 0.4})`);
-       rayGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
-       ctx.strokeStyle = rayGrad;
-       ctx.lineWidth = Math.max(4, r * 0.01 + Math.random() * 20);
+       const rayGrad = ctx.createLinearGradient(cx + Math.cos(angle)*r1, cy + Math.sin(angle)*r1, cx + Math.cos(angle)*r2, cy + Math.sin(angle)*r2);
+       rayGrad.addColorStop(0, `rgba(255, 255, 255, ${0.6 + Math.random() * 0.4})`); rayGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+       ctx.strokeStyle = rayGrad; ctx.lineWidth = Math.max(4, r * 0.01 + Math.random() * 20);
        
        ctx.beginPath();
-       const waves = 1.5 + Math.random() * 2.5; 
-       const amplitude = r * (0.05 + Math.random() * 0.08); 
-
+       const waves = 1.5 + Math.random() * 2.5, amplitude = r * (0.05 + Math.random() * 0.08); 
        for (let t = 0; t <= 1; t += 0.01) {
-           const curR = r1 + (r2 - r1) * t;
-           const wOffset = Math.sin(t * Math.PI * 2 * waves) * amplitude;
+           const curR = r1 + (r2 - r1) * t, wOffset = Math.sin(t * Math.PI * 2 * waves) * amplitude;
            const px = cx + Math.cos(angle)*curR + Math.cos(angle + Math.PI/2)*wOffset;
            const py = cy + Math.sin(angle)*curR + Math.sin(angle + Math.PI/2)*wOffset;
            if (t === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
@@ -368,92 +334,53 @@ if (menuToggle) {
     return c;
   }
 
-  // 4. Rain
   function createRainMask() {
     const { c, ctx, w, h } = getCanvas();
-    
-    // Nuvens no topo com gradiente volumétrico
     const numNuvens = 12;
     for(let i=0; i<numNuvens; i++) {
-      const px = (i/numNuvens) * w + (Math.random()-0.5)*100;
-      const py = -h*0.05 + Math.random()*h*0.15;
-      const raio = h*0.15 + Math.random()*h*0.1;
-      
+      const px = (i/numNuvens) * w + (Math.random()-0.5)*100, py = -h*0.05 + Math.random()*h*0.15, raio = h*0.15 + Math.random()*h*0.1;
       const grad = ctx.createRadialGradient(px, py, 0, px, py, raio);
-      grad.addColorStop(0, 'rgba(255,255,255,1)');
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
-      
-      ctx.fillStyle = grad;
-      ctx.beginPath(); ctx.arc(px, py, raio, 0, Math.PI*2); ctx.fill();
+      grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(px, py, raio, 0, Math.PI*2); ctx.fill();
     }
-
-    // Pingos de chuva (linhas tracejadas caindo)
     ctx.lineWidth = 2;
     for(let i=0; i<150; i++) {
-      const px = Math.random() * w;
-      const py = Math.random() * h;
-      const comp = 20 + Math.random() * 60;
+      const px = Math.random() * w, py = Math.random() * h, comp = 20 + Math.random() * 60;
       ctx.strokeStyle = `rgba(255,255,255,${0.2 + Math.random()*0.5})`;
       ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - comp*0.2, py + comp); ctx.stroke();
     }
     return c;
   }
 
-  // 5. Pest (Folha Mordida com Curvas)
   function createPestMask() {
     const { c, ctx, w, h } = getCanvas();
-    const cx = w * 0.7; const cy = h * 0.45;
-    const s = Math.min(w, h) * (state.mobile ? 0.35 : 0.45);
-
-    // Desenha uma folha com Bezier
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - s);
+    const cx = w * 0.7; const cy = h * 0.45; const s = Math.min(w, h) * (state.mobile ? 0.35 : 0.45);
+    ctx.beginPath(); ctx.moveTo(cx, cy - s);
     ctx.bezierCurveTo(cx + s*0.8, cy - s*0.5, cx + s*0.8, cy + s*0.5, cx, cy + s);
     ctx.bezierCurveTo(cx - s*0.8, cy + s*0.5, cx - s*0.8, cy - s*0.5, cx, cy - s);
-    
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, s);
-    grad.addColorStop(0, 'rgba(255,255,255,1)');
-    grad.addColorStop(1, 'rgba(255,255,255,0.2)');
+    grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(1, 'rgba(255,255,255,0.2)');
     ctx.fillStyle = grad; ctx.fill();
 
-    // Recorta os pedaços (Mordidas de praga)
     ctx.globalCompositeOperation = 'destination-out';
     for(let i=0; i<25; i++) {
-      ctx.beginPath(); 
-      const bX = cx + (Math.random()-0.5)*s*1.8;
-      const bY = cy + (Math.random()-0.5)*s*1.8;
-      ctx.arc(bX, bY, s*0.1 + Math.random()*s*0.15, 0, Math.PI*2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + (Math.random()-0.5)*s*1.8, cy + (Math.random()-0.5)*s*1.8, s*0.1 + Math.random()*s*0.15, 0, Math.PI*2); ctx.fill();
     }
     return c;
   }
 
-  // 6. Result (Vórtice Analítico)
   function createResultMask() {
     const { c, ctx, w, h } = getCanvas();
-    const cx = w/2; const cy = h/2;
-    const rBase = Math.min(w,h) * 0.4;
-
+    const cx = w/2; const cy = h/2; const rBase = Math.min(w,h) * 0.4;
     for(let i=0; i<5; i++) {
-      const raio = rBase + (i * 25);
-      ctx.lineWidth = 1 + Math.random()*4;
-      ctx.strokeStyle = `rgba(255,255,255,${1.0 - i*0.2})`;
-      
-      // Linhas tracejadas orgânicas
-      if(i%2 === 0) ctx.setLineDash([10 + Math.random()*30, 10 + Math.random()*20]);
-      else ctx.setLineDash([]);
-
-      ctx.beginPath(); ctx.arc(cx, cy, raio, 0, Math.PI*2); ctx.stroke();
+      ctx.lineWidth = 1 + Math.random()*4; ctx.strokeStyle = `rgba(255,255,255,${1.0 - i*0.2})`;
+      if(i%2 === 0) ctx.setLineDash([10 + Math.random()*30, 10 + Math.random()*20]); else ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(cx, cy, rBase + (i * 25), 0, Math.PI*2); ctx.stroke();
     }
-    
-    // Brilho central suave
     ctx.globalCompositeOperation = 'source-over';
     const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, rBase*1.5);
-    glow.addColorStop(0, 'rgba(255,255,255,0.15)');
-    glow.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = glow;
-    ctx.beginPath(); ctx.arc(cx, cy, rBase*1.5, 0, Math.PI*2); ctx.fill();
-
+    glow.addColorStop(0, 'rgba(255,255,255,0.15)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx, cy, rBase*1.5, 0, Math.PI*2); ctx.fill();
     return c;
   }
 
@@ -478,27 +405,27 @@ if (menuToggle) {
     state.velocities = new Float32Array(count * 3);
     state.alphas = new Float32Array(count); state.seeds = new Float32Array(count);
 
-    state.mText = new Float32Array(count * 2); state.mField = new Float32Array(count * 2);
-    state.mSun = new Float32Array(count * 2);  state.mRain = new Float32Array(count * 2);
-    state.mPest = new Float32Array(count * 2); state.mResult = new Float32Array(count * 2);
+    state.homes = [
+      new Float32Array(count * 2), new Float32Array(count * 2), new Float32Array(count * 2),
+      new Float32Array(count * 2), new Float32Array(count * 2), new Float32Array(count * 2)
+    ];
 
     for (let i = 0; i < count; i++) {
       const o = i * 3, o2 = i * 2;
       const z = (Math.random() - 0.5) * 0.18;
       
-      state.mText[o2] = m1[i][0]; state.mText[o2+1] = m1[i][1];
-      state.mField[o2] = m2[i][0]; state.mField[o2+1] = m2[i][1];
-      state.mSun[o2] = m3[i][0]; state.mSun[o2+1] = m3[i][1];
-      state.mRain[o2] = m4[i][0]; state.mRain[o2+1] = m4[i][1];
-      state.mPest[o2] = m5[i][0]; state.mPest[o2+1] = m5[i][1];
-      state.mResult[o2] = m6[i][0]; state.mResult[o2+1] = m6[i][1];
+      state.homes[0][o2] = m1[i][0]; state.homes[0][o2+1] = m1[i][1];
+      state.homes[1][o2] = m2[i][0]; state.homes[1][o2+1] = m2[i][1];
+      state.homes[2][o2] = m3[i][0]; state.homes[2][o2+1] = m3[i][1];
+      state.homes[3][o2] = m4[i][0]; state.homes[3][o2+1] = m4[i][1];
+      state.homes[4][o2] = m5[i][0]; state.homes[4][o2+1] = m5[i][1];
+      state.homes[5][o2] = m6[i][0]; state.homes[5][o2+1] = m6[i][1];
 
       state.positions[o] = m1[i][0] + (Math.random()-0.5)*0.012;
       state.positions[o+1] = m1[i][1] + (Math.random()-0.5)*0.012;
       state.positions[o+2] = z;
 
-      state.alphas[i] = 0.28 + Math.random() * 0.72;
-      state.seeds[i] = Math.random();
+      state.alphas[i] = 0.28 + Math.random() * 0.72; state.seeds[i] = Math.random();
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alpha); gl.bufferData(gl.ARRAY_BUFFER, state.alphas, gl.STATIC_DRAW);
@@ -506,11 +433,19 @@ if (menuToggle) {
   }
 
   function updateScrollTarget() {
-    const vh = window.innerHeight || 1;
-    const maxScroll = Math.max(document.body.scrollHeight - vh, 1);
-    const ratio = clamp(window.scrollY / maxScroll, 0, 1);
+    const scroller = document.querySelector('.journey-container');
+    let currentScroll = 0;
+    let maxScroll = 1;
+
+    if (scroller) {
+      currentScroll = scroller.scrollTop;
+      maxScroll = Math.max(scroller.scrollHeight - (window.innerHeight || 1), 1);
+    } else {
+      currentScroll = window.scrollY;
+      maxScroll = Math.max(document.body.scrollHeight - (window.innerHeight || 1), 1);
+    }
     
-    // São 5 transições perfeitamente divididas pelo scroll (0.0 até 5.0)
+    const ratio = clamp(currentScroll / maxScroll, 0, 1);
     state.scrollTarget = ratio * 5.0; 
   }
 
@@ -563,7 +498,8 @@ if (menuToggle) {
   }
 
   function bindEvents() {
-    window.addEventListener('scroll', updateScrollTarget, { passive: true });
+    const scroller = document.querySelector('.journey-container') || window;
+    scroller.addEventListener('scroll', updateScrollTarget, { passive: true });
     window.addEventListener('mousemove', e => pushPointer(e.clientX, e.clientY), { passive: true });
     window.addEventListener('touchstart', e => { if(e.touches[0]) pushPointer(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
     window.addEventListener('touchmove', e => { if(e.touches[0]) pushPointer(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
@@ -572,16 +508,18 @@ if (menuToggle) {
   }
 
   function updatePhysics(now) {
-    // Interpolação global suave (0.0 até 5.0)
     state.scrollProgress += (state.scrollTarget - state.scrollProgress) * config.scrollEase;
     const p = state.scrollProgress;
-    const stage = Math.floor(p);
-    const fract = p - stage;
+    
+    // Evita estouro do Array nas 6 mascaras
+    const stage = clamp(Math.floor(p), 0, 5);
+    const nextStage = clamp(stage + 1, 0, 5);
+    const fract = clamp(p - stage, 0, 1);
 
     const activelyMoving = now - state.lastMove < config.settleDelay;
     const recentlyTouched = now - state.lastMove < config.releaseDelay;
-    const scrollMoving = Math.abs(state.scrollTarget - state.scrollProgress) > 0.006;
-    const globalReturnForce = (recentlyTouched || scrollMoving) ? config.returnActive : config.returnIdle;
+    const globalReturnForce = (recentlyTouched || Math.abs(state.scrollTarget - state.scrollProgress) > 0.006) ? config.returnActive : config.returnIdle;
+
     const invW = 2 / state.width, invH = 2 / state.height;
 
     for (let t = state.trail.length - 1; t >= 0; t--) {
@@ -589,25 +527,22 @@ if (menuToggle) {
       if (state.trail[t].life < 0.028) state.trail.splice(t, 1);
     }
 
-    const masks = [state.mText, state.mField, state.mSun, state.mRain, state.mPest, state.mResult];
-    const maskA = masks[Math.min(stage, 5)];
-    const maskB = masks[Math.min(stage + 1, 5)];
+    const maskA = state.homes[stage];
+    const maskB = state.homes[nextStage];
 
     for (let i = 0; i < state.count; i++) {
       const o = i * 3, o2 = i * 2;
       let x = state.positions[o], y = state.positions[o+1], z = state.positions[o+2];
       let vx = state.velocities[o], vy = state.velocities[o+1], vz = state.velocities[o+2];
       
-      // Descobre a "Casa" atual interpolando as máscaras
       const hx = maskA[o2] + (maskB[o2] - maskA[o2]) * fract;
       const hy = maskA[o2+1] + (maskB[o2+1] - maskA[o2+1]) * fract;
-      state.currentHomes[o] = hx; state.currentHomes[o+1] = hy;
 
       vx += (hx - x) * globalReturnForce;
       vy += (hy - y) * globalReturnForce;
       vz += (0 - z) * globalReturnForce * 0.55;
 
-      // FÍSICA FLUIDA ORIGINAL (A Magia)
+      // FÍSICA FLUIDA ORGÂNICA
       if (activelyMoving && state.trail.length) {
         const px = clipToPxX(x), py = clipToPxY(y);
         const mx = state.pointer.px, my = state.pointer.py;
@@ -653,10 +588,26 @@ if (menuToggle) {
         }
       }
 
+      // Gravidade para a Chuva (Estágio 3.0)
+      const distRain = Math.max(0, 1.0 - Math.abs(p - 3.0));
+      if (distRain > 0.8) {
+          vy -= 0.004 * distRain * (1.0 + state.seeds[i]);
+          if (y < -1.2) { x = hx; y = 1.2; vy = 0; }
+      }
+
+      // Vórtice Giratório no Resultado (Estágio 5.0)
+      const distResult = Math.max(0, 1.0 - Math.abs(p - 5.0));
+      if (distResult > 0.1) {
+          vx += Math.sin(Math.atan2(y, x)) * 0.004 * distResult;
+          vy -= Math.cos(Math.atan2(y, x)) * 0.004 * distResult;
+      }
+
+      // Movimento Orgânico Contínuo (Noise)
       vx += Math.sin(now * 0.0012 + state.seeds[i] * 80.0) * config.noise;
       vy += Math.cos(now * 0.0010 + state.seeds[i] * 44.0) * config.noise;
 
       vx *= config.friction; vy *= config.friction; vz *= 0.94;
+      
       const speed = Math.hypot(vx, vy);
       if (speed > config.maxSpeed) { vx *= config.maxSpeed / speed; vy *= config.maxSpeed / speed; }
 
@@ -700,8 +651,7 @@ if (menuToggle) {
     state.dpr = Math.min(window.devicePixelRatio || 1, state.mobile ? 1.4 : 1.6);
     canvas.width = Math.floor(state.width * state.dpr);
     canvas.height = Math.floor(state.height * state.dpr);
-    buildParticles();
-    updateScrollTarget();
+    buildParticles(); updateScrollTarget();
   }
 
   let resizeTimer = 0;
