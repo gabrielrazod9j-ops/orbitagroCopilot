@@ -72,13 +72,16 @@
     positions: null,
     textHomes: null,
     fieldHomes: null,
+    sunHomes: null,
     currentHomes: null,
     velocities: null,
     alphas: null,
     seeds: null,
     trail: [],
-    scrollTarget: 0,
-    scrollProgress: 0,
+    fieldTarget: 0,
+    fieldProgress: 0,
+    sunTarget: 0,
+    sunProgress: 0,
     rainTarget: 0,
     rainProgress: 0,
     pointer: { active: false, px: 0, py: 0, lastX: 0, lastY: 0, lastTime: 0 },
@@ -101,6 +104,7 @@
     uniform float uPointSize;
     uniform float uDpr;
     uniform float uFieldMix;
+    uniform float uSunMix;
     varying float vAlpha;
     varying float vSeed;
 
@@ -108,8 +112,9 @@
       vAlpha = aAlpha;
       vSeed = aSeed;
       gl_Position = vec4(aPosition, 1.0);
+      float maxMix = max(uFieldMix, uSunMix);
       float depth = 1.0 + aPosition.z * 0.22;
-      gl_PointSize = uPointSize * uDpr * depth * (1.0 + uFieldMix * 0.16);
+      gl_PointSize = uPointSize * uDpr * depth * (1.0 + maxMix * 0.16);
     }
   `;
 
@@ -118,6 +123,7 @@
     varying float vAlpha;
     varying float vSeed;
     uniform highp float uFieldMix;
+    uniform highp float uSunMix;
     uniform highp float uRainMix;
 
     void main() {
@@ -131,10 +137,11 @@
 
       vec3 warmWhite = vec3(0.965, 0.955, 0.925);
       vec3 earthSeed = vec3(0.58, 0.34, 0.18);
+      vec3 sunColor = vec3(1.0, 0.65, 0.12); 
       vec3 rainColor = vec3(0.72, 0.82, 0.98);
 
-      float fieldAmount = smoothstep(0.18, 1.0, uFieldMix) * (1.0 - uRainMix);
-      vec3 color = mix(warmWhite, earthSeed, fieldAmount);
+      vec3 color = mix(warmWhite, earthSeed, uFieldMix);
+      color = mix(color, sunColor, uSunMix);
       color = mix(color, rainColor, uRainMix);
 
       gl_FragColor = vec4(color, alpha);
@@ -170,6 +177,7 @@
     pointSize: gl.getUniformLocation(program, 'uPointSize'),
     dpr: gl.getUniformLocation(program, 'uDpr'),
     fieldMix: gl.getUniformLocation(program, 'uFieldMix'),
+    sunMix: gl.getUniformLocation(program, 'uSunMix'),
     rainMix: gl.getUniformLocation(program, 'uRainMix')
   };
 
@@ -306,8 +314,84 @@
       ctx.quadraticCurveTo(centerX + i * w * 0.035, h * 0.78, centerX, horizonY);
       ctx.stroke();
     }
-
     ctx.globalAlpha = 1.0;
+    return mask;
+  }
+
+  // --- MÁSCARA DO SOL (SOMENTE SOL E RAIOS, SEM O CHÃO) ---
+  function createSunMask() {
+    const mask = document.createElement('canvas');
+    mask.width = Math.max(360, Math.floor(state.width));
+    mask.height = Math.max(360, Math.floor(state.height));
+    const ctx = mask.getContext('2d', { willReadFrequently: true });
+    const w = mask.width;
+    const h = mask.height;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // 1. O Sol
+    const cx = 0; 
+    const cy = h * 0.20; 
+    const r = Math.min(w, h) * (state.mobile ? 0.25 : 0.35); 
+
+    const sunGlow = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
+    sunGlow.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    sunGlow.addColorStop(0.4, 'rgba(255, 255, 255, 0.8)');
+    sunGlow.addColorStop(0.8, 'rgba(255, 255, 255, 0.3)');
+    sunGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    ctx.fillStyle = sunGlow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Raios solares em ondas
+    const numRays = 26; 
+    for(let i = 0; i < numRays; i++) {
+       const baseAngle = -Math.PI * 0.15 + (i / numRays) * Math.PI * 0.75;
+       const angle = baseAngle + (Math.random() * 0.08); 
+       
+       const r1 = r * 0.2; 
+       const r2 = Math.max(w, h) * 1.5; 
+       
+       const rayGrad = ctx.createLinearGradient(
+         cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1,
+         cx + Math.cos(angle) * r2, cy + Math.sin(angle) * r2
+       );
+       rayGrad.addColorStop(0, `rgba(255, 255, 255, ${0.6 + Math.random() * 0.4})`);
+       rayGrad.addColorStop(0.5, `rgba(255, 255, 255, ${0.3 + Math.random() * 0.3})`);
+       rayGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+       ctx.strokeStyle = rayGrad;
+       ctx.lineWidth = Math.max(4, r * 0.01 + Math.random() * 20);
+       
+       ctx.beginPath();
+       const waves = 1.5 + Math.random() * 2.5; 
+       const amplitude = r * (0.05 + Math.random() * 0.08); 
+
+       for (let t = 0; t <= 1; t += 0.01) {
+           const currentRadius = r1 + (r2 - r1) * t;
+           const waveOffset = Math.sin(t * Math.PI * 2 * waves) * amplitude;
+           
+           const orthoX = Math.cos(angle + Math.PI / 2) * waveOffset;
+           const orthoY = Math.sin(angle + Math.PI / 2) * waveOffset;
+           
+           const px = cx + Math.cos(angle) * currentRadius + orthoX;
+           const py = cy + Math.sin(angle) * currentRadius + orthoY;
+           
+           if (t === 0) {
+               ctx.moveTo(px, py);
+           } else {
+               ctx.lineTo(px, py);
+           }
+       }
+       ctx.stroke();
+    }
+
+    // A plantação foi removida desta etapa!
+    
     return mask;
   }
 
@@ -321,16 +405,22 @@
     const mobile = state.mobile;
     const max = mobile ? config.maxMobile : config.maxDesktop;
     const sample = mobile ? config.sampleMobile : config.sampleDesktop;
+    
     const textMask = createTextMask();
     const fieldMask = createFieldMask();
+    const sunMask = createSunMask();
+
     const textCandidates = readMaskCandidates(textMask, sample);
     const fieldCandidates = readMaskCandidates(fieldMask, sample);
-    const count = Math.min(max, textCandidates.length, fieldCandidates.length);
+    const sunCandidates = readMaskCandidates(sunMask, sample);
+    
+    const count = Math.min(max, textCandidates.length, fieldCandidates.length, sunCandidates.length);
 
     state.count = count;
     state.positions = new Float32Array(count * 3);
     state.textHomes = new Float32Array(count * 3);
     state.fieldHomes = new Float32Array(count * 3);
+    state.sunHomes = new Float32Array(count * 3);
     state.currentHomes = new Float32Array(count * 3);
     state.velocities = new Float32Array(count * 3);
     state.alphas = new Float32Array(count);
@@ -339,8 +429,11 @@
     for (let i = 0; i < count; i++) {
       const text = candidateToClip(textCandidates[i], textMask);
       const field = candidateToClip(fieldCandidates[i], fieldMask);
+      const sun = candidateToClip(sunCandidates[i], sunMask);
+      
       const z = (Math.random() - 0.5) * 0.18;
       const fieldZ = (Math.random() - 0.5) * 0.24;
+      const sunZ = (Math.random() - 0.5) * 0.24;
       const o = i * 3;
 
       state.positions[o] = text[0] + (Math.random() - 0.5) * 0.012;
@@ -355,11 +448,15 @@
       state.fieldHomes[o + 1] = field[1];
       state.fieldHomes[o + 2] = fieldZ;
 
+      state.sunHomes[o] = sun[0];
+      state.sunHomes[o + 1] = sun[1];
+      state.sunHomes[o + 2] = sunZ;
+
       state.currentHomes[o] = text[0];
       state.currentHomes[o + 1] = text[1];
       state.currentHomes[o + 2] = z;
 
-      state.alphas[i] = 0.28 + Math.max(text[2], field[2]) * 0.72;
+      state.alphas[i] = 0.28 + Math.max(text[2], field[2], sun[2]) * 0.72;
       state.seeds[i] = Math.random();
     }
 
@@ -375,17 +472,18 @@
     const maxScroll = Math.max(doc.scrollHeight - vh, 1);
     const ratio = clamp(window.scrollY / maxScroll, 0, 1);
 
-    const fieldRatio = clamp(ratio / 0.35, 0, 1);
-    const fieldMix = smoothstep01(fieldRatio);
-    state.scrollTarget = fieldMix;
-    document.body.classList.toggle('is-field', fieldMix > 0.18);
+    const fieldRatio = clamp(ratio / 0.25, 0, 1);
+    state.fieldTarget = smoothstep01(fieldRatio);
 
-    const rainStart = 0.7;
-    const rainRange = 0.3;
-    const rainRaw = clamp((ratio - rainStart) / rainRange, 0, 1);
-    const rainMixTarget = smoothstep01(rainRaw);
-    state.rainTarget = rainMixTarget;
-    document.body.classList.toggle('is-rain', rainMixTarget > 0.05);
+    const sunRatio = clamp((ratio - 0.35) / 0.25, 0, 1);
+    state.sunTarget = smoothstep01(sunRatio);
+
+    const rainRaw = clamp((ratio - 0.75) / 0.25, 0, 1);
+    state.rainTarget = smoothstep01(rainRaw);
+
+    document.body.classList.toggle('is-field', state.fieldTarget > 0.18);
+    document.body.classList.toggle('is-sun', state.sunTarget > 0.18);
+    document.body.classList.toggle('is-rain', state.rainTarget > 0.05);
   }
 
   function sampleTrail(px, py) {
@@ -421,17 +519,12 @@
           const ty = aby / len;
           bestScore = score;
           best = {
-            x: cx,
-            y: cy,
-            d,
-            tx,
-            ty,
+            x: cx, y: cy, d, tx, ty,
             nx: d > 1.0 ? dx / d : -ty,
             ny: d > 1.0 ? dy / d : tx,
             vx: a.vx * (1.0 - u) + b.vx * u,
             vy: a.vy * (1.0 - u) + b.vy * u,
-            score,
-            head: i > state.trail.length - 5
+            score, head: i > state.trail.length - 5
           };
         }
       }
@@ -483,19 +576,32 @@
   }
 
   function updateHomes() {
-    state.scrollProgress += (state.scrollTarget - state.scrollProgress) * config.scrollEase;
+    state.fieldProgress += (state.fieldTarget - state.fieldProgress) * config.scrollEase;
+    state.sunProgress += (state.sunTarget - state.sunProgress) * config.scrollEase;
     state.rainProgress += (state.rainTarget - state.rainProgress) * config.scrollEase;
 
-    const t = state.scrollProgress;
+    const f = state.fieldProgress;
+    const s = state.sunProgress;
+    
     const text = state.textHomes;
     const field = state.fieldHomes;
+    const sun = state.sunHomes;
     const home = state.currentHomes;
 
     for (let i = 0; i < state.count; i++) {
       const o = i * 3;
-      home[o]     = text[o]     + (field[o]     - text[o])     * t;
-      home[o + 1] = text[o + 1] + (field[o + 1] - text[o + 1]) * t;
-      home[o + 2] = text[o + 2] + (field[o + 2] - text[o + 2]) * t;
+      
+      let px = text[o]     + (field[o]     - text[o])     * f;
+      let py = text[o + 1] + (field[o + 1] - text[o + 1]) * f;
+      let pz = text[o + 2] + (field[o + 2] - text[o + 2]) * f;
+
+      px = px + (sun[o]     - px) * s;
+      py = py + (sun[o + 1] - py) * s;
+      pz = pz + (sun[o + 2] - pz) * s;
+
+      home[o]     = px;
+      home[o + 1] = py;
+      home[o + 2] = pz;
     }
   }
 
@@ -512,9 +618,9 @@
     const seed = state.seeds;
     const invW = 2 / state.width;
     const invH = 2 / state.height;
-    const scrollMoving = Math.abs(state.scrollTarget - state.scrollProgress);
+    const scrollMoving = Math.abs(state.fieldTarget - state.fieldProgress) > 0.006 || Math.abs(state.sunTarget - state.sunProgress) > 0.006;
 
-    const baseReturn = (recentlyTouched || scrollMoving > 0.006) ? config.returnActive : config.returnIdle;
+    const baseReturn = (recentlyTouched || scrollMoving) ? config.returnActive : config.returnIdle;
     const globalReturnForce = baseReturn * (1.0 - rainMix);
 
     for (let t = state.trail.length - 1; t >= 0; t--) {
@@ -599,7 +705,7 @@
       }
 
       const n = Math.sin(now * 0.0012 + seed[i] * 80.0) * config.noise;
-      const scrollDrift = state.scrollProgress * (1.0 - state.scrollProgress) * 0.0007;
+      const scrollDrift = state.fieldProgress * (1.0 - state.fieldProgress) * 0.0007;
       vx += n;
       vy += Math.cos(now * 0.0010 + seed[i] * 44.0) * config.noise - scrollDrift;
 
@@ -677,7 +783,8 @@
 
     gl.uniform1f(locations.pointSize, state.mobile ? config.pointMobile : config.pointDesktop);
     gl.uniform1f(locations.dpr, state.dpr);
-    gl.uniform1f(locations.fieldMix, state.scrollProgress);
+    gl.uniform1f(locations.fieldMix, state.fieldProgress);
+    gl.uniform1f(locations.sunMix, state.sunProgress);
     gl.uniform1f(locations.rainMix, rainMix);
 
     gl.drawArrays(gl.POINTS, 0, state.count);
