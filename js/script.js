@@ -102,7 +102,7 @@ if (menuToggle) {
 }
 
 // ==========================================
-// 2. ENGINE WEBGL (FÍSICA FLUIDA ORGÂNICA RESTAURADA)
+// 2. ENGINE WEBGL (FOLHAS ESPALHADAS PELA TELA)
 // ==========================================
 (() => {
   const canvas = document.getElementById('particleCanvas');
@@ -172,7 +172,10 @@ if (menuToggle) {
       vSeed = aSeed;
       gl_Position = vec4(aPosition, 1.0);
       float depth = 1.0 + aPosition.z * 0.22;
-      float mixFactor = fract(uProgress);
+      
+      float isPestBug = step(0.92, vSeed) * clamp(1.0 - abs(uProgress - 4.0), 0.0, 1.0);
+      float mixFactor = fract(uProgress) + (isPestBug * 0.5);
+      
       gl_PointSize = uPointSize * uDpr * depth * (1.0 + mixFactor * 0.16);
     }
   `;
@@ -192,12 +195,17 @@ if (menuToggle) {
       float shimmer = 0.92 + sin(vSeed * 44.0) * 0.08;
       float alpha = (dotMask + core + rim) * vAlpha * shimmer;
 
-      vec3 c0 = vec3(0.965, 0.955, 0.925); // Text (Branco)
-      vec3 c1 = vec3(0.58, 0.34, 0.18);    // Field (Terra)
-      vec3 c2 = vec3(1.0, 0.65, 0.12);     // Sun (Dourado)
-      vec3 c3 = vec3(0.45, 0.75, 0.98);    // Rain (Azul)
-      vec3 c4 = vec3(0.65, 0.7, 0.2);      // Pest (Verde)
-      vec3 c5 = vec3(0.2, 0.9, 0.65);      // Result (Ciano)
+      vec3 c0 = vec3(0.965, 0.955, 0.925); 
+      vec3 c1 = vec3(0.58, 0.34, 0.18);    
+      vec3 c2 = vec3(1.0, 0.65, 0.12);     
+      vec3 c3 = vec3(0.45, 0.75, 0.98);    
+      
+      vec3 leafGreen = vec3(0.4, 0.55, 0.15); 
+      vec3 bugWhite = vec3(0.95, 0.95, 0.95); 
+      float isPestBug = step(0.92, vSeed) * clamp(1.0 - abs(uProgress - 4.0), 0.0, 1.0); 
+      vec3 c4 = mix(leafGreen, bugWhite, isPestBug); 
+      
+      vec3 c5 = vec3(0.2, 0.9, 0.65);      
 
       vec3 color = mix(c0, c1, clamp(uProgress, 0.0, 1.0));
       color = mix(color, c2, clamp(uProgress - 1.0, 0.0, 1.0));
@@ -232,9 +240,6 @@ if (menuToggle) {
 
   const bufs = { pos: gl.createBuffer(), alpha: gl.createBuffer(), seed: gl.createBuffer() };
 
-  // ==========================================
-  // GERAÇÃO DAS MÁSCARAS
-  // ==========================================
   function readMaskCandidates(mask, sample) {
     const ctx = mask.getContext('2d', { willReadFrequently: true });
     const data = ctx.getImageData(0, 0, mask.width, mask.height).data;
@@ -313,11 +318,9 @@ if (menuToggle) {
 
     const numRays = 26; 
     for(let i = 0; i < numRays; i++) {
-       // AQUI ESTAVA O BUG FATAL DA ÚLTIMA VERSÃO! (Corrigido declarando "angle")
-       const angle = -Math.PI * 0.15 + (i / 26) * Math.PI * 0.75 + (Math.random() * 0.08); 
+       const baseAngle = -Math.PI * 0.15 + (i / 26) * Math.PI * 0.75 + (Math.random() * 0.08); 
        const r1 = r * 0.2; const r2 = Math.max(w, h) * 1.5; 
-       
-       const rayGrad = ctx.createLinearGradient(cx + Math.cos(angle)*r1, cy + Math.sin(angle)*r1, cx + Math.cos(angle)*r2, cy + Math.sin(angle)*r2);
+       const rayGrad = ctx.createLinearGradient(cx + Math.cos(baseAngle)*r1, cy + Math.sin(baseAngle)*r1, cx + Math.cos(baseAngle)*r2, cy + Math.sin(baseAngle)*r2);
        rayGrad.addColorStop(0, `rgba(255, 255, 255, ${0.6 + Math.random() * 0.4})`); rayGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
        ctx.strokeStyle = rayGrad; ctx.lineWidth = Math.max(4, r * 0.01 + Math.random() * 20);
        
@@ -325,8 +328,8 @@ if (menuToggle) {
        const waves = 1.5 + Math.random() * 2.5, amplitude = r * (0.05 + Math.random() * 0.08); 
        for (let t = 0; t <= 1; t += 0.01) {
            const curR = r1 + (r2 - r1) * t, wOffset = Math.sin(t * Math.PI * 2 * waves) * amplitude;
-           const px = cx + Math.cos(angle)*curR + Math.cos(angle + Math.PI/2)*wOffset;
-           const py = cy + Math.sin(angle)*curR + Math.sin(angle + Math.PI/2)*wOffset;
+           const px = cx + Math.cos(baseAngle)*curR + Math.cos(baseAngle + Math.PI/2)*wOffset;
+           const py = cy + Math.sin(baseAngle)*curR + Math.sin(baseAngle + Math.PI/2)*wOffset;
            if (t === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
        }
        ctx.stroke();
@@ -352,19 +355,52 @@ if (menuToggle) {
     return c;
   }
 
+  // --- NOVA FUNÇÃO: FOLHAS ESPALHADAS PELA TELA ---
   function createPestMask() {
     const { c, ctx, w, h } = getCanvas();
-    const cx = w * 0.7; const cy = h * 0.45; const s = Math.min(w, h) * (state.mobile ? 0.35 : 0.45);
-    ctx.beginPath(); ctx.moveTo(cx, cy - s);
-    ctx.bezierCurveTo(cx + s*0.8, cy - s*0.5, cx + s*0.8, cy + s*0.5, cx, cy + s);
-    ctx.bezierCurveTo(cx - s*0.8, cy + s*0.5, cx - s*0.8, cy - s*0.5, cx, cy - s);
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, s);
-    grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(1, 'rgba(255,255,255,0.2)');
-    ctx.fillStyle = grad; ctx.fill();
+    
+    function drawLeaf(lx, ly, s, angle) {
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.bezierCurveTo(s*0.6, -s*0.5, s*0.6, s*0.5, 0, s);
+      ctx.bezierCurveTo(-s*0.6, s*0.5, -s*0.6, -s*0.5, 0, -s);
+      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, s);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(1, 'rgba(255,255,255,0.2)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.restore();
+    }
 
+    const leaves = [];
+    const numLeaves = state.mobile ? 18 : 35; // Aumentei muito a quantidade para preencher a tela
+    const baseS = Math.min(w, h) * (state.mobile ? 0.08 : 0.12);
+
+    for(let i=0; i<numLeaves; i++) {
+      // Distribui as folhas aleatoriamente por quase toda a área do canvas
+      const lx = w * 0.05 + Math.random() * (w * 0.9);
+      const ly = h * 0.05 + Math.random() * (h * 0.9);
+      const leafAngle = Math.random() * Math.PI * 2;
+      const lSize = baseS * (0.6 + Math.random() * 0.8); // Varia bastante o tamanho para dar profundidade
+
+      leaves.push({x: lx, y: ly, s: lSize});
+      drawLeaf(lx, ly, lSize, leafAngle);
+    }
+
+    // Ataque das pragas: Recorta vários furos distribuídos sobre as folhas
     ctx.globalCompositeOperation = 'destination-out';
-    for(let i=0; i<25; i++) {
-      ctx.beginPath(); ctx.arc(cx + (Math.random()-0.5)*s*1.8, cy + (Math.random()-0.5)*s*1.8, s*0.1 + Math.random()*s*0.15, 0, Math.PI*2); ctx.fill();
+    const numHoles = state.mobile ? 120 : 250; 
+    for(let i=0; i<numHoles; i++) {
+      const leaf = leaves[Math.floor(Math.random() * leaves.length)];
+      const ang = Math.random() * Math.PI * 2;
+      const dist = Math.random() * leaf.s * 0.75; 
+      const bX = leaf.x + Math.cos(ang) * dist;
+      const bY = leaf.y + Math.sin(ang) * dist;
+      const holeSize = leaf.s * 0.05 + Math.random() * leaf.s * 0.15;
+      ctx.beginPath(); ctx.arc(bX, bY, holeSize, 0, Math.PI*2); ctx.fill();
     }
     return c;
   }
@@ -511,7 +547,6 @@ if (menuToggle) {
     state.scrollProgress += (state.scrollTarget - state.scrollProgress) * config.scrollEase;
     const p = state.scrollProgress;
     
-    // Evita estouro do Array nas 6 mascaras
     const stage = clamp(Math.floor(p), 0, 5);
     const nextStage = clamp(stage + 1, 0, 5);
     const fract = clamp(p - stage, 0, 1);
@@ -542,7 +577,6 @@ if (menuToggle) {
       vy += (hy - y) * globalReturnForce;
       vz += (0 - z) * globalReturnForce * 0.55;
 
-      // FÍSICA FLUIDA ORGÂNICA
       if (activelyMoving && state.trail.length) {
         const px = clipToPxX(x), py = clipToPxY(y);
         const mx = state.pointer.px, my = state.pointer.py;
@@ -588,21 +622,18 @@ if (menuToggle) {
         }
       }
 
-      // Gravidade para a Chuva (Estágio 3.0)
       const distRain = Math.max(0, 1.0 - Math.abs(p - 3.0));
       if (distRain > 0.8) {
           vy -= 0.004 * distRain * (1.0 + state.seeds[i]);
           if (y < -1.2) { x = hx; y = 1.2; vy = 0; }
       }
 
-      // Vórtice Giratório no Resultado (Estágio 5.0)
       const distResult = Math.max(0, 1.0 - Math.abs(p - 5.0));
       if (distResult > 0.1) {
           vx += Math.sin(Math.atan2(y, x)) * 0.004 * distResult;
           vy -= Math.cos(Math.atan2(y, x)) * 0.004 * distResult;
       }
 
-      // Movimento Orgânico Contínuo (Noise)
       vx += Math.sin(now * 0.0012 + state.seeds[i] * 80.0) * config.noise;
       vy += Math.cos(now * 0.0010 + state.seeds[i] * 44.0) * config.noise;
 
@@ -623,8 +654,27 @@ if (menuToggle) {
 
     updatePhysics(now);
 
+    const bgColors = [
+      [0.02, 0.03, 0.08], 
+      [0.07, 0.04, 0.02], 
+      [0.10, 0.03, 0.00], 
+      [0.04, 0.07, 0.09], 
+      [0.03, 0.06, 0.04], 
+      [0.01, 0.07, 0.08]  
+    ];
+
+    const p = clamp(state.scrollProgress, 0, 5);
+    const stage = Math.floor(p);
+    const nextStage = Math.min(stage + 1, 5);
+    const fract = p - stage;
+
+    const r = bgColors[stage][0] + (bgColors[nextStage][0] - bgColors[stage][0]) * fract;
+    const g = bgColors[stage][1] + (bgColors[nextStage][1] - bgColors[stage][1]) * fract;
+    const b = bgColors[stage][2] + (bgColors[nextStage][2] - bgColors[stage][2]) * fract;
+
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.clearColor(r, g, b, 1); 
+    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(program); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, bufs.pos); gl.bufferData(gl.ARRAY_BUFFER, state.positions, gl.DYNAMIC_DRAW);
