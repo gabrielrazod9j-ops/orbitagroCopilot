@@ -1,37 +1,111 @@
 // ==========================================
-// 1. GERENCIAMENTO DO MENU MOBILE
+// 1. CÉREBRO COPILOTO (LÓGICA PYTHON PORTADA)
 // ==========================================
-(() => {
-  const toggle = document.querySelector('.menu-toggle');
-  const menu = document.querySelector('#mobileMenu');
-  if (!toggle || !menu) return;
+const CULTURAS = [
+  { nome: "Mandioca", temp_min: 20, temp_max: 30, chuva_min_7d: 10, chuva_max_7d: 70, ph_min: 5.0, ph_max: 6.5 },
+  { nome: "Feijão", temp_min: 18, temp_max: 30, chuva_min_7d: 15, chuva_max_7d: 80, ph_min: 5.5, ph_max: 6.8 },
+  { nome: "Milho", temp_min: 18, temp_max: 32, chuva_min_7d: 15, chuva_max_7d: 90, ph_min: 5.5, ph_max: 7.0 },
+  { nome: "Arroz", temp_min: 20, temp_max: 35, chuva_min_7d: 20, chuva_max_7d: 100, ph_min: 5.0, ph_max: 6.5 },
+  { nome: "Café", temp_min: 18, temp_max: 26, chuva_min_7d: 10, chuva_max_7d: 70, ph_min: 5.5, ph_max: 6.5 },
+  { nome: "Banana", temp_min: 20, temp_max: 30, chuva_min_7d: 20, chuva_max_7d: 100, ph_min: 5.5, ph_max: 7.0 },
+  { nome: "Tomate", temp_min: 18, temp_max: 28, chuva_min_7d: 10, chuva_max_7d: 60, ph_min: 5.5, ph_max: 6.8 },
+  { nome: "Alface", temp_min: 15, temp_max: 25, chuva_min_7d: 10, chuva_max_7d: 50, ph_min: 6.0, ph_max: 7.0 }
+];
 
-  toggle.addEventListener('click', () => {
-    const isOpen = toggle.classList.toggle('is-open');
-    menu.classList.toggle('is-open', isOpen);
-    toggle.setAttribute('aria-expanded', String(isOpen));
-    toggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+function processarDiagnostico() {
+  const selectCultura = document.getElementById('cultura');
+  const inputDiasSeca = document.getElementById('diasSeca');
+  if (!selectCultura || !inputDiasSeca) return;
+
+  const diasSeca = parseInt(inputDiasSeca.value) || 0;
+  const calor = document.getElementById('calor').value;
+  const soloObs = document.getElementById('soloObs').value;
+  const pragas = document.getElementById('pragas').value;
+  
+  let pontos = 0;
+  
+  if (diasSeca >= 10) pontos += 3;
+  else if (diasSeca >= 5) pontos += 2;
+  else if (diasSeca >= 3) pontos += 1;
+
+  if (calor === "2") pontos += 1;
+  else if (calor === "3") pontos += 2;
+
+  if (pragas === "1") pontos += 3;
+  else if (pragas === "2") pontos += 1;
+
+  if (soloObs === "1") pontos += 2;
+  else if (soloObs === "2") pontos += 1;
+
+  let nivel = "BAIXO";
+  let colorBadge = "#4caf50";
+  if (pontos > 2 && pontos <= 5) { nivel = "MÉDIO"; colorBadge = "#ff9800"; }
+  else if (pontos > 5 && pontos <= 8) { nivel = "ALTO"; colorBadge = "#f44336"; }
+  else if (pontos > 8) { nivel = "CRÍTICO"; colorBadge = "#d32f2f"; }
+
+  let recs = [];
+  if (diasSeca >= 3) recs.push("Olhe a umidade do solo antes de irrigar. Se estiver muito seco, priorize água.");
+  if (calor === "2" || calor === "3") recs.push("Evite pulverizar ou adubar nas horas mais quentes do dia.");
+  if (pragas === "1" || pragas === "2") recs.push("Verifique folhas, caule e frutos. Tire foto e procure cooperativa ou técnico.");
+  if (soloObs === "1") recs.push("Evite entrada de máquina ou pisoteio se o solo estiver encharcado.");
+  else if (soloObs === "2") recs.push("Solo muito rachado indica falta de água ou matéria orgânica. Acompanhe de perto.");
+
+  if (nivel === "ALTO" || nivel === "CRÍTICO") recs.push("Risco alto: procure orientação técnica local ou cooperativa.");
+  if (recs.length === 0) recs.push("Situação aparentemente tranquila. Continue observando a lavoura.");
+
+  const badge = document.getElementById('riskBadge');
+  if (badge) {
+    badge.textContent = `Risco: ${nivel}`;
+    badge.style.color = colorBadge;
+    badge.style.borderColor = colorBadge;
+    badge.style.background = `${colorBadge}22`;
+  }
+
+  const recList = document.getElementById('recList');
+  if (recList) {
+    recList.innerHTML = '';
+    recs.forEach(r => {
+      const li = document.createElement('li');
+      li.textContent = r;
+      recList.appendChild(li);
+    });
+  }
+
+  document.getElementById('stage-resultado').scrollIntoView({ behavior: 'smooth' });
+}
+
+const btnDiagnostico = document.getElementById('btnDiagnostico');
+if (btnDiagnostico) btnDiagnostico.addEventListener('click', processarDiagnostico);
+
+const btnRecomecar = document.getElementById('btnRecomecar');
+if (btnRecomecar) {
+  btnRecomecar.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('diasSeca').value = 0;
+    document.getElementById('pragas').value = "3";
   });
-})();
+}
+
+const menuToggle = document.querySelector('.menu-toggle');
+if (menuToggle) {
+  menuToggle.addEventListener('click', function() {
+    const isOpen = this.classList.toggle('is-open');
+    document.getElementById('mobileMenu').classList.toggle('is-open', isOpen);
+  });
+}
+
 
 // ==========================================
-// 2. ENGINE DE PARTÍCULAS WEBGL (ORBITAGRO)
+// 2. ENGINE WEBGL (FÍSICA ORIGINAL RESTAURADA)
 // ==========================================
 (() => {
   const canvas = document.getElementById('particleCanvas');
   const gl = canvas.getContext('webgl', {
-    alpha: true,
-    antialias: true,
-    depth: false,
-    stencil: false,
-    premultipliedAlpha: false,
-    preserveDrawingBuffer: false
+    alpha: true, antialias: true, depth: false, stencil: false,
+    premultipliedAlpha: false, preserveDrawingBuffer: false
   });
 
-  if (!gl) {
-    console.warn('WebGL não está disponível neste navegador.');
-    return;
-  }
+  if (!gl) return;
 
   const config = {
     maxDesktop: 90000, 
@@ -64,38 +138,24 @@
   };
 
   const state = {
-    width: 1,
-    height: 1,
-    dpr: 1,
-    mobile: false,
-    count: 0,
-    positions: null,
-    textHomes: null,
-    fieldHomes: null,
-    sunHomes: null,
-    currentHomes: null,
-    velocities: null,
-    alphas: null,
-    seeds: null,
+    width: 1, height: 1, dpr: 1, mobile: false, count: 0,
+    positions: null, currentHomes: null, velocities: null, alphas: null, seeds: null,
+    
+    // As 6 Máscaras
+    mText: null, mField: null, mSun: null, mRain: null, mPest: null, mResult: null,
+    
+    scrollTarget: 0, scrollProgress: 0, // Vai de 0.0 até 5.0
+    
     trail: [],
-    fieldTarget: 0,
-    fieldProgress: 0,
-    sunTarget: 0,
-    sunProgress: 0,
-    rainTarget: 0,
-    rainProgress: 0,
     pointer: { active: false, px: 0, py: 0, lastX: 0, lastY: 0, lastTime: 0 },
     lastMove: 0
   };
 
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-  const smoothstep01 = t => t * t * (3 - 2 * t);
   const pxToClipX = px => (px / state.width) * 2 - 1;
   const pxToClipY = py => 1 - (py / state.height) * 2;
   const clipToPxX = x => (x + 1) * 0.5 * state.width;
   const clipToPxY = y => (1 - y) * 0.5 * state.height;
-
-  const computeRainMix = () => state.rainProgress;
 
   const vertexSource = `
     attribute vec3 aPosition;
@@ -103,8 +163,7 @@
     attribute float aSeed;
     uniform float uPointSize;
     uniform float uDpr;
-    uniform float uFieldMix;
-    uniform float uSunMix;
+    uniform float uProgress;
     varying float vAlpha;
     varying float vSeed;
 
@@ -112,9 +171,11 @@
       vAlpha = aAlpha;
       vSeed = aSeed;
       gl_Position = vec4(aPosition, 1.0);
-      float maxMix = max(uFieldMix, uSunMix);
       float depth = 1.0 + aPosition.z * 0.22;
-      gl_PointSize = uPointSize * uDpr * depth * (1.0 + maxMix * 0.16);
+      
+      // Partículas pulsam levemente dependendo da tela
+      float mixFactor = fract(uProgress);
+      gl_PointSize = uPointSize * uDpr * depth * (1.0 + mixFactor * 0.16);
     }
   `;
 
@@ -122,9 +183,7 @@
     precision highp float;
     varying float vAlpha;
     varying float vSeed;
-    uniform highp float uFieldMix;
-    uniform highp float uSunMix;
-    uniform highp float uRainMix;
+    uniform float uProgress;
 
     void main() {
       vec2 uv = gl_PointCoord - 0.5;
@@ -135,14 +194,18 @@
       float shimmer = 0.92 + sin(vSeed * 44.0) * 0.08;
       float alpha = (dotMask + core + rim) * vAlpha * shimmer;
 
-      vec3 warmWhite = vec3(0.965, 0.955, 0.925);
-      vec3 earthSeed = vec3(0.58, 0.34, 0.18);
-      vec3 sunColor = vec3(1.0, 0.65, 0.12); 
-      vec3 rainColor = vec3(0.72, 0.82, 0.98);
+      vec3 c0 = vec3(0.965, 0.955, 0.925); // Text (Branco)
+      vec3 c1 = vec3(0.58, 0.34, 0.18);    // Field (Terra)
+      vec3 c2 = vec3(1.0, 0.65, 0.12);     // Sun (Fogo/Dourado)
+      vec3 c3 = vec3(0.45, 0.75, 0.98);    // Rain (Azul)
+      vec3 c4 = vec3(0.65, 0.7, 0.2);      // Pest (Verde Doente)
+      vec3 c5 = vec3(0.2, 0.9, 0.65);      // Result (Ciano/Tecnologia)
 
-      vec3 color = mix(warmWhite, earthSeed, uFieldMix);
-      color = mix(color, sunColor, uSunMix);
-      color = mix(color, rainColor, uRainMix);
+      vec3 color = mix(c0, c1, clamp(uProgress, 0.0, 1.0));
+      color = mix(color, c2, clamp(uProgress - 1.0, 0.0, 1.0));
+      color = mix(color, c3, clamp(uProgress - 2.0, 0.0, 1.0));
+      color = mix(color, c4, clamp(uProgress - 3.0, 0.0, 1.0));
+      color = mix(color, c5, clamp(uProgress - 4.0, 0.0, 1.0));
 
       gl_FragColor = vec4(color, alpha);
     }
@@ -152,9 +215,7 @@
     const shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      throw new Error(gl.getShaderInfoLog(shader));
-    }
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
     return shader;
   }
 
@@ -163,9 +224,7 @@
     gl.attachShader(program, createShader(gl.VERTEX_SHADER, vertexSource));
     gl.attachShader(program, createShader(gl.FRAGMENT_SHADER, fragmentSource));
     gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      throw new Error(gl.getProgramInfoLog(program));
-    }
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
     return program;
   }
 
@@ -176,192 +235,118 @@
     seed: gl.getAttribLocation(program, 'aSeed'),
     pointSize: gl.getUniformLocation(program, 'uPointSize'),
     dpr: gl.getUniformLocation(program, 'uDpr'),
-    fieldMix: gl.getUniformLocation(program, 'uFieldMix'),
-    sunMix: gl.getUniformLocation(program, 'uSunMix'),
-    rainMix: gl.getUniformLocation(program, 'uRainMix')
+    progress: gl.getUniformLocation(program, 'uProgress')
   };
 
-  const positionBuffer = gl.createBuffer();
-  const alphaBuffer = gl.createBuffer();
-  const seedBuffer = gl.createBuffer();
+  const bufs = { pos: gl.createBuffer(), alpha: gl.createBuffer(), seed: gl.createBuffer() };
 
-  function shuffle(list) {
-    for (let i = list.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [list[i], list[j]] = [list[j], list[i]];
-    }
-    return list;
-  }
-
+  // ==========================================
+  // GERAÇÃO DAS MÁSCARAS (ALTA FIDELIDADE)
+  // ==========================================
   function readMaskCandidates(mask, sample) {
     const ctx = mask.getContext('2d', { willReadFrequently: true });
     const data = ctx.getImageData(0, 0, mask.width, mask.height).data;
     const candidates = [];
-
     for (let y = 0; y < mask.height; y += sample) {
       for (let x = 0; x < mask.width; x += sample) {
         const alpha = data[(y * mask.width + x) * 4 + 3];
-        if (alpha > 24) candidates.push([x, y, alpha / 255.0]);
+        if (alpha > 24) candidates.push([pxToClipX(x), pxToClipY(y)]);
       }
     }
-    return shuffle(candidates);
+    // Shuffle
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+    return candidates;
   }
 
+  function getCanvas() {
+    const c = document.createElement('canvas');
+    c.width = Math.max(360, Math.floor(state.width));
+    c.height = Math.max(360, Math.floor(state.height));
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#fff';
+    return { c, ctx, w: c.width, h: c.height };
+  }
+
+  // 1. Text
   function createTextMask() {
-    const mask = document.createElement('canvas');
-    mask.width = Math.max(360, Math.floor(state.width));
-    mask.height = Math.max(360, Math.floor(state.height));
-    const ctx = mask.getContext('2d', { willReadFrequently: true });
-    const mobile = state.mobile;
-
-    ctx.clearRect(0, 0, mask.width, mask.height);
-    ctx.fillStyle = '#fff';
-    ctx.strokeStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-
-    const fontSize = clamp(mask.width * (mobile ? 0.125 : 0.095), 44, mobile ? 82 : 118);
-    const lineHeight = fontSize * 0.96;
-    const cx = mask.width / 2;
-    const cy = mask.height / 2;
-    const lines = ['OrbitAgro', 'Copilot'];
-    ctx.font = `800 ${fontSize}px Inter, Arial, sans-serif`;
-    ctx.lineWidth = Math.max(1.3, fontSize * 0.022);
-
-    lines.forEach((line, index) => {
-      const y = cy + (index - 0.5) * lineHeight;
-      ctx.strokeText(line, cx, y);
-      ctx.fillText(line, cx, y);
+    const { c, ctx, w, h } = getCanvas();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const fs = clamp(w * (state.mobile ? 0.125 : 0.095), 44, state.mobile ? 82 : 118);
+    ctx.font = `800 ${fs}px Inter, sans-serif`;
+    ctx.lineWidth = Math.max(1.3, fs * 0.022);
+    const lh = fs * 0.96;
+    ['OrbitAgro', 'Copilot'].forEach((line, i) => {
+      const y = h/2 + (i - 0.5) * lh;
+      ctx.strokeText(line, w/2, y); ctx.fillText(line, w/2, y);
     });
-    return mask;
+    return c;
   }
 
+  // 2. Field
   function createFieldMask() {
-    const mask = document.createElement('canvas');
-    mask.width = Math.max(360, Math.floor(state.width));
-    mask.height = Math.max(360, Math.floor(state.height));
-    const ctx = mask.getContext('2d', { willReadFrequently: true });
-    const w = mask.width;
-    const h = mask.height;
-
-    ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = '#fff';
-    ctx.fillStyle = '#fff';
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
+    const { c, ctx, w, h } = getCanvas();
     const rows = state.mobile ? 10 : 15;
-    const horizonY = h * 0.62;
-    const baseY = h * 0.96;
-    const centerX = w * 0.5;
+    const horizonY = h * 0.62; const baseY = h * 0.96; const cx = w * 0.5;
 
     for (let r = 0; r < rows; r++) {
       const t = r / Math.max(1, rows - 1);
       const y = horizonY + Math.pow(t, 1.72) * (baseY - horizonY);
       const spread = w * (0.10 + t * 0.58);
-      const curvePower = h * (0.018 + t * 0.035);
+      const curve = h * (0.018 + t * 0.035);
 
       ctx.globalAlpha = 0.18 + t * 0.74;
       ctx.lineWidth = Math.max(1.1, 1.2 + t * 3.6);
       ctx.beginPath();
-      ctx.moveTo(centerX - spread, y);
-      ctx.bezierCurveTo(
-        centerX - spread * 0.48,
-        y - curvePower,
-        centerX + spread * 0.48,
-        y + curvePower * 0.55,
-        centerX + spread,
-        y
-      );
+      ctx.moveTo(cx - spread, y);
+      ctx.bezierCurveTo(cx - spread*0.48, y - curve, cx + spread*0.48, y + curve*0.55, cx + spread, y);
       ctx.stroke();
 
       const seeds = Math.floor(42 + t * 128);
       for (let p = 0; p < seeds; p++) {
         const u = p / Math.max(1, seeds - 1);
-        const wave = Math.sin(u * Math.PI * 2.0 + r * 0.62) * curvePower * 0.42;
-        const jitterX = (Math.random() - 0.5) * (2.5 + t * 7.0);
-        const jitterY = (Math.random() - 0.5) * (1.5 + t * 5.0);
-        const x = centerX - spread + u * spread * 2.0 + jitterX;
-        const py = y + wave + jitterY;
+        const wave = Math.sin(u * Math.PI * 2 + r * 0.62) * curve * 0.42;
+        const jx = (Math.random() - 0.5) * (2.5 + t * 7.0);
+        const jy = (Math.random() - 0.5) * (1.5 + t * 5.0);
+        const px = cx - spread + u * spread * 2.0 + jx;
+        const py = y + wave + jy;
         const size = 1.1 + t * 3.2;
 
         ctx.globalAlpha = 0.26 + t * 0.68;
-        ctx.beginPath();
-        ctx.arc(x, py, size, 0, Math.PI * 2.0);
-        ctx.fill();
-
-        if (t > 0.28 && p % 3 === 0) {
-          ctx.globalAlpha = 0.18 + t * 0.45;
-          ctx.lineWidth = Math.max(0.8, size * 0.34);
-          ctx.beginPath();
-          ctx.moveTo(x, py);
-          ctx.quadraticCurveTo(x - size * 1.3, py - size * 1.8, x - size * 2.25, py - size * 0.55);
-          ctx.moveTo(x, py);
-          ctx.quadraticCurveTo(x + size * 1.3, py - size * 1.8, x + size * 2.25, py - size * 0.55);
-          ctx.stroke();
-        }
+        ctx.beginPath(); ctx.arc(px, py, size, 0, Math.PI * 2); ctx.fill();
       }
     }
-
-    ctx.globalAlpha = 0.28;
-    for (let i = -5; i <= 5; i++) {
-      const startX = centerX + i * w * 0.105;
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.moveTo(startX, h * 0.985);
-      ctx.quadraticCurveTo(centerX + i * w * 0.035, h * 0.78, centerX, horizonY);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1.0;
-    return mask;
+    return c;
   }
 
-  // --- MÁSCARA DO SOL (SOMENTE SOL E RAIOS, SEM O CHÃO) ---
+  // 3. Sun
   function createSunMask() {
-    const mask = document.createElement('canvas');
-    mask.width = Math.max(360, Math.floor(state.width));
-    mask.height = Math.max(360, Math.floor(state.height));
-    const ctx = mask.getContext('2d', { willReadFrequently: true });
-    const w = mask.width;
-    const h = mask.height;
-
-    ctx.clearRect(0, 0, w, h);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // 1. O Sol
-    const cx = 0; 
-    const cy = h * 0.20; 
+    const { c, ctx, w, h } = getCanvas();
+    const cx = 0; const cy = h * 0.20; 
     const r = Math.min(w, h) * (state.mobile ? 0.25 : 0.35); 
 
     const sunGlow = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
     sunGlow.addColorStop(0, 'rgba(255, 255, 255, 1)');
     sunGlow.addColorStop(0.4, 'rgba(255, 255, 255, 0.8)');
-    sunGlow.addColorStop(0.8, 'rgba(255, 255, 255, 0.3)');
     sunGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
     
     ctx.fillStyle = sunGlow;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
 
-    // 2. Raios solares em ondas
     const numRays = 26; 
     for(let i = 0; i < numRays; i++) {
        const baseAngle = -Math.PI * 0.15 + (i / numRays) * Math.PI * 0.75;
        const angle = baseAngle + (Math.random() * 0.08); 
-       
-       const r1 = r * 0.2; 
-       const r2 = Math.max(w, h) * 1.5; 
+       const r1 = r * 0.2; const r2 = Math.max(w, h) * 1.5; 
        
        const rayGrad = ctx.createLinearGradient(
-         cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1,
-         cx + Math.cos(angle) * r2, cy + Math.sin(angle) * r2
+         cx + Math.cos(angle)*r1, cy + Math.sin(angle)*r1, cx + Math.cos(angle)*r2, cy + Math.sin(angle)*r2
        );
        rayGrad.addColorStop(0, `rgba(255, 255, 255, ${0.6 + Math.random() * 0.4})`);
-       rayGrad.addColorStop(0.5, `rgba(255, 255, 255, ${0.3 + Math.random() * 0.3})`);
        rayGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
        ctx.strokeStyle = rayGrad;
@@ -372,160 +357,187 @@
        const amplitude = r * (0.05 + Math.random() * 0.08); 
 
        for (let t = 0; t <= 1; t += 0.01) {
-           const currentRadius = r1 + (r2 - r1) * t;
-           const waveOffset = Math.sin(t * Math.PI * 2 * waves) * amplitude;
-           
-           const orthoX = Math.cos(angle + Math.PI / 2) * waveOffset;
-           const orthoY = Math.sin(angle + Math.PI / 2) * waveOffset;
-           
-           const px = cx + Math.cos(angle) * currentRadius + orthoX;
-           const py = cy + Math.sin(angle) * currentRadius + orthoY;
-           
-           if (t === 0) {
-               ctx.moveTo(px, py);
-           } else {
-               ctx.lineTo(px, py);
-           }
+           const curR = r1 + (r2 - r1) * t;
+           const wOffset = Math.sin(t * Math.PI * 2 * waves) * amplitude;
+           const px = cx + Math.cos(angle)*curR + Math.cos(angle + Math.PI/2)*wOffset;
+           const py = cy + Math.sin(angle)*curR + Math.sin(angle + Math.PI/2)*wOffset;
+           if (t === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
        }
        ctx.stroke();
     }
-
-    // A plantação foi removida desta etapa!
-    
-    return mask;
+    return c;
   }
 
-  function candidateToClip(candidate, mask) {
-    const px = candidate[0] / mask.width * state.width;
-    const py = candidate[1] / mask.height * state.height;
-    return [pxToClipX(px), pxToClipY(py), candidate[2]];
+  // 4. Rain
+  function createRainMask() {
+    const { c, ctx, w, h } = getCanvas();
+    
+    // Nuvens no topo com gradiente volumétrico
+    const numNuvens = 12;
+    for(let i=0; i<numNuvens; i++) {
+      const px = (i/numNuvens) * w + (Math.random()-0.5)*100;
+      const py = -h*0.05 + Math.random()*h*0.15;
+      const raio = h*0.15 + Math.random()*h*0.1;
+      
+      const grad = ctx.createRadialGradient(px, py, 0, px, py, raio);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(px, py, raio, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Pingos de chuva (linhas tracejadas caindo)
+    ctx.lineWidth = 2;
+    for(let i=0; i<150; i++) {
+      const px = Math.random() * w;
+      const py = Math.random() * h;
+      const comp = 20 + Math.random() * 60;
+      ctx.strokeStyle = `rgba(255,255,255,${0.2 + Math.random()*0.5})`;
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - comp*0.2, py + comp); ctx.stroke();
+    }
+    return c;
+  }
+
+  // 5. Pest (Folha Mordida com Curvas)
+  function createPestMask() {
+    const { c, ctx, w, h } = getCanvas();
+    const cx = w * 0.7; const cy = h * 0.45;
+    const s = Math.min(w, h) * (state.mobile ? 0.35 : 0.45);
+
+    // Desenha uma folha com Bezier
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - s);
+    ctx.bezierCurveTo(cx + s*0.8, cy - s*0.5, cx + s*0.8, cy + s*0.5, cx, cy + s);
+    ctx.bezierCurveTo(cx - s*0.8, cy + s*0.5, cx - s*0.8, cy - s*0.5, cx, cy - s);
+    
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, s);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(1, 'rgba(255,255,255,0.2)');
+    ctx.fillStyle = grad; ctx.fill();
+
+    // Recorta os pedaços (Mordidas de praga)
+    ctx.globalCompositeOperation = 'destination-out';
+    for(let i=0; i<25; i++) {
+      ctx.beginPath(); 
+      const bX = cx + (Math.random()-0.5)*s*1.8;
+      const bY = cy + (Math.random()-0.5)*s*1.8;
+      ctx.arc(bX, bY, s*0.1 + Math.random()*s*0.15, 0, Math.PI*2);
+      ctx.fill();
+    }
+    return c;
+  }
+
+  // 6. Result (Vórtice Analítico)
+  function createResultMask() {
+    const { c, ctx, w, h } = getCanvas();
+    const cx = w/2; const cy = h/2;
+    const rBase = Math.min(w,h) * 0.4;
+
+    for(let i=0; i<5; i++) {
+      const raio = rBase + (i * 25);
+      ctx.lineWidth = 1 + Math.random()*4;
+      ctx.strokeStyle = `rgba(255,255,255,${1.0 - i*0.2})`;
+      
+      // Linhas tracejadas orgânicas
+      if(i%2 === 0) ctx.setLineDash([10 + Math.random()*30, 10 + Math.random()*20]);
+      else ctx.setLineDash([]);
+
+      ctx.beginPath(); ctx.arc(cx, cy, raio, 0, Math.PI*2); ctx.stroke();
+    }
+    
+    // Brilho central suave
+    ctx.globalCompositeOperation = 'source-over';
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, rBase*1.5);
+    glow.addColorStop(0, 'rgba(255,255,255,0.15)');
+    glow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(cx, cy, rBase*1.5, 0, Math.PI*2); ctx.fill();
+
+    return c;
   }
 
   function buildParticles() {
-    const mobile = state.mobile;
-    const max = mobile ? config.maxMobile : config.maxDesktop;
-    const sample = mobile ? config.sampleMobile : config.sampleDesktop;
+    state.mobile = window.innerWidth < 720;
+    state.width = window.innerWidth; state.height = window.innerHeight;
+    const sample = state.mobile ? config.sampleMobile : config.sampleDesktop;
     
-    const textMask = createTextMask();
-    const fieldMask = createFieldMask();
-    const sunMask = createSunMask();
+    const m1 = readMaskCandidates(createTextMask(), sample);
+    const m2 = readMaskCandidates(createFieldMask(), sample);
+    const m3 = readMaskCandidates(createSunMask(), sample);
+    const m4 = readMaskCandidates(createRainMask(), sample);
+    const m5 = readMaskCandidates(createPestMask(), sample);
+    const m6 = readMaskCandidates(createResultMask(), sample);
 
-    const textCandidates = readMaskCandidates(textMask, sample);
-    const fieldCandidates = readMaskCandidates(fieldMask, sample);
-    const sunCandidates = readMaskCandidates(sunMask, sample);
-    
-    const count = Math.min(max, textCandidates.length, fieldCandidates.length, sunCandidates.length);
-
+    const maxParticles = state.mobile ? config.maxMobile : config.maxDesktop;
+    const count = Math.min(maxParticles, m1.length, m2.length, m3.length, m4.length, m5.length, m6.length);
     state.count = count;
+
     state.positions = new Float32Array(count * 3);
-    state.textHomes = new Float32Array(count * 3);
-    state.fieldHomes = new Float32Array(count * 3);
-    state.sunHomes = new Float32Array(count * 3);
     state.currentHomes = new Float32Array(count * 3);
     state.velocities = new Float32Array(count * 3);
-    state.alphas = new Float32Array(count);
-    state.seeds = new Float32Array(count);
+    state.alphas = new Float32Array(count); state.seeds = new Float32Array(count);
+
+    state.mText = new Float32Array(count * 2); state.mField = new Float32Array(count * 2);
+    state.mSun = new Float32Array(count * 2);  state.mRain = new Float32Array(count * 2);
+    state.mPest = new Float32Array(count * 2); state.mResult = new Float32Array(count * 2);
 
     for (let i = 0; i < count; i++) {
-      const text = candidateToClip(textCandidates[i], textMask);
-      const field = candidateToClip(fieldCandidates[i], fieldMask);
-      const sun = candidateToClip(sunCandidates[i], sunMask);
-      
+      const o = i * 3, o2 = i * 2;
       const z = (Math.random() - 0.5) * 0.18;
-      const fieldZ = (Math.random() - 0.5) * 0.24;
-      const sunZ = (Math.random() - 0.5) * 0.24;
-      const o = i * 3;
+      
+      state.mText[o2] = m1[i][0]; state.mText[o2+1] = m1[i][1];
+      state.mField[o2] = m2[i][0]; state.mField[o2+1] = m2[i][1];
+      state.mSun[o2] = m3[i][0]; state.mSun[o2+1] = m3[i][1];
+      state.mRain[o2] = m4[i][0]; state.mRain[o2+1] = m4[i][1];
+      state.mPest[o2] = m5[i][0]; state.mPest[o2+1] = m5[i][1];
+      state.mResult[o2] = m6[i][0]; state.mResult[o2+1] = m6[i][1];
 
-      state.positions[o] = text[0] + (Math.random() - 0.5) * 0.012;
-      state.positions[o + 1] = text[1] + (Math.random() - 0.5) * 0.012;
-      state.positions[o + 2] = z;
+      state.positions[o] = m1[i][0] + (Math.random()-0.5)*0.012;
+      state.positions[o+1] = m1[i][1] + (Math.random()-0.5)*0.012;
+      state.positions[o+2] = z;
 
-      state.textHomes[o] = text[0];
-      state.textHomes[o + 1] = text[1];
-      state.textHomes[o + 2] = z;
-
-      state.fieldHomes[o] = field[0];
-      state.fieldHomes[o + 1] = field[1];
-      state.fieldHomes[o + 2] = fieldZ;
-
-      state.sunHomes[o] = sun[0];
-      state.sunHomes[o + 1] = sun[1];
-      state.sunHomes[o + 2] = sunZ;
-
-      state.currentHomes[o] = text[0];
-      state.currentHomes[o + 1] = text[1];
-      state.currentHomes[o + 2] = z;
-
-      state.alphas[i] = 0.28 + Math.max(text[2], field[2], sun[2]) * 0.72;
+      state.alphas[i] = 0.28 + Math.random() * 0.72;
       state.seeds[i] = Math.random();
     }
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, alphaBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, state.alphas, gl.STATIC_DRAW);
-    gl.bindBuffer(gl.ARRAY_BUFFER, seedBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, state.seeds, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alpha); gl.bufferData(gl.ARRAY_BUFFER, state.alphas, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufs.seed); gl.bufferData(gl.ARRAY_BUFFER, state.seeds, gl.STATIC_DRAW);
   }
 
   function updateScrollTarget() {
     const vh = window.innerHeight || 1;
-    const doc = document.documentElement;
-    const maxScroll = Math.max(doc.scrollHeight - vh, 1);
+    const maxScroll = Math.max(document.body.scrollHeight - vh, 1);
     const ratio = clamp(window.scrollY / maxScroll, 0, 1);
-
-    const fieldRatio = clamp(ratio / 0.25, 0, 1);
-    state.fieldTarget = smoothstep01(fieldRatio);
-
-    const sunRatio = clamp((ratio - 0.35) / 0.25, 0, 1);
-    state.sunTarget = smoothstep01(sunRatio);
-
-    const rainRaw = clamp((ratio - 0.75) / 0.25, 0, 1);
-    state.rainTarget = smoothstep01(rainRaw);
-
-    document.body.classList.toggle('is-field', state.fieldTarget > 0.18);
-    document.body.classList.toggle('is-sun', state.sunTarget > 0.18);
-    document.body.classList.toggle('is-rain', state.rainTarget > 0.05);
+    
+    // São 5 transições perfeitamente divididas pelo scroll (0.0 até 5.0)
+    state.scrollTarget = ratio * 5.0; 
   }
 
   function sampleTrail(px, py) {
     const tubeRadius = state.mobile ? config.pathTubeMobile : config.pathTubeDesktop;
-    let best = null;
-    let bestScore = 0;
-
+    let best = null; let bestScore = 0;
     if (state.trail.length < 2) return null;
 
     for (let i = 1; i < state.trail.length; i++) {
-      const a = state.trail[i - 1];
-      const b = state.trail[i];
-      const abx = b.x - a.x;
-      const aby = b.y - a.y;
+      const a = state.trail[i - 1], b = state.trail[i];
+      const abx = b.x - a.x, aby = b.y - a.y;
       const len2 = abx * abx + aby * aby || 1;
       const u = clamp(((px - a.x) * abx + (py - a.y) * aby) / len2, 0, 1);
-      const cx = a.x + abx * u;
-      const cy = a.y + aby * u;
-      const dx = px - cx;
-      const dy = py - cy;
+      const cx = a.x + abx * u, cy = a.y + aby * u;
+      const dx = px - cx, dy = py - cy;
       const d2 = dx * dx + dy * dy;
       const trailAge = (state.trail.length - i) / Math.max(1, state.trail.length);
       const r = tubeRadius * (1.08 - trailAge * 0.42);
 
       if (d2 < r * r) {
-        const d = Math.sqrt(d2) || 1;
-        const len = Math.sqrt(len2) || 1;
+        const d = Math.sqrt(d2) || 1, len = Math.sqrt(len2) || 1;
         const life = (a.life * (1.0 - u) + b.life * u) * (1.0 - trailAge * 0.18);
         const score = Math.pow(1.0 - d / r, 1.25) * life;
 
         if (score > bestScore) {
-          const tx = abx / len;
-          const ty = aby / len;
           bestScore = score;
-          best = {
-            x: cx, y: cy, d, tx, ty,
-            nx: d > 1.0 ? dx / d : -ty,
-            ny: d > 1.0 ? dy / d : tx,
-            vx: a.vx * (1.0 - u) + b.vx * u,
-            vy: a.vy * (1.0 - u) + b.vy * u,
-            score, head: i > state.trail.length - 5
-          };
+          best = { x: cx, y: cy, d, tx: abx/len, ty: aby/len, nx: d>1 ? dx/d : -aby/len, ny: d>1 ? dy/d : abx/len, vx: a.vx*(1-u) + b.vx*u, vy: a.vy*(1-u) + b.vy*u, score, head: i > state.trail.length - 5 };
         }
       }
     }
@@ -534,21 +546,17 @@
 
   function pushPointer(x, y) {
     const now = performance.now();
-    const last = state.pointer;
-    const dt = Math.max(16, now - (last.lastTime || now));
-    const vx = last.lastTime ? (x - last.lastX) / dt * 16.67 : 0;
-    const vy = last.lastTime ? (y - last.lastY) / dt * 16.67 : 0;
+    const dt = Math.max(16, now - (state.pointer.lastTime || now));
+    const vx = state.pointer.lastTime ? (x - state.pointer.lastX) / dt * 16.67 : 0;
+    const vy = state.pointer.lastTime ? (y - state.pointer.lastY) / dt * 16.67 : 0;
 
     state.pointer.active = true;
-    state.pointer.px = x;
-    state.pointer.py = y;
-    state.pointer.lastX = x;
-    state.pointer.lastY = y;
-    state.pointer.lastTime = now;
-    state.lastMove = now;
+    state.pointer.px = x; state.pointer.py = y;
+    state.pointer.lastX = x; state.pointer.lastY = y;
+    state.pointer.lastTime = now; state.lastMove = now;
 
-    const previous = state.trail[state.trail.length - 1];
-    if (!previous || Math.hypot(x - previous.x, y - previous.y) > 2.8) {
+    const prev = state.trail[state.trail.length - 1];
+    if (!prev || Math.hypot(x - prev.x, y - prev.y) > 2.8) {
       state.trail.push({ x, y, vx, vy, life: 1.0 });
       while (state.trail.length > 128) state.trail.shift();
     }
@@ -557,106 +565,59 @@
   function bindEvents() {
     window.addEventListener('scroll', updateScrollTarget, { passive: true });
     window.addEventListener('mousemove', e => pushPointer(e.clientX, e.clientY), { passive: true });
-    window.addEventListener('touchstart', e => {
-      if (e.touches[0]) pushPointer(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-    window.addEventListener('touchmove', e => {
-      if (e.touches[0]) pushPointer(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-    window.addEventListener('mouseleave', () => {
-      state.pointer.active = false;
-      state.pointer.lastTime = 0;
-      state.trail.length = 0;
-    });
-    window.addEventListener('touchend', () => {
-      state.pointer.active = false;
-      state.pointer.lastTime = 0;
-      state.trail.length = 0;
-    });
-  }
-
-  function updateHomes() {
-    state.fieldProgress += (state.fieldTarget - state.fieldProgress) * config.scrollEase;
-    state.sunProgress += (state.sunTarget - state.sunProgress) * config.scrollEase;
-    state.rainProgress += (state.rainTarget - state.rainProgress) * config.scrollEase;
-
-    const f = state.fieldProgress;
-    const s = state.sunProgress;
-    
-    const text = state.textHomes;
-    const field = state.fieldHomes;
-    const sun = state.sunHomes;
-    const home = state.currentHomes;
-
-    for (let i = 0; i < state.count; i++) {
-      const o = i * 3;
-      
-      let px = text[o]     + (field[o]     - text[o])     * f;
-      let py = text[o + 1] + (field[o + 1] - text[o + 1]) * f;
-      let pz = text[o + 2] + (field[o + 2] - text[o + 2]) * f;
-
-      px = px + (sun[o]     - px) * s;
-      py = py + (sun[o + 1] - py) * s;
-      pz = pz + (sun[o + 2] - pz) * s;
-
-      home[o]     = px;
-      home[o + 1] = py;
-      home[o + 2] = pz;
-    }
+    window.addEventListener('touchstart', e => { if(e.touches[0]) pushPointer(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    window.addEventListener('touchmove', e => { if(e.touches[0]) pushPointer(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    window.addEventListener('mouseleave', () => { state.pointer.active = false; state.pointer.lastTime = 0; state.trail.length = 0; });
+    window.addEventListener('touchend', () => { state.pointer.active = false; state.pointer.lastTime = 0; state.trail.length = 0; });
   }
 
   function updatePhysics(now) {
-    updateHomes();
+    // Interpolação global suave (0.0 até 5.0)
+    state.scrollProgress += (state.scrollTarget - state.scrollProgress) * config.scrollEase;
+    const p = state.scrollProgress;
+    const stage = Math.floor(p);
+    const fract = p - stage;
 
     const activelyMoving = now - state.lastMove < config.settleDelay;
     const recentlyTouched = now - state.lastMove < config.releaseDelay;
-    const rainMix = computeRainMix();
-
-    const pos = state.positions;
-    const home = state.currentHomes;
-    const vel = state.velocities;
-    const seed = state.seeds;
-    const invW = 2 / state.width;
-    const invH = 2 / state.height;
-    const scrollMoving = Math.abs(state.fieldTarget - state.fieldProgress) > 0.006 || Math.abs(state.sunTarget - state.sunProgress) > 0.006;
-
-    const baseReturn = (recentlyTouched || scrollMoving) ? config.returnActive : config.returnIdle;
-    const globalReturnForce = baseReturn * (1.0 - rainMix);
+    const scrollMoving = Math.abs(state.scrollTarget - state.scrollProgress) > 0.006;
+    const globalReturnForce = (recentlyTouched || scrollMoving) ? config.returnActive : config.returnIdle;
+    const invW = 2 / state.width, invH = 2 / state.height;
 
     for (let t = state.trail.length - 1; t >= 0; t--) {
       state.trail[t].life *= activelyMoving ? 0.965 : 0.88;
       if (state.trail[t].life < 0.028) state.trail.splice(t, 1);
     }
 
+    const masks = [state.mText, state.mField, state.mSun, state.mRain, state.mPest, state.mResult];
+    const maskA = masks[Math.min(stage, 5)];
+    const maskB = masks[Math.min(stage + 1, 5)];
+
     for (let i = 0; i < state.count; i++) {
-      const o = i * 3;
-      let x = pos[o];
-      let y = pos[o + 1];
-      let z = pos[o + 2];
-      let vx = vel[o];
-      let vy = vel[o + 1];
-      let vz = vel[o + 2];
-      const hx = home[o];
-      const hy = home[o + 1];
-      const hz = home[o + 2];
+      const o = i * 3, o2 = i * 2;
+      let x = state.positions[o], y = state.positions[o+1], z = state.positions[o+2];
+      let vx = state.velocities[o], vy = state.velocities[o+1], vz = state.velocities[o+2];
+      
+      // Descobre a "Casa" atual interpolando as máscaras
+      const hx = maskA[o2] + (maskB[o2] - maskA[o2]) * fract;
+      const hy = maskA[o2+1] + (maskB[o2+1] - maskA[o2+1]) * fract;
+      state.currentHomes[o] = hx; state.currentHomes[o+1] = hy;
 
       vx += (hx - x) * globalReturnForce;
       vy += (hy - y) * globalReturnForce;
-      vz += (hz - z) * globalReturnForce * 0.55;
+      vz += (0 - z) * globalReturnForce * 0.55;
 
+      // FÍSICA FLUIDA ORIGINAL (A Magia)
       if (activelyMoving && state.trail.length) {
-        const px = clipToPxX(x);
-        const py = clipToPxY(y);
-        const mx = state.pointer.px;
-        const my = state.pointer.py;
-        const mdx = mx - px;
-        const mdy = my - py;
-        const mouseRadius = state.mobile ? config.mouseFollowRadiusMobile : config.mouseFollowRadiusDesktop;
+        const px = clipToPxX(x), py = clipToPxY(y);
+        const mx = state.pointer.px, my = state.pointer.py;
+        const mdx = mx - px, mdy = my - py;
+        const mR = state.mobile ? config.mouseFollowRadiusMobile : config.mouseFollowRadiusDesktop;
         const md2 = mdx * mdx + mdy * mdy;
 
-        if (md2 < mouseRadius * mouseRadius) {
+        if (md2 < mR * mR) {
           const md = Math.sqrt(md2) || 1.0;
-          const ms = Math.pow(1.0 - md / mouseRadius, 1.45);
+          const ms = Math.pow(1.0 - md / mR, 1.45);
           vx += (mdx / md) * config.mouseFollow * ms * invW * 260.0;
           vy += -(mdy / md) * config.mouseFollow * ms * invH * 260.0;
         }
@@ -665,127 +626,68 @@
         if (hit) {
           const s = hit.score;
           const gesture = Math.hypot(hit.vx, hit.vy);
-          let dirX = hit.tx;
-          let dirY = hit.ty;
-          if (gesture > 0.01 && dirX * hit.vx + dirY * hit.vy < 0.0) {
-            dirX *= -1.0;
-            dirY *= -1.0;
-          }
+          let dirX = hit.tx, dirY = hit.ty;
+          if (gesture > 0.01 && dirX * hit.vx + dirY * hit.vy < 0.0) { dirX *= -1; dirY *= -1; }
 
-          const flowX = dirX * invW;
-          const flowY = -dirY * invH;
-          const edgeX = hit.nx * invW;
-          const edgeY = -hit.ny * invH;
-          const orbitX = -hit.ty * invW;
-          const orbitY = -hit.tx * invH;
           const headBoost = hit.head ? 1.65 : 1.0;
-          const side = seed[i] > 0.5 ? 1.0 : -1.0;
+          const side = state.seeds[i] > 0.5 ? 1.0 : -1.0;
           const desiredOffset = (state.mobile ? config.pathEdgeMobile : config.pathEdgeDesktop) * side;
           const targetPx = hit.x + hit.nx * desiredOffset;
           const targetPy = hit.y + hit.ny * desiredOffset;
-          const targetX = pxToClipX(targetPx);
-          const targetY = pxToClipY(targetPy);
           const targetPull = Math.min(0.066, config.pathTargetPull * s * headBoost);
           const edgeForce = clamp((desiredOffset - hit.d * side) / 70.0, -1.0, 1.0);
 
-          vx += (targetX - x) * targetPull;
-          vy += (targetY - y) * targetPull;
-          vx += flowX * config.pathFollow * s * 430.0;
-          vy += flowY * config.pathFollow * s * 430.0;
-          vx += edgeX * config.pathEdgePull * edgeForce * s * 610.0 * headBoost;
-          vy += edgeY * config.pathEdgePull * edgeForce * s * 610.0 * headBoost;
-          vx += orbitX * config.pathOrbit * s * side * 165.0;
-          vy += orbitY * config.pathOrbit * s * side * 165.0;
-          vx += flowX * config.flow * s * gesture * 1.45;
-          vy += flowY * config.flow * s * gesture * 1.45;
-          vx += edgeX * config.headPush * s * (hit.head ? 72.0 : 22.0);
-          vy += edgeY * config.headPush * s * (hit.head ? 72.0 : 22.0);
-          vz += (Math.sin(seed[i] * 100.0) * 0.0032) * s;
+          vx += (pxToClipX(targetPx) - x) * targetPull;
+          vy += (pxToClipY(targetPy) - y) * targetPull;
+          vx += (dirX * invW) * config.pathFollow * s * 430.0;
+          vy += (-dirY * invH) * config.pathFollow * s * 430.0;
+          vx += (hit.nx * invW) * config.pathEdgePull * edgeForce * s * 610.0 * headBoost;
+          vy += (-hit.ny * invH) * config.pathEdgePull * edgeForce * s * 610.0 * headBoost;
+          vx += (-hit.ty * invW) * config.pathOrbit * s * side * 165.0;
+          vy += (-hit.tx * invH) * config.pathOrbit * s * side * 165.0;
+          vx += (dirX * invW) * config.flow * s * gesture * 1.45;
+          vy += (-dirY * invH) * config.flow * s * gesture * 1.45;
+          vx += (hit.nx * invW) * config.headPush * s * (hit.head ? 72.0 : 22.0);
+          vy += (-hit.ny * invH) * config.headPush * s * (hit.head ? 72.0 : 22.0);
+          vz += (Math.sin(state.seeds[i] * 100.0) * 0.0032) * s;
         }
       }
 
-      const n = Math.sin(now * 0.0012 + seed[i] * 80.0) * config.noise;
-      const scrollDrift = state.fieldProgress * (1.0 - state.fieldProgress) * 0.0007;
-      vx += n;
-      vy += Math.cos(now * 0.0010 + seed[i] * 44.0) * config.noise - scrollDrift;
+      vx += Math.sin(now * 0.0012 + state.seeds[i] * 80.0) * config.noise;
+      vy += Math.cos(now * 0.0010 + state.seeds[i] * 44.0) * config.noise;
 
-      if (rainMix > 0.1) {
-        const g = 0.0025 + 0.0012 * seed[i];
-        vy -= g * rainMix;
-      }
-
-      vx *= config.friction;
-      vy *= config.friction;
-      vz *= 0.94;
-
+      vx *= config.friction; vy *= config.friction; vz *= 0.94;
       const speed = Math.hypot(vx, vy);
-      if (speed > config.maxSpeed) {
-        const m = config.maxSpeed / speed;
-        vx *= m;
-        vy *= m;
-      }
+      if (speed > config.maxSpeed) { vx *= config.maxSpeed / speed; vy *= config.maxSpeed / speed; }
 
-      x += vx;
-      y += vy;
-      z = clamp(z + vz, -0.42, 0.42);
+      x += vx; y += vy; z = clamp(z + vz, -0.42, 0.42);
 
-      if (rainMix > 0.0) {
-        const py = clipToPxY(y);
-        if (py > state.height + 40) {
-          const spawnX = Math.random() * state.width;
-          const spawnY = -40 - Math.random() * 120;
-          x = pxToClipX(spawnX);
-          y = pxToClipY(spawnY);
-          z = (Math.random() - 0.5) * 0.18;
-          vx = 0.0;
-          vy = 0.0;
-          vz = 0.0;
-        }
-      }
-
-      pos[o] = x;
-      pos[o + 1] = y;
-      pos[o + 2] = z;
-      vel[o] = vx;
-      vel[o + 1] = vy;
-      vel[o + 2] = vz;
+      state.positions[o] = x; state.positions[o+1] = y; state.positions[o+2] = z;
+      state.velocities[o] = vx; state.velocities[o+1] = vy; state.velocities[o+2] = vz;
     }
   }
 
   function render(now) {
-    if (!state.positions || !state.count) {
-      requestAnimationFrame(render);
-      return;
-    }
+    if (!state.positions || !state.count) { requestAnimationFrame(render); return; }
 
     updatePhysics(now);
-    const rainMix = computeRainMix();
 
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(0, 0, 0, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.useProgram(program);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(program); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, state.positions, gl.DYNAMIC_DRAW);
-    gl.enableVertexAttribArray(locations.position);
-    gl.vertexAttribPointer(locations.position, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufs.pos); gl.bufferData(gl.ARRAY_BUFFER, state.positions, gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(locations.position); gl.vertexAttribPointer(locations.position, 3, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, alphaBuffer);
-    gl.enableVertexAttribArray(locations.alpha);
-    gl.vertexAttribPointer(locations.alpha, 1, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alpha);
+    gl.enableVertexAttribArray(locations.alpha); gl.vertexAttribPointer(locations.alpha, 1, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, seedBuffer);
-    gl.enableVertexAttribArray(locations.seed);
-    gl.vertexAttribPointer(locations.seed, 1, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufs.seed);
+    gl.enableVertexAttribArray(locations.seed); gl.vertexAttribPointer(locations.seed, 1, gl.FLOAT, false, 0, 0);
 
     gl.uniform1f(locations.pointSize, state.mobile ? config.pointMobile : config.pointDesktop);
     gl.uniform1f(locations.dpr, state.dpr);
-    gl.uniform1f(locations.fieldMix, state.fieldProgress);
-    gl.uniform1f(locations.sunMix, state.sunProgress);
-    gl.uniform1f(locations.rainMix, rainMix);
+    gl.uniform1f(locations.progress, state.scrollProgress);
 
     gl.drawArrays(gl.POINTS, 0, state.count);
     requestAnimationFrame(render);
@@ -803,12 +705,7 @@
   }
 
   let resizeTimer = 0;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(resize, 140);
-  });
+  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 140); });
 
-  resize();
-  bindEvents();
-  requestAnimationFrame(render);
+  resize(); bindEvents(); requestAnimationFrame(render);
 })();
