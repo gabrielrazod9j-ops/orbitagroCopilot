@@ -16,6 +16,8 @@
 
 html, body {
   width: 100%;
+  height: 100%;
+  overflow: hidden; /* Remove o scroll nativo e livre da janela */
   background: var(--bg);
   color: var(--text);
   font-family: Inter, "SF Pro Display", system-ui, sans-serif;
@@ -153,18 +155,38 @@ html, body {
   font-weight: 650;
 }
 
-/* === JORNADA DO COPILOTO === */
+/* === JORNADA DO COPILOTO COM SCROLL SNAPPING === */
 .journey-container {
   position: relative;
   z-index: 10;
+  height: 100vh;
+  width: 100vw;
+  overflow-y: scroll;
+  /* A MÁGICA: Define o scroll obrigatório por bloco */
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+/* Oculta a barra de rolagem (Fica clean como no NewMixCoffee) */
+.journey-container::-webkit-scrollbar {
+  display: none;
+}
+.journey-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .stage {
   height: 100vh;
+  width: 100vw;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  /* Trava perfeitamente o início do bloco no topo da tela */
+  scroll-snap-align: start;
+  /* Impede que o usuário pule várias fases se rolar muito forte */
+  scroll-snap-stop: always;
 }
 
 .scroll-field-note {
@@ -193,7 +215,6 @@ html, body {
   transition: all 0.6s var(--ease);
 }
 
-/* O card ganha foco quando chega no meio da tela */
 .glass-card:hover, .stage:focus-within .glass-card {
   opacity: 1;
   transform: translateY(0);
@@ -265,7 +286,6 @@ html, body {
 
 .secondary-btn:hover { background: rgba(255,255,255,0.1); }
 
-/* Card de Resultado Específico */
 .result-card .risk-badge {
   display: inline-block;
   padding: 8px 16px;
@@ -273,7 +293,6 @@ html, body {
   font-weight: 800;
   font-size: 14px;
   margin-bottom: 24px;
-  background: rgba(255,255,255,0.1);
 }
 
 .result-card .recommendations ul {
