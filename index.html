@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OrbitAgro Copilot</title>
+  <title>OrbitAgro Copilot - Global Solution</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- Elementos HUD -->
   <div class="hud-element hud-top-left">ORBIT.SYS // V.2.4.1_BETA</div>
-  <div class="hud-element hud-bottom-right">LAT 23°33'S LON 46°38'W // SENSOR: ACTV</div>
+  <div class="hud-element hud-bottom-right" id="hud-location">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
   <div class="hud-element hud-vertical">DATA_STREAM_SYNC</div>
 
   <header class="site-header" aria-label="Menu principal">
@@ -19,11 +18,11 @@
       </a>
       <nav class="desktop-nav">
         <a href="index.html">Home</a>
-        <a href="sobre.html">Sobre</a>
+        <a href="pages/sobre.html">Sobre</a>
         <a href="#stage-plantacao">Solução</a>
-        <a href="faq.html">FAQ</a>
-        <a href="contato.html">Contato</a>
-        <a href="integrantes.html" class="highlighted-link">Equipe</a>
+        <a href="pages/faq.html">FAQ</a>
+        <a href="pages/contato.html">Contato</a>
+        <a href="pages/integrantes.html" class="highlighted-link">Equipe</a>
       </nav>
       <button class="menu-toggle" type="button" aria-label="Abrir menu">
         <span></span><span></span><span></span>
@@ -33,57 +32,82 @@
 
   <nav class="mobile-menu" id="mobileMenu">
     <a href="index.html">Home</a>
-    <a href="sobre.html">Sobre</a>
+    <a href="pages/sobre.html">Sobre</a>
     <a href="#stage-plantacao">Solução</a>
-    <a href="faq.html">FAQ</a>
-    <a href="contato.html">Contato</a>
-    <a href="integrantes.html" style="color: #4caf50;">Equipe</a>
+    <a href="pages/faq.html">FAQ</a>
+    <a href="pages/contato.html">Contato</a>
+    <a href="pages/integrantes.html" style="color: #4caf50;">Equipe</a>
   </nav>
 
   <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
   <main class="journey-container">
-    <!-- Estágio 1: Hero -->
-    <section class="stage align-center" id="stage-hero">
-      <div class="hero-content animate-fade-up">
-        <div class="scroll-hint">
-          <svg class="mouse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5" y="2" width="14" height="20" rx="7" ry="7"></rect>
-            <line x1="12" y1="6" x2="12" y2="10"></line>
-          </svg>
-          <span>Iniciar Calibração</span>
-        </div>
+    <section class="stage align-center" id="stage-hero" style="position: relative;">
+      <div class="scroll-hint">
+        <svg class="mouse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="7" ry="7"></rect>
+          <line x1="12" y1="6" x2="12" y2="10"></line>
+        </svg>
+        <span>Iniciar Calibração de Satélite</span>
       </div>
     </section>
 
-    <!-- Estágio 2: Plantação -->
-    <section class="stage align-left" id="stage-plantacao">
-      <div class="glass-card">
+    <section class="stage split-layout" id="stage-plantacao">
+      <div class="glass-card align-left">
         <h2 class="split-text">Dados da Lavoura</h2>
-        <p class="animate-fade-up" style="transition-delay: 0.1s;">Vamos registrar a sua área de cultivo.</p>
+        <p class="animate-fade-up" style="transition-delay: 0.1s;">Parâmetros iniciais de cultivo.</p>
         
         <label class="animate-fade-up" style="transition-delay: 0.2s;">Identificação do talhão</label>
         <input type="text" id="talhao" placeholder="Ex: Lote Alfa" class="text-input animate-fade-up" style="transition-delay: 0.3s;" />
 
-        <label class="animate-fade-up" style="transition-delay: 0.4s;">Cultura predominante</label>
+        <label class="animate-fade-up" style="transition-delay: 0.4s;">Cultura predominante (Top Brasil)</label>
         <div class="chip-group animate-fade-up" style="transition-delay: 0.5s;">
-          <label class="chip"><input type="radio" name="cultura" value="0" checked>🌾 Mandioca</label>
-          <label class="chip"><input type="radio" name="cultura" value="1">🫘 Feijão</label>
-          <label class="chip"><input type="radio" name="cultura" value="2">🌽 Milho</label>
-          <label class="chip"><input type="radio" name="cultura" value="3">🍚 Arroz</label>
-          <label class="chip"><input type="radio" name="cultura" value="4">☕ Café</label>
-          <label class="chip"><input type="radio" name="cultura" value="5">🍌 Banana</label>
-          <label class="chip"><input type="radio" name="cultura" value="6">🍅 Tomate</label>
-          <label class="chip"><input type="radio" name="cultura" value="7">🥬 Alface</label>
+          <label class="chip"><input type="radio" name="cultura" value="soja">🌿 Soja</label>
+          <label class="chip"><input type="radio" name="cultura" value="cana">🎋 Cana</label>
+          <label class="chip"><input type="radio" name="cultura" value="milho">🌽 Milho</label>
+          <label class="chip"><input type="radio" name="cultura" value="cafe">☕ Café</label>
+          <label class="chip"><input type="radio" name="cultura" value="algodao">☁️ Algodão</label>
         </div>
       </div>
+      
+      <article class="insights-panel align-right" id="panel-plantacao">
+        <div class="hologram-beam"></div> 
+        <div class="hologram-base"></div> 
+        
+        <div class="crop-profile-row animate-fade-up">
+          <div class="image-scanner-container">
+             <img src="" id="info-img-cultura" class="crop-image-large" alt="Grão da Cultura" />
+             <div class="scanner-overlay"></div>
+          </div>
+          
+          <div class="crop-info-side">
+             <span id="info-ranking">--</span>
+             <h3 id="info-nome-cultura" class="huge-data small text-primary">--</h3>
+             
+             <div class="insight-label mt-3">Requisitos Edáficos (Solo)</div>
+             <div class="insight-value-side" id="info-solo-tipo">-</div>
+             
+             <div class="insight-label mt-3">Preparo e Manejo Sustentável</div>
+             <div class="insight-value-side text-muted" id="info-solo-manejo">-</div>
+          </div>
+        </div>
+      </article>
     </section>
 
-    <!-- Estágio 3: Sol -->
-    <section class="stage align-right" id="stage-sol">
-      <div class="glass-card">
+    <section class="stage split-layout reverse" id="stage-sol">
+      <article class="floating-info align-left">
+        <h3 class="floating-title">Telemetria Local (Satélite)</h3>
+        <div class="huge-data" id="rt-temp">--°C</div>
+        <p class="floating-text" id="rt-location">Buscando geolocalização...</p>
+        
+        <h3 class="floating-title mt-4">Qualidade do Ar (AQI)</h3>
+        <div class="huge-data small" id="rt-aqi">--</div>
+        <p class="floating-text" id="rt-aqi-desc">Analisando particulados...</p>
+      </article>
+
+      <div class="glass-card align-right">
         <h2 class="split-text">Climatologia</h2>
-        <p class="animate-fade-up" style="transition-delay: 0.1s;">Padrões atmosféricos recentes.</p>
+        <p class="animate-fade-up" style="transition-delay: 0.1s;">Padrões atmosféricos recentes na propriedade.</p>
         
         <label class="animate-fade-up" style="transition-delay: 0.2s;">Dias consecutivos sem precipitação?</label>
         <div class="stepper animate-fade-up" style="transition-delay: 0.3s;">
@@ -94,119 +118,82 @@
 
         <label class="animate-fade-up" style="transition-delay: 0.4s; margin-top: 32px;">Pico térmico na última semana?</label>
         <div class="radio-cards animate-fade-up" style="transition-delay: 0.5s;">
-          <label class="radio-card">
-            <input type="radio" name="calor" value="1" checked>
-            <span class="icon">🌤️</span><span class="title">Estável</span>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="calor" value="2">
-            <span class="icon">🔥</span><span class="title">Alto</span>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="calor" value="3">
-            <span class="icon">🌋</span><span class="title">Crítico</span>
-          </label>
+          <label class="radio-card"><input type="radio" name="calor" value="1" checked><span class="icon">🌤️</span><span class="title">Estável</span></label>
+          <label class="radio-card"><input type="radio" name="calor" value="2"><span class="icon">🔥</span><span class="title">Alto</span></label>
+          <label class="radio-card"><input type="radio" name="calor" value="3"><span class="icon">🌋</span><span class="title">Crítico</span></label>
         </div>
       </div>
     </section>
 
-    <!-- Estágio 4: Chuva -->
-    <section class="stage align-left" id="stage-chuva">
-      <div class="glass-card">
+    <section class="stage split-layout" id="stage-chuva">
+      <div class="glass-card align-left">
         <h2 class="split-text">Geomorfologia</h2>
         <p class="animate-fade-up" style="transition-delay: 0.1s;">A base hídrica da produtividade.</p>
         
         <label class="animate-fade-up" style="transition-delay: 0.2s;">Nível de saturação visual do solo:</label>
         <div class="radio-cards column-cards animate-fade-up" style="transition-delay: 0.3s;">
-          <label class="radio-card">
-            <input type="radio" name="soloObs" value="3" checked>
-            <span class="icon">🌱</span><span class="title">Equilíbrio Hídrico</span>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="soloObs" value="1">
-            <span class="icon">💧</span><span class="title">Saturação / Alagamento</span>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="soloObs" value="2">
-            <span class="icon">🏜️</span><span class="title">Déficit / Fissuras</span>
-          </label>
+          <label class="radio-card"><input type="radio" name="soloObs" value="3" checked><span class="icon">🌱</span><span class="title">Equilíbrio Hídrico</span></label>
+          <label class="radio-card"><input type="radio" name="soloObs" value="1"><span class="icon">💧</span><span class="title">Saturação / Alagamento</span></label>
+          <label class="radio-card"><input type="radio" name="soloObs" value="2"><span class="icon">🏜️</span><span class="title">Déficit / Fissuras</span></label>
         </div>
       </div>
+
+      <article class="floating-info align-right">
+        <h3 class="floating-title">Precipitação Estimada (24h)</h3>
+        <div class="huge-data text-blue" id="rt-chuva">--%</div>
+        <h3 class="floating-title mt-4">Projeção a Curto Prazo</h3>
+        <ul class="forecast-list" id="rt-forecast"><li>Aguardando dados orbitais...</li></ul>
+      </article>
     </section>
 
-    <!-- Estágio 5: Pragas -->
-    <section class="stage align-right" id="stage-pragas">
-      <div class="glass-card">
+    <section class="stage split-layout reverse" id="stage-pragas">
+      <article class="floating-info align-left" id="lista-pragas">
+        <h3 class="floating-title">Ameaças Biológicas: <span style="color:var(--muted);">Aguardando Seleção...</span></h3>
+      </article>
+
+      <div class="glass-card align-right">
         <h2 class="split-text">Saúde Biológica</h2>
         <p class="animate-fade-up" style="transition-delay: 0.1s;">Inspeção tátil e visual das folhas.</p>
         
         <label class="animate-fade-up" style="transition-delay: 0.2s;">Presença de patógenos ou desfolha?</label>
         <div class="radio-cards animate-fade-up" style="transition-delay: 0.3s;">
-          <label class="radio-card">
-            <input type="radio" name="pragas" value="3" checked>
-            <span class="icon">✅</span><span class="title">Nula</span>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="pragas" value="2">
-            <span class="icon">🤔</span><span class="title">Baixa</span>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="pragas" value="1">
-            <span class="icon">🐛</span><span class="title">Alta</span>
-          </label>
+          <label class="radio-card"><input type="radio" name="pragas" value="3" checked><span class="icon">✅</span><span class="title">Nula</span></label>
+          <label class="radio-card"><input type="radio" name="pragas" value="2"><span class="icon">🤔</span><span class="title">Baixa</span></label>
+          <label class="radio-card"><input type="radio" name="pragas" value="1"><span class="icon">🐛</span><span class="title">Alta</span></label>
         </div>
 
-        <button id="btnDiagnostico" class="primary-btn animate-fade-up" style="transition-delay: 0.5s;">Compilar Dados Visuais</button>
+        <button id="btnDiagnostico" class="primary-btn animate-fade-up" style="transition-delay: 0.5s;">Compilar Dados Orbitais</button>
       </div>
     </section>
 
-    <!-- Estágio 6: Resultado -->
-    <section class="stage align-center" id="stage-resultado">
+    <section class="stage final-stage" id="stage-resultado">
+      <div class="floating-corner top-left"><h4>Saúde Biológica</h4><p id="res-praga">Aguardando...</p></div>
+      <div class="floating-corner bottom-left"><h4>Manejo do Solo</h4><p id="res-solo">Aguardando...</p></div>
+      <div class="floating-corner top-right"><h4>Gestão Hídrica</h4><p id="res-chuva">Aguardando...</p></div>
+      <div class="floating-corner bottom-right"><h4>Clima e Atmosfera</h4><p id="res-clima">Aguardando...</p></div>
+
       <div class="glass-card result-card">
-        <h2 class="split-text">Telemetria OrbitAgro</h2>
-        
+        <h2 class="split-text">Telemetria Consolidada</h2>
         <div class="dashboard animate-fade-up" style="transition-delay: 0.1s;">
           <div class="gauge-container">
-            <div class="orbital-rings">
-              <div class="ring ring-1"></div>
-              <div class="ring ring-2"></div>
-              <div class="scanner-line"></div>
-            </div>
-            
             <svg viewBox="0 0 100 55" class="gauge">
               <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 4"/>
               <path id="gaugeFill" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#4caf50" stroke-width="6" stroke-linecap="round" stroke-dasharray="126" stroke-dashoffset="126" style="filter: drop-shadow(0 0 8px var(--primary));" />
             </svg>
-            <div class="gauge-text" id="riskBadge">A PROCESSAR</div>
+            <div class="gauge-text" id="riskBadge">PROCESSAR</div>
           </div>
-
           <div class="factors">
-            <h4>Índice de Estressores</h4>
-            <div class="factor">
-              <div class="factor-header"><span>Hídrico</span></div>
-              <div class="factor-bar"><div class="factor-fill" id="barSeca"></div></div>
-            </div>
-            <div class="factor">
-              <div class="factor-header"><span>Térmico</span></div>
-              <div class="factor-bar"><div class="factor-fill" id="barCalor"></div></div>
-            </div>
-            <div class="factor">
-              <div class="factor-header"><span>Biológico</span></div>
-              <div class="factor-bar"><div class="factor-fill" id="barPraga"></div></div>
-            </div>
-            <div class="factor">
-              <div class="factor-header"><span>Edáfico</span></div>
-              <div class="factor-bar"><div class="factor-fill" id="barSolo"></div></div>
-            </div>
+            <div class="factor"><div class="factor-header"><span>Hídrico</span></div><div class="factor-bar"><div class="factor-fill" id="barSeca"></div></div></div>
+            <div class="factor"><div class="factor-header"><span>Térmico</span></div><div class="factor-bar"><div class="factor-fill" id="barCalor"></div></div></div>
+            <div class="factor"><div class="factor-header"><span>Biológico</span></div><div class="factor-bar"><div class="factor-fill" id="barPraga"></div></div></div>
+            <div class="factor"><div class="factor-header"><span>Edáfico</span></div><div class="factor-bar"><div class="factor-fill" id="barSolo"></div></div></div>
           </div>
         </div>
-        
-        <div class="recommendations animate-fade-up" style="transition-delay: 0.4s;">
-          <h3>Vetor de Ação:</h3>
+        <div class="recommendations animate-fade-up" style="transition-delay: 0.3s;">
+          <h3>Vetor de Ação Recomendada:</h3>
           <ul id="recList"></ul>
         </div>
-
-        <button id="btnRecomecar" class="secondary-btn animate-fade-up" style="transition-delay: 0.6s;">Nova Calibração</button>
+        <button id="btnRecomecar" class="secondary-btn animate-fade-up" style="transition-delay: 0.4s; margin-top: 30px;">Nova Calibração</button>
       </div>
     </section>
   </main>
