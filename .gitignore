@@ -1,0 +1,13 @@
+# Chaves de API e Segredos
+.env
+
+# Pastas de dependências e logs
+node_modules/
+dist/
+build/
+logs/
+*.log
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
