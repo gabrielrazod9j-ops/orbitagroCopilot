@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre | OrbitAgro Copilot</title>
+    <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+    <header class="site-header" aria-label="Sobre">
+    <div class="header-inner">
+      <a class="brand-logo" href="../index.html" aria-label="OrbitAgro Copilot - Página de Sobre">
+        <span>orbitagro</span><span>copilot</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Navegação principal">
+        <a href="../index.html">Home</a>
+        <a href="sobre.html" class="active">Sobre</a>
+        <a href="solucao.html">Solução</a>
+        <a href="experiencia.html">Experiência</a>
+        <a href="integrantes.html">Integrantes</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contato.html">Contato</a>
+        <a href="login.html">Login</a>
+      </nav>
+
+      <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="mobile-menu" id="mobileMenu" aria-label="Menu mobile">
+    <a href="../index.html">Home</a>
+    <a href="sobre.html" class="active">Sobre</a>
+    <a href="solucao.html">Solução</a>
+    <a href="experiencia.html">Experiência</a>
+    <a href="integrantes.html">Integrantes</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contato.html">Contato</a>
+    <a href="login.html">Login</a>
+  </nav>
+  <canvas id="particleCanvas" aria-hidden="true"></canvas>
+  <main class="journey-container">
+    <!--Apresentação do projeto-->
+    <section class="stage" id="stage-apresentação sobre">
+      <div class="glass-card">
+        <h2>OrbitAgro Copilot</h2>
+        <p>
+          Inteligência climática e produtiva para pequenos e médios produtores.
+          Não é mais um app “de mapas”: é um copiloto que traduz dados de satélite, clima e sinais da lavoura em ações
+          práticas — em linguagem simples.
+        </p>
+      </div>
+    </section>
+
+    <!-- Problema -->
+    <section class="stage" id="stage-problema">
+      <div class="glass-card">
+        <h2>O que trava a produtividade</h2>
+        <p>
+          Pequenos e médios produtores enfrentam perdas quando o tempo certo de agir não fica claro.
+          Principalmente por:
+        </p>
+          <ul class="lista-ação">
+            <li>seca e chuva imprevisível (planejamento difícil)</li>
+            <li>atraso na identificação de pragas e estresse na planta</li>
+            <li>falta de leitura simples do que o clima realmente indica</li>
+            <li>dificuldade em interpretar dados de satélite e transformá-los em decisão</li>
+            <li>pouco acesso a ferramentas caras de agricultura de precisão</li>
+          </ul>
+      </div>
+    </section>
+
+    <!-- Solução -->
+    <section class="stage" id="stage-solucao">
+      <div class="glass-card">
+        <h2>O que o OrbitAgro faz</h2>
+        <p>
+          Ajuda você a registrar a lavoura e receber alertas simples.
+          O sistema combina: cultura, dias sem chuva, calor, chuva prevista, sinais observados e condições de solo.
+        </p>
+        <div class="recomendações" aria-label="Como funciona">
+          <ul class="lista-ação">
+            <li>Satélite + dados espaciais: indica variações e possíveis áreas com risco;</li>
+            <li>Clima: interpreta previsões e padrões para os próximos dias;</li>
+            <li>Sintomas no campo: o produtor registra o que percebe e melhora a precisão;</li>
+            <li>IA recomenda: ações práticas, priorizadas e fáceis de executar;</li>
+          </ul>
+        </div>
+
+        <!--exemplo de resposta:-->
+        <div style="margin-top: 22px;">
+          <p style="margin:0; color: rgba(255,255,255,0.9); font-weight: 650;">Exemplo de resposta:</p>
+          <p style="margin-top: 10px;">
+            “Sua lavoura está com risco alto de estresse hídrico nos próximos 5 dias.
+            Priorize irrigação no talhão X, evite adubação antes da chuva e monitore sinais de praga.”
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <!--conectando a pagina HTML com o arquivo javascript-->
+   <script src="../js/script.js"></script>
+</body>
+</html> 
