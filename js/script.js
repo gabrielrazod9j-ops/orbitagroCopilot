@@ -1,65 +1,108 @@
 // ==========================================
-// 1. CÉREBRO COPILOTO (LÓGICA PYTHON PORTADA)
+// 1. UI AVANÇADA E OBSERVER DE ALTA PERFORMANCE
 // ==========================================
-const CULTURAS = [
-  { nome: "Mandioca", temp_min: 20, temp_max: 30, chuva_min_7d: 10, chuva_max_7d: 70, ph_min: 5.0, ph_max: 6.5 },
-  { nome: "Feijão", temp_min: 18, temp_max: 30, chuva_min_7d: 15, chuva_max_7d: 80, ph_min: 5.5, ph_max: 6.8 },
-  { nome: "Milho", temp_min: 18, temp_max: 32, chuva_min_7d: 15, chuva_max_7d: 90, ph_min: 5.5, ph_max: 7.0 },
-  { nome: "Arroz", temp_min: 20, temp_max: 35, chuva_min_7d: 20, chuva_max_7d: 100, ph_min: 5.0, ph_max: 6.5 },
-  { nome: "Café", temp_min: 18, temp_max: 26, chuva_min_7d: 10, chuva_max_7d: 70, ph_min: 5.5, ph_max: 6.5 },
-  { nome: "Banana", temp_min: 20, temp_max: 30, chuva_min_7d: 20, chuva_max_7d: 100, ph_min: 5.5, ph_max: 7.0 },
-  { nome: "Tomate", temp_min: 18, temp_max: 28, chuva_min_7d: 10, chuva_max_7d: 60, ph_min: 5.5, ph_max: 6.8 },
-  { nome: "Alface", temp_min: 15, temp_max: 25, chuva_min_7d: 10, chuva_max_7d: 50, ph_min: 6.0, ph_max: 7.0 }
-];
+
+const menuToggle = document.querySelector('.menu-toggle');
+const mobileMenu = document.getElementById('mobileMenu');
+if (menuToggle && mobileMenu) {
+  menuToggle.addEventListener('click', () => {
+    mobileMenu.classList.toggle('is-open');
+  });
+}
+
+// Tipografia Cinética Leve (Otimizada para não estourar o layout thrashing)
+document.querySelectorAll('.split-text').forEach(title => {
+  const text = title.innerText;
+  title.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+  
+  text.split(' ').forEach((word, wordIndex) => {
+    const wordSpan = document.createElement('span');
+    wordSpan.className = 'word';
+    
+    const innerSpan = document.createElement('span');
+    innerSpan.className = 'word-inner';
+    innerSpan.innerText = word;
+    innerSpan.style.transitionDelay = `${wordIndex * 60}ms`;
+    
+    wordSpan.appendChild(innerSpan);
+    fragment.appendChild(wordSpan);
+    fragment.appendChild(document.createTextNode(' '));
+  });
+  title.appendChild(fragment);
+});
+
+const observerOptions = { root: null, threshold: 0.3 };
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-active');
+    } else {
+      entry.target.classList.remove('is-active');
+    }
+  });
+}, observerOptions);
+document.querySelectorAll('.stage').forEach(stage => observer.observe(stage));
+
+// ==========================================
+// 2. CÉREBRO COPILOTO E DASHBOARD
+// ==========================================
+
+const btnMinus = document.getElementById('btnMinus');
+const btnPlus = document.getElementById('btnPlus');
+const inputDias = document.getElementById('diasSeca');
+
+if (btnMinus && btnPlus && inputDias) {
+  btnMinus.addEventListener('click', () => {
+    let val = parseInt(inputDias.value) || 0;
+    if (val > 0) inputDias.value = val - 1;
+  });
+  btnPlus.addEventListener('click', () => {
+    let val = parseInt(inputDias.value) || 0;
+    inputDias.value = val + 1;
+  });
+}
+
+const btnDiagnostico = document.getElementById('btnDiagnostico');
+if (btnDiagnostico) {
+  btnDiagnostico.addEventListener('click', () => {
+    if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // Haptic Feedback
+    processarDiagnostico();
+  });
+}
 
 function processarDiagnostico() {
-  const selectCultura = document.getElementById('cultura');
-  const inputDiasSeca = document.getElementById('diasSeca');
-  if (!selectCultura || !inputDiasSeca) return;
-
-  const diasSeca = parseInt(inputDiasSeca.value) || 0;
-  const calor = document.getElementById('calor').value;
-  const soloObs = document.getElementById('soloObs').value;
-  const pragas = document.getElementById('pragas').value;
+  const diasSeca = parseInt(inputDias.value) || 0;
+  const calor = document.querySelector('input[name="calor"]:checked')?.value || "1";
+  const soloObs = document.querySelector('input[name="soloObs"]:checked')?.value || "3";
+  const pragas = document.querySelector('input[name="pragas"]:checked')?.value || "3";
   
-  let pontos = 0;
+  let ptsSeca = 0, ptsCalor = 0, ptsPraga = 0, ptsSolo = 0;
   
-  if (diasSeca >= 10) pontos += 3;
-  else if (diasSeca >= 5) pontos += 2;
-  else if (diasSeca >= 3) pontos += 1;
+  if (diasSeca >= 10) ptsSeca = 3; else if (diasSeca >= 5) ptsSeca = 2; else if (diasSeca >= 3) ptsSeca = 1;
+  if (calor === "2") ptsCalor = 1; else if (calor === "3") ptsCalor = 2;
+  if (pragas === "1") ptsPraga = 3; else if (pragas === "2") ptsPraga = 1;
+  if (soloObs === "1") ptsSolo = 2; else if (soloObs === "2") ptsSolo = 1;
 
-  if (calor === "2") pontos += 1;
-  else if (calor === "3") pontos += 2;
+  const pontos = ptsSeca + ptsCalor + ptsPraga + ptsSolo;
 
-  if (pragas === "1") pontos += 3;
-  else if (pragas === "2") pontos += 1;
-
-  if (soloObs === "1") pontos += 2;
-  else if (soloObs === "2") pontos += 1;
-
-  let nivel = "BAIXO";
-  let colorBadge = "#4caf50";
-  if (pontos > 2 && pontos <= 5) { nivel = "MÉDIO"; colorBadge = "#ff9800"; }
-  else if (pontos > 5 && pontos <= 8) { nivel = "ALTO"; colorBadge = "#f44336"; }
-  else if (pontos > 8) { nivel = "CRÍTICO"; colorBadge = "#d32f2f"; }
+  let nivel = "NORMAL", colorBadge = "#4caf50", glowBadge = "rgba(76, 175, 80, 0.4)";
+  if (pontos > 2 && pontos <= 5) { nivel = "ATENÇÃO"; colorBadge = "#ff9800"; glowBadge = "rgba(255, 152, 0, 0.4)"; }
+  else if (pontos > 5 && pontos <= 8) { nivel = "ALERTA"; colorBadge = "#f44336"; glowBadge = "rgba(244, 67, 54, 0.4)"; }
+  else if (pontos > 8) { nivel = "CRÍTICO"; colorBadge = "#d32f2f"; glowBadge = "rgba(211, 47, 47, 0.4)"; }
 
   let recs = [];
-  if (diasSeca >= 3) recs.push("Olhe a umidade do solo antes de irrigar. Se estiver muito seco, priorize água.");
-  if (calor === "2" || calor === "3") recs.push("Evite pulverizar ou adubar nas horas mais quentes do dia.");
-  if (pragas === "1" || pragas === "2") recs.push("Verifique folhas, caule e frutos. Tire foto e procure cooperativa ou técnico.");
-  if (soloObs === "1") recs.push("Evite entrada de máquina ou pisoteio se o solo estiver encharcado.");
-  else if (soloObs === "2") recs.push("Solo muito rachado indica falta de água ou matéria orgânica. Acompanhe de perto.");
+  if (diasSeca >= 3) recs.push("Déficit hídrico detetado. Calibrar sistema de irrigação.");
+  if (calor === "2" || calor === "3") recs.push("Pico térmico. Suspender pulverizações no período diurno.");
+  if (pragas === "1" || pragas === "2") recs.push("Anomalia biológica na folhagem. Requisitar vistoria técnica.");
+  if (soloObs === "1") recs.push("Saturação do solo. Interromper tráfego de maquinaria pesada.");
+  else if (soloObs === "2") recs.push("Fissuras no solo: risco de stress radicular severo.");
 
-  if (nivel === "ALTO" || nivel === "CRÍTICO") recs.push("Risco alto: procure orientação técnica local ou cooperativa.");
-  if (recs.length === 0) recs.push("Situação aparentemente tranquila. Continue observando a lavoura.");
+  if (nivel === "ALTO" || nivel === "CRÍTICO") recs.push("Protocolo de emergência ativado. Contacte a equipa técnica central.");
+  if (recs.length === 0) recs.push("Parâmetros dentro da normalidade estatística. Sistema nominal.");
 
   const badge = document.getElementById('riskBadge');
-  if (badge) {
-    badge.textContent = `Risco: ${nivel}`;
-    badge.style.color = colorBadge;
-    badge.style.borderColor = colorBadge;
-    badge.style.background = `${colorBadge}22`;
-  }
+  if (badge) { badge.textContent = nivel; badge.style.color = colorBadge; }
 
   const recList = document.getElementById('recList');
   if (recList) {
@@ -71,38 +114,49 @@ function processarDiagnostico() {
     });
   }
 
-  const scroller = document.querySelector('.journey-container');
-  if (scroller) {
-      const target = document.getElementById('stage-resultado');
-      if (target) scroller.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+  const gaugeFill = document.getElementById('gaugeFill');
+  if (gaugeFill) {
+    const percent = Math.min(pontos / 10, 1);
+    const offset = 126 - (126 * percent);
+    setTimeout(() => {
+      gaugeFill.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(0.16, 1, 0.3, 1), stroke 1s';
+      gaugeFill.style.strokeDashoffset = offset;
+      gaugeFill.style.stroke = colorBadge;
+    }, 400);
   }
-}
 
-const btnDiagnostico = document.getElementById('btnDiagnostico');
-if (btnDiagnostico) btnDiagnostico.addEventListener('click', processarDiagnostico);
+  const bars = [ { id: 'barSeca', val: ptsSeca, max: 3 }, { id: 'barCalor', val: ptsCalor, max: 2 }, { id: 'barPraga', val: ptsPraga, max: 3 }, { id: 'barSolo', val: ptsSolo, max: 2 } ];
+  bars.forEach((b, i) => {
+    const el = document.getElementById(b.id);
+    if(el) {
+      const p = (b.val / b.max) * 100;
+      let corBarra = '#4caf50';
+      if(p > 33) corBarra = '#ff9800';
+      if(p > 66) corBarra = '#f44336';
+      setTimeout(() => { el.style.width = p + '%'; el.style.background = corBarra; }, 600 + (i * 120));
+    }
+  });
+
+  document.documentElement.style.setProperty('--primary', colorBadge);
+  document.documentElement.style.setProperty('--glow', glowBadge);
+
+  const scroller = document.querySelector('.journey-container');
+  if (scroller) scroller.scrollTo({ top: document.getElementById('stage-resultado').offsetTop, behavior: 'smooth' });
+}
 
 const btnRecomecar = document.getElementById('btnRecomecar');
 if (btnRecomecar) {
   btnRecomecar.addEventListener('click', () => {
     const scroller = document.querySelector('.journey-container');
     if (scroller) scroller.scrollTo({ top: 0, behavior: 'smooth' });
-    else window.scrollTo({ top: 0, behavior: 'smooth' });
-    
+    document.getElementById('gaugeFill').style.strokeDashoffset = 126;
+    document.querySelectorAll('.factor-fill').forEach(el => el.style.width = '0%');
     document.getElementById('diasSeca').value = 0;
-    document.getElementById('pragas').value = "3";
-  });
-}
-
-const menuToggle = document.querySelector('.menu-toggle');
-if (menuToggle) {
-  menuToggle.addEventListener('click', function() {
-    const isOpen = this.classList.toggle('is-open');
-    document.getElementById('mobileMenu').classList.toggle('is-open', isOpen);
   });
 }
 
 // ==========================================
-// 2. ENGINE WEBGL (FOLHAS ESPALHADAS PELA TELA)
+// 3. ENGINE WEBGL (MOTOR OTIMIZADO PARA 60FPS CRAVADOS)
 // ==========================================
 (() => {
   const canvas = document.getElementById('particleCanvas');
@@ -113,13 +167,14 @@ if (menuToggle) {
 
   if (!gl) return;
 
+  // CONFIGURAÇÃO ULTRA OTIMIZADA: Menos massa de cálculo, tamanhos de pontos ligeiramente maiores
   const config = {
-    maxDesktop: 90000, 
-    maxMobile: 45000,
-    sampleDesktop: 2,
-    sampleMobile: 2,
-    pointDesktop: 1.82,
-    pointMobile: 2.05,
+    maxDesktop: 28000, // Corte agressivo de processamento para manter fluidez com JS em cima
+    maxMobile: 12000,
+    sampleDesktop: 3, // Lê menos pixels na hora de criar as máscaras
+    sampleMobile: 4,
+    pointDesktop: 2.3, // Ponto maior para compensar a diminuição na contagem
+    pointMobile: 2.6,
     returnIdle: 0.024,
     returnActive: 0.0026,
     friction: 0.953,
@@ -270,11 +325,15 @@ if (menuToggle) {
   function createTextMask() {
     const { c, ctx, w, h } = getCanvas();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const fs = clamp(w * (state.mobile ? 0.125 : 0.095), 44, state.mobile ? 82 : 118);
-    ctx.font = `800 ${fs}px Inter, sans-serif`; ctx.lineWidth = Math.max(1.3, fs * 0.022);
-    const lh = fs * 0.96;
+    
+    const fs = clamp(w * (state.mobile ? 0.18 : 0.14), 50, state.mobile ? 100 : 180);
+    ctx.font = `900 ${fs}px "SF Pro Display", Inter, sans-serif`; 
+    ctx.lineWidth = Math.max(1.5, fs * 0.02);
+    const lh = fs * 0.85; 
+    
     ['OrbitAgro', 'Copilot'].forEach((line, i) => {
-      ctx.strokeText(line, w/2, h/2 + (i - 0.5) * lh); ctx.fillText(line, w/2, h/2 + (i - 0.5) * lh);
+      ctx.strokeText(line, w/2, h/2 + (i - 0.5) * lh); 
+      ctx.fillText(line, w/2, h/2 + (i - 0.5) * lh);
     });
     return c;
   }
@@ -355,10 +414,8 @@ if (menuToggle) {
     return c;
   }
 
-  // --- NOVA FUNÇÃO: FOLHAS ESPALHADAS PELA TELA ---
   function createPestMask() {
     const { c, ctx, w, h } = getCanvas();
-    
     function drawLeaf(lx, ly, s, angle) {
       ctx.save();
       ctx.translate(lx, ly);
@@ -376,21 +433,18 @@ if (menuToggle) {
     }
 
     const leaves = [];
-    const numLeaves = state.mobile ? 18 : 35; // Aumentei muito a quantidade para preencher a tela
+    const numLeaves = state.mobile ? 18 : 35; 
     const baseS = Math.min(w, h) * (state.mobile ? 0.08 : 0.12);
 
     for(let i=0; i<numLeaves; i++) {
-      // Distribui as folhas aleatoriamente por quase toda a área do canvas
       const lx = w * 0.05 + Math.random() * (w * 0.9);
       const ly = h * 0.05 + Math.random() * (h * 0.9);
       const leafAngle = Math.random() * Math.PI * 2;
-      const lSize = baseS * (0.6 + Math.random() * 0.8); // Varia bastante o tamanho para dar profundidade
-
+      const lSize = baseS * (0.6 + Math.random() * 0.8); 
       leaves.push({x: lx, y: ly, s: lSize});
       drawLeaf(lx, ly, lSize, leafAngle);
     }
 
-    // Ataque das pragas: Recorta vários furos distribuídos sobre as folhas
     ctx.globalCompositeOperation = 'destination-out';
     const numHoles = state.mobile ? 120 : 250; 
     for(let i=0; i<numHoles; i++) {
