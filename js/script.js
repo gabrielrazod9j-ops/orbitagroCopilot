@@ -10,21 +10,18 @@ if (menuToggle && mobileMenu) {
   });
 }
 
-// Tipografia Cinética Leve (Otimizada para não estourar o layout thrashing)
+// Tipografia Cinética Leve
 document.querySelectorAll('.split-text').forEach(title => {
   const text = title.innerText;
   title.innerHTML = '';
   const fragment = document.createDocumentFragment();
-  
   text.split(' ').forEach((word, wordIndex) => {
     const wordSpan = document.createElement('span');
     wordSpan.className = 'word';
-    
     const innerSpan = document.createElement('span');
     innerSpan.className = 'word-inner';
     innerSpan.innerText = word;
     innerSpan.style.transitionDelay = `${wordIndex * 60}ms`;
-    
     wordSpan.appendChild(innerSpan);
     fragment.appendChild(wordSpan);
     fragment.appendChild(document.createTextNode(' '));
@@ -32,53 +29,183 @@ document.querySelectorAll('.split-text').forEach(title => {
   title.appendChild(fragment);
 });
 
-const observerOptions = { root: null, threshold: 0.3 };
+const observerOptions = { root: null, threshold: 0.2 };
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('is-active');
-    } else {
-      entry.target.classList.remove('is-active');
-    }
+    if (entry.isIntersecting) entry.target.classList.add('is-active');
   });
 }, observerOptions);
 document.querySelectorAll('.stage').forEach(stage => observer.observe(stage));
 
 // ==========================================
-// 2. CÉREBRO COPILOTO E DASHBOARD
+// 2. BASE DE DADOS E INTELIGÊNCIA DA LAVOURA
 // ==========================================
+const agroDB = {
+  "soja": { 
+    nome: "Soja", 
+    ranking: "1º Liderança Nacional (R$ 260 Bi)",
+    imagem: "image/image/soja.png", 
+    solo: "Solos profundos e bem drenados. Ph ideal 6.0 a 6.5.", 
+    manejo: "Requer inoculação bacteriana. Plantio direto é essencial para mitigar impactos.",
+    pragas: [
+      { nome: "Percevejo-marrom", id: "Grãos chochos.", act: "Controle biológico com Telenomus podisi." }
+    ]
+  },
+  "milho": { 
+    nome: "Milho", 
+    ranking: "3º Commodity (R$ 88 Bi)",
+    imagem: "image/image/milho.png", 
+    solo: "Solos férteis, de textura média e ricos em matéria orgânica.", 
+    manejo: "Sucessão de culturas (soja/milho) é crucial.",
+    pragas: [
+      { nome: "Lagarta-do-cartucho", id: "Furos nas folhas.", act: "Inseticida biológico no cartucho." }
+    ]
+  },
+  "cafe": { 
+    nome: "Café", 
+    ranking: "4º Ouro Verde (R$ 69 Bi)",
+    imagem: "image/image/cafe.png", 
+    solo: "Terrenos em altitude. Sensível ao alagamento.", 
+    manejo: "Adoção de sistemas sombreados mitiga variações climáticas.",
+    pragas: [
+      { nome: "Bicho-mineiro", id: "Lesões nas folhas.", act: "Controle químico inicial rigoroso." }
+    ]
+  },
+  "algodao": { 
+    nome: "Algodão", 
+    ranking: "5º Maior Exportação",
+    imagem: "image/image/algodao.png", 
+    solo: "Solos com mais de 1m de profundidade, boa umidade.", 
+    manejo: "Cultura altamente tecnificada. Requer agricultura de precisão.",
+    pragas: [
+      { nome: "Bicudo-do-algodoeiro", id: "Botões caídos.", act: "Instalação de tubos mata-bicudo." }
+    ]
+  },
+  "cana": { 
+    nome: "Cana-de-açúcar", 
+    ranking: "2º Maior VBP (R$ 105 Bi)",
+    imagem: "image/image/cana.png", 
+    solo: "Solos profundos (Latossolos), com boa aeração.", 
+    manejo: "Colheita sem queima. Palhada protege contra estresse hídrico.",
+    pragas: [
+      { nome: "Broca-da-cana", id: "Furos nos colmos.", act: "Liberação preventiva de Cotesia flavipes." }
+    ]
+  }
+};
 
-const btnMinus = document.getElementById('btnMinus');
-const btnPlus = document.getElementById('btnPlus');
+let activeCrop = null;
+
+function updateCropInsights(cropKey) {
+  const data = agroDB[cropKey];
+  if (!data) return;
+
+  // Atualiza os dados na tela Holográfica
+  document.getElementById('info-nome-cultura').innerText = data.nome;
+  document.getElementById('info-ranking').innerText = data.ranking;
+  document.getElementById('info-img-cultura').src = data.imagem;
+  document.getElementById('info-solo-tipo').innerText = data.solo;
+  document.getElementById('info-solo-manejo').innerText = data.manejo;
+  
+  const panel = document.getElementById('panel-plantacao');
+  if (panel) panel.classList.add('visible');
+
+  // Atualiza o painel de Pragas (Estágio 5)
+  const listPragas = document.getElementById('lista-pragas');
+  if (listPragas) {
+    listPragas.innerHTML = `<h3 class="floating-title">Ameaças Biológicas: <span style="color:var(--primary);">${data.nome}</span></h3>`;
+    data.pragas.forEach(p => {
+      listPragas.innerHTML += `
+        <div class="pest-item animate-fade-up">
+          <strong>🐛 ${p.nome}</strong>
+          <span>🔍 <b>Sintomas:</b> ${p.id}</span>
+          <code>🛡️ <b>Manejo:</b> ${p.act}</code>
+        </div>
+      `;
+    });
+  }
+}
+
+// Lógica Otimizada: Se clicar no rádio selecionado, ele desmarca e oculta a tela.
+document.querySelectorAll('.chip').forEach(chip => {
+  const radio = chip.querySelector('input[type="radio"]');
+  chip.addEventListener('click', function(e) {
+    e.preventDefault(); 
+    
+    if (activeCrop === radio.value) {
+      radio.checked = false; 
+      activeCrop = null;
+      document.getElementById('panel-plantacao').classList.remove('visible');
+      document.getElementById('lista-pragas').innerHTML = `<h3 class="floating-title">Ameaças Biológicas: <span style="color:var(--muted);">Aguardando Seleção...</span></h3>`;
+    } else {
+      radio.checked = true; 
+      activeCrop = radio.value;
+      updateCropInsights(radio.value);
+    }
+  });
+});
+
+// Geolocalização e Dados Climáticos Inteligentes
+function fetchWeatherTelemetrics() {
+  const setMockData = (cidade) => {
+    // Clima
+    const temp = Math.floor(Math.random() * (35 - 18) + 18);
+    document.getElementById('rt-temp').innerText = `${temp}°C`;
+    document.getElementById('rt-location').innerText = `📍 ${cidade}`;
+    
+    // AQI
+    const aqi = Math.floor(Math.random() * 120);
+    let aqiText = "Boa"; let aqiColor = "#4caf50";
+    if(aqi > 50) { aqiText = "Moderada"; aqiColor = "#ff9800"; }
+    if(aqi > 100) { aqiText = "Ruim"; aqiColor = "#f44336"; }
+    document.getElementById('rt-aqi').innerText = `${aqi} - ${aqiText}`;
+    document.getElementById('rt-aqi').style.color = aqiColor;
+
+    // Chuva
+    const rain = Math.floor(Math.random() * 100);
+    document.getElementById('rt-chuva').innerText = `${rain}%`;
+    document.getElementById('rt-forecast').innerHTML = `
+      <li><span>Amanhã</span> <span>${Math.random() > 0.5 ? '☀️' : '🌧️'} ${Math.floor(Math.random()*100)}%</span></li>
+      <li><span>2 Dias</span> <span>${Math.random() > 0.5 ? '🌤️' : '⛈️'} ${Math.floor(Math.random()*100)}%</span></li>
+      <li><span>3 Dias</span> <span>☀️ 0%</span></li>
+    `;
+    
+    document.getElementById('hud-location').innerText = `SATÉLITE SINCRONIZADO // 📍 ${cidade.toUpperCase()}`;
+  };
+
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setMockData(`LAT ${pos.coords.latitude.toFixed(2)} | LON ${pos.coords.longitude.toFixed(2)}`),
+      () => setMockData("SÃO PAULO, BR (Padrão)")
+    );
+  } else {
+    setMockData("SISTEMA OFFLINE");
+  }
+}
+setTimeout(fetchWeatherTelemetrics, 1000);
+
+// Stepper Controle
 const inputDias = document.getElementById('diasSeca');
+document.getElementById('btnMinus')?.addEventListener('click', () => { let v = parseInt(inputDias.value)||0; if(v>0) inputDias.value = v-1; });
+document.getElementById('btnPlus')?.addEventListener('click', () => { inputDias.value = (parseInt(inputDias.value)||0)+1; });
 
-if (btnMinus && btnPlus && inputDias) {
-  btnMinus.addEventListener('click', () => {
-    let val = parseInt(inputDias.value) || 0;
-    if (val > 0) inputDias.value = val - 1;
-  });
-  btnPlus.addEventListener('click', () => {
-    let val = parseInt(inputDias.value) || 0;
-    inputDias.value = val + 1;
-  });
-}
+// Compilação Final (Gera o Centro e as 4 Caixas de Resultado)
+document.getElementById('btnDiagnostico')?.addEventListener('click', () => {
+  if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+  
+  // Exige que a cultura tenha sido escolhida antes de ir para o resultado
+  if (!activeCrop) {
+    alert("Inicie selecionando a Cultura Predominante da Lavoura.");
+    document.querySelector('.journey-container').scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
 
-const btnDiagnostico = document.getElementById('btnDiagnostico');
-if (btnDiagnostico) {
-  btnDiagnostico.addEventListener('click', () => {
-    if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // Haptic Feedback
-    processarDiagnostico();
-  });
-}
-
-function processarDiagnostico() {
+  const culturaStr = activeCrop;
   const diasSeca = parseInt(inputDias.value) || 0;
   const calor = document.querySelector('input[name="calor"]:checked')?.value || "1";
   const soloObs = document.querySelector('input[name="soloObs"]:checked')?.value || "3";
   const pragas = document.querySelector('input[name="pragas"]:checked')?.value || "3";
   
   let ptsSeca = 0, ptsCalor = 0, ptsPraga = 0, ptsSolo = 0;
-  
   if (diasSeca >= 10) ptsSeca = 3; else if (diasSeca >= 5) ptsSeca = 2; else if (diasSeca >= 3) ptsSeca = 1;
   if (calor === "2") ptsCalor = 1; else if (calor === "3") ptsCalor = 2;
   if (pragas === "1") ptsPraga = 3; else if (pragas === "2") ptsPraga = 1;
@@ -86,41 +213,28 @@ function processarDiagnostico() {
 
   const pontos = ptsSeca + ptsCalor + ptsPraga + ptsSolo;
 
-  let nivel = "NORMAL", colorBadge = "#4caf50", glowBadge = "rgba(76, 175, 80, 0.4)";
+  let nivel = "NOMINAL", colorBadge = "#4caf50", glowBadge = "rgba(76, 175, 80, 0.4)";
   if (pontos > 2 && pontos <= 5) { nivel = "ATENÇÃO"; colorBadge = "#ff9800"; glowBadge = "rgba(255, 152, 0, 0.4)"; }
   else if (pontos > 5 && pontos <= 8) { nivel = "ALERTA"; colorBadge = "#f44336"; glowBadge = "rgba(244, 67, 54, 0.4)"; }
   else if (pontos > 8) { nivel = "CRÍTICO"; colorBadge = "#d32f2f"; glowBadge = "rgba(211, 47, 47, 0.4)"; }
 
-  let recs = [];
-  if (diasSeca >= 3) recs.push("Déficit hídrico detetado. Calibrar sistema de irrigação.");
-  if (calor === "2" || calor === "3") recs.push("Pico térmico. Suspender pulverizações no período diurno.");
-  if (pragas === "1" || pragas === "2") recs.push("Anomalia biológica na folhagem. Requisitar vistoria técnica.");
-  if (soloObs === "1") recs.push("Saturação do solo. Interromper tráfego de maquinaria pesada.");
-  else if (soloObs === "2") recs.push("Fissuras no solo: risco de stress radicular severo.");
+  // 4 Cantos Telemetria
+  const dbCultura = agroDB[culturaStr];
+  document.getElementById('res-praga').innerText = pragas === "1" ? `Alerta vermelho para ${dbCultura.pragas[0].nome}. Pulverização corretiva necessária.` : `Índice biológico estável para ${dbCultura.nome}. Mantenha monitoramento.`;
+  document.getElementById('res-solo').innerText = soloObs === "1" ? `Solo alagado. Suspenda maquinário pesado.` : `Condição aceitável. Mantenha os padrões de ${dbCultura.solo.split('.')[0]}.`;
+  document.getElementById('res-chuva').innerText = diasSeca > 5 ? `Atenção: ${diasSeca} dias secos. Previsão de chuva: ${document.getElementById('rt-chuva').innerText}.` : `Regime hídrico satisfatório para a raiz da cultura.`;
+  document.getElementById('res-clima').innerText = `Satélite registra ${document.getElementById('rt-temp').innerText} com AQI ${document.getElementById('rt-aqi').innerText.split('-')[0]}.`;
 
-  if (nivel === "ALTO" || nivel === "CRÍTICO") recs.push("Protocolo de emergência ativado. Contacte a equipa técnica central.");
-  if (recs.length === 0) recs.push("Parâmetros dentro da normalidade estatística. Sistema nominal.");
-
-  const badge = document.getElementById('riskBadge');
-  if (badge) { badge.textContent = nivel; badge.style.color = colorBadge; }
-
-  const recList = document.getElementById('recList');
-  if (recList) {
-    recList.innerHTML = '';
-    recs.forEach(r => {
-      const li = document.createElement('li');
-      li.textContent = r;
-      recList.appendChild(li);
-    });
-  }
+  // Atualiza Card Central
+  document.getElementById('riskBadge').innerText = nivel;
+  document.getElementById('riskBadge').style.color = colorBadge;
 
   const gaugeFill = document.getElementById('gaugeFill');
   if (gaugeFill) {
     const percent = Math.min(pontos / 10, 1);
-    const offset = 126 - (126 * percent);
     setTimeout(() => {
       gaugeFill.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(0.16, 1, 0.3, 1), stroke 1s';
-      gaugeFill.style.strokeDashoffset = offset;
+      gaugeFill.style.strokeDashoffset = 126 - (126 * percent);
       gaugeFill.style.stroke = colorBadge;
     }, 400);
   }
@@ -130,50 +244,55 @@ function processarDiagnostico() {
     const el = document.getElementById(b.id);
     if(el) {
       const p = (b.val / b.max) * 100;
-      let corBarra = '#4caf50';
-      if(p > 33) corBarra = '#ff9800';
-      if(p > 66) corBarra = '#f44336';
-      setTimeout(() => { el.style.width = p + '%'; el.style.background = corBarra; }, 600 + (i * 120));
+      let cor = '#4caf50'; if(p > 33) cor = '#ff9800'; if(p > 66) cor = '#f44336';
+      setTimeout(() => { el.style.width = p + '%'; el.style.background = cor; }, 600 + (i * 120));
     }
   });
 
+  // Recomendações em Lista Central
+  const recList = document.getElementById('recList');
+  recList.innerHTML = '';
+  if (pontos === 0) recList.innerHTML = "<li>Mantenha as práticas atuais. Lavoura sem estressores severos.</li>";
+  if (diasSeca > 3) recList.innerHTML += `<li>Acionar plano de contingência hídrica para proteção de safra da ${dbCultura.nome}.</li>`;
+  if (calor !== "1") recList.innerHTML += `<li>Suspender uso de herbicidas no período de pico térmico.</li>`;
+
   document.documentElement.style.setProperty('--primary', colorBadge);
   document.documentElement.style.setProperty('--glow', glowBadge);
+  
+  document.querySelector('.journey-container').scrollTo({ top: document.getElementById('stage-resultado').offsetTop, behavior: 'smooth' });
+});
 
-  const scroller = document.querySelector('.journey-container');
-  if (scroller) scroller.scrollTo({ top: document.getElementById('stage-resultado').offsetTop, behavior: 'smooth' });
-}
-
-const btnRecomecar = document.getElementById('btnRecomecar');
-if (btnRecomecar) {
-  btnRecomecar.addEventListener('click', () => {
-    const scroller = document.querySelector('.journey-container');
-    if (scroller) scroller.scrollTo({ top: 0, behavior: 'smooth' });
-    document.getElementById('gaugeFill').style.strokeDashoffset = 126;
-    document.querySelectorAll('.factor-fill').forEach(el => el.style.width = '0%');
-    document.getElementById('diasSeca').value = 0;
-  });
-}
+document.getElementById('btnRecomecar')?.addEventListener('click', () => {
+  document.querySelector('.journey-container').scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('gaugeFill').style.strokeDashoffset = 126;
+  document.querySelectorAll('.factor-fill').forEach(el => el.style.width = '0%');
+  document.documentElement.style.setProperty('--primary', '#4caf50');
+  
+  // Reseta estado
+  document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+  activeCrop = null;
+  document.getElementById('panel-plantacao').classList.remove('visible');
+  document.getElementById('lista-pragas').innerHTML = `<h3 class="floating-title">Ameaças Biológicas: <span style="color:var(--muted);">Aguardando Seleção...</span></h3>`;
+});
 
 // ==========================================
-// 3. ENGINE WEBGL (MOTOR OTIMIZADO PARA 60FPS CRAVADOS)
+// 3. ENGINE WEBGL (MOTOR OTIMIZADO)
 // ==========================================
 (() => {
   const canvas = document.getElementById('particleCanvas');
   const gl = canvas.getContext('webgl', {
-    alpha: true, antialias: true, depth: false, stencil: false,
+    alpha: true, antialias: false, depth: false, stencil: false,
     premultipliedAlpha: false, preserveDrawingBuffer: false
   });
 
   if (!gl) return;
 
-  // CONFIGURAÇÃO ULTRA OTIMIZADA: Menos massa de cálculo, tamanhos de pontos ligeiramente maiores
   const config = {
-    maxDesktop: 28000, // Corte agressivo de processamento para manter fluidez com JS em cima
+    maxDesktop: 28000, 
     maxMobile: 12000,
-    sampleDesktop: 3, // Lê menos pixels na hora de criar as máscaras
+    sampleDesktop: 3, 
     sampleMobile: 4,
-    pointDesktop: 2.3, // Ponto maior para compensar a diminuição na contagem
+    pointDesktop: 2.3, 
     pointMobile: 2.6,
     returnIdle: 0.024,
     returnActive: 0.0026,
@@ -703,18 +822,19 @@ if (btnRecomecar) {
     }
   }
 
+  let lastTime = 0;
   function render(now) {
     if (!state.positions || !state.count) { requestAnimationFrame(render); return; }
+    
+    const dt = now - lastTime;
+    if (dt < 16) { requestAnimationFrame(render); return; }
+    lastTime = now;
 
     updatePhysics(now);
 
     const bgColors = [
-      [0.02, 0.03, 0.08], 
-      [0.07, 0.04, 0.02], 
-      [0.10, 0.03, 0.00], 
-      [0.04, 0.07, 0.09], 
-      [0.03, 0.06, 0.04], 
-      [0.01, 0.07, 0.08]  
+      [0.02, 0.03, 0.08], [0.07, 0.04, 0.02], [0.10, 0.03, 0.00], 
+      [0.04, 0.07, 0.09], [0.03, 0.06, 0.04], [0.01, 0.07, 0.08]  
     ];
 
     const p = clamp(state.scrollProgress, 0, 5);
