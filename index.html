@@ -73,20 +73,16 @@
       <article class="insights-panel align-right" id="panel-plantacao">
         <div class="hologram-beam"></div> 
         <div class="hologram-base"></div> 
-        
         <div class="crop-profile-row animate-fade-up">
           <div class="image-scanner-container">
              <img src="" id="info-img-cultura" class="crop-image-large" alt="Grão da Cultura" />
              <div class="scanner-overlay"></div>
           </div>
-          
           <div class="crop-info-side">
              <span id="info-ranking">--</span>
              <h3 id="info-nome-cultura" class="huge-data small text-primary">--</h3>
-             
              <div class="insight-label mt-3">Requisitos Edáficos (Solo)</div>
              <div class="insight-value-side" id="info-solo-tipo">-</div>
-             
              <div class="insight-label mt-3">Preparo e Manejo Sustentável</div>
              <div class="insight-value-side text-muted" id="info-solo-manejo">-</div>
           </div>
@@ -94,33 +90,56 @@
       </article>
     </section>
 
-    <section class="stage split-layout reverse" id="stage-sol">
-      <article class="floating-info align-left">
-        <h3 class="floating-title">Telemetria Local (Satélite)</h3>
-        <div class="huge-data" id="rt-temp">--°C</div>
-        <p class="floating-text" id="rt-location">Buscando geolocalização...</p>
-        
-        <h3 class="floating-title mt-4">Qualidade do Ar (AQI)</h3>
-        <div class="huge-data small" id="rt-aqi">--</div>
-        <p class="floating-text" id="rt-aqi-desc">Analisando particulados...</p>
+    <section class="stage monitoramento-stage" id="stage-sol">
+      <aside class="telemetry-left">
+        <div class="data-box">
+          <h3 class="label">Temperatura Local</h3>
+          <div class="value" id="rt-temp">--°C</div>
+          <p class="sub-label" id="rt-local">Aguardando Coordenada...</p>
+        </div>
+        <div class="data-box mt-4">
+          <h3 class="label">Qualidade do Ar (AQI)</h3>
+          <div class="value text-primary" id="rt-aqi">--</div>
+          <p class="sub-label">Analisando particulados...</p>
+        </div>
+      </aside>
+
+      <article class="satellite-viewer">
+        <div class="viewer-border">
+          <img id="img-satelite-real" src="" alt="Aguardando API..." />
+          
+          <div class="ndvi-legend" id="ndviLegend">
+            <div class="legend-title">Índice Vegetativo da Espectrometria Orbital (NDVI)</div>
+            <div class="legend-bar"></div>
+            <div class="legend-labels">
+              <span>Nuvens / Água</span>
+              <span>Solo Exposto</span>
+              <span>Deficiência</span>
+              <span>Saudável</span>
+              <span>Dossel Denso</span>
+            </div>
+          </div>
+          
+        </div>
       </article>
 
-      <div class="glass-card align-right">
-        <h2 class="split-text">Climatologia</h2>
-        <p class="animate-fade-up" style="transition-delay: 0.1s;">Padrões atmosféricos recentes na propriedade.</p>
-        
-        <label class="animate-fade-up" style="transition-delay: 0.2s;">Dias consecutivos sem precipitação?</label>
-        <div class="stepper animate-fade-up" style="transition-delay: 0.3s;">
-          <button type="button" class="step-btn" id="btnMinus">-</button>
-          <input type="number" id="diasSeca" value="0" min="0" readonly />
-          <button type="button" class="step-btn" id="btnPlus">+</button>
+      <aside class="telemetry-right">
+        <div class="data-box">
+          <h3 class="label">Previsão (3 Dias)</h3>
+          <ul id="rt-forecast" class="forecast-list">
+            <li>Aguardando satélite...</li>
+          </ul>
         </div>
+      </aside>
 
-        <label class="animate-fade-up" style="transition-delay: 0.4s; margin-top: 32px;">Pico térmico na última semana?</label>
-        <div class="radio-cards animate-fade-up" style="transition-delay: 0.5s;">
-          <label class="radio-card"><input type="radio" name="calor" value="1" checked><span class="icon">🌤️</span><span class="title">Estável</span></label>
-          <label class="radio-card"><input type="radio" name="calor" value="2"><span class="icon">🔥</span><span class="title">Alto</span></label>
-          <label class="radio-card"><input type="radio" name="calor" value="3"><span class="icon">🌋</span><span class="title">Crítico</span></label>
+      <div class="soil-info-bar">
+        <div class="info-item">
+          <h4>Manejo Recomendado</h4>
+          <p id="res-solo-info">Sincronizando com satélite Sentinel-2...</p>
+        </div>
+        <div class="info-item">
+          <h4>Laudo Agronômico Orbital</h4>
+          <p id="res-ndvi">Processando imagem espectral...</p>
         </div>
       </div>
     </section>
@@ -129,20 +148,22 @@
       <div class="glass-card align-left">
         <h2 class="split-text">Geomorfologia</h2>
         <p class="animate-fade-up" style="transition-delay: 0.1s;">A base hídrica da produtividade.</p>
-        
         <label class="animate-fade-up" style="transition-delay: 0.2s;">Nível de saturação visual do solo:</label>
         <div class="radio-cards column-cards animate-fade-up" style="transition-delay: 0.3s;">
           <label class="radio-card"><input type="radio" name="soloObs" value="3" checked><span class="icon">🌱</span><span class="title">Equilíbrio Hídrico</span></label>
           <label class="radio-card"><input type="radio" name="soloObs" value="1"><span class="icon">💧</span><span class="title">Saturação / Alagamento</span></label>
           <label class="radio-card"><input type="radio" name="soloObs" value="2"><span class="icon">🏜️</span><span class="title">Déficit / Fissuras</span></label>
         </div>
+        <label class="animate-fade-up" style="transition-delay: 0.4s; margin-top: 32px;">Dias consecutivos sem precipitação?</label>
+        <div class="stepper animate-fade-up" style="transition-delay: 0.5s;">
+          <button type="button" class="step-btn" id="btnMinus">-</button>
+          <input type="number" id="diasSeca" value="0" min="0" readonly />
+          <button type="button" class="step-btn" id="btnPlus">+</button>
+        </div>
       </div>
-
       <article class="floating-info align-right">
         <h3 class="floating-title">Precipitação Estimada (24h)</h3>
         <div class="huge-data text-blue" id="rt-chuva">--%</div>
-        <h3 class="floating-title mt-4">Projeção a Curto Prazo</h3>
-        <ul class="forecast-list" id="rt-forecast"><li>Aguardando dados orbitais...</li></ul>
       </article>
     </section>
 
@@ -150,19 +171,22 @@
       <article class="floating-info align-left" id="lista-pragas">
         <h3 class="floating-title">Ameaças Biológicas: <span style="color:var(--muted);">Aguardando Seleção...</span></h3>
       </article>
-
       <div class="glass-card align-right">
         <h2 class="split-text">Saúde Biológica</h2>
         <p class="animate-fade-up" style="transition-delay: 0.1s;">Inspeção tátil e visual das folhas.</p>
-        
         <label class="animate-fade-up" style="transition-delay: 0.2s;">Presença de patógenos ou desfolha?</label>
         <div class="radio-cards animate-fade-up" style="transition-delay: 0.3s;">
           <label class="radio-card"><input type="radio" name="pragas" value="3" checked><span class="icon">✅</span><span class="title">Nula</span></label>
           <label class="radio-card"><input type="radio" name="pragas" value="2"><span class="icon">🤔</span><span class="title">Baixa</span></label>
           <label class="radio-card"><input type="radio" name="pragas" value="1"><span class="icon">🐛</span><span class="title">Alta</span></label>
         </div>
-
-        <button id="btnDiagnostico" class="primary-btn animate-fade-up" style="transition-delay: 0.5s;">Compilar Dados Orbitais</button>
+        <label class="animate-fade-up" style="transition-delay: 0.4s; margin-top: 32px;">Pico térmico na última semana?</label>
+        <div class="radio-cards animate-fade-up" style="transition-delay: 0.5s;">
+          <label class="radio-card"><input type="radio" name="calor" value="1" checked><span class="icon">🌤️</span><span class="title">Estável</span></label>
+          <label class="radio-card"><input type="radio" name="calor" value="2"><span class="icon">🔥</span><span class="title">Alto</span></label>
+          <label class="radio-card"><input type="radio" name="calor" value="3"><span class="icon">🌋</span><span class="title">Crítico</span></label>
+        </div>
+        <button id="btnDiagnostico" class="primary-btn animate-fade-up" style="transition-delay: 0.6s;">Compilar Dados Orbitais</button>
       </div>
     </section>
 
@@ -171,7 +195,6 @@
       <div class="floating-corner bottom-left"><h4>Manejo do Solo</h4><p id="res-solo">Aguardando...</p></div>
       <div class="floating-corner top-right"><h4>Gestão Hídrica</h4><p id="res-chuva">Aguardando...</p></div>
       <div class="floating-corner bottom-right"><h4>Clima e Atmosfera</h4><p id="res-clima">Aguardando...</p></div>
-
       <div class="glass-card result-card">
         <h2 class="split-text">Telemetria Consolidada</h2>
         <div class="dashboard animate-fade-up" style="transition-delay: 0.1s;">
@@ -197,7 +220,6 @@
       </div>
     </section>
   </main>
-
   <script src="js/script.js"></script>
 </body>
 </html>

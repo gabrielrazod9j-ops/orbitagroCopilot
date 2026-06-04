@@ -1,7 +1,6 @@
 // ==========================================
-// 1. UI AVANÇADA E OBSERVER DE ALTA PERFORMANCE
+// 1. UI AVANÇADA E OBSERVER
 // ==========================================
-
 const menuToggle = document.querySelector('.menu-toggle');
 const mobileMenu = document.getElementById('mobileMenu');
 if (menuToggle && mobileMenu) {
@@ -10,7 +9,6 @@ if (menuToggle && mobileMenu) {
   });
 }
 
-// Tipografia Cinética Leve
 document.querySelectorAll('.split-text').forEach(title => {
   const text = title.innerText;
   title.innerHTML = '';
@@ -38,78 +36,239 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.stage').forEach(stage => observer.observe(stage));
 
 // ==========================================
-// 2. BASE DE DADOS E INTELIGÊNCIA DA LAVOURA
+// 2. BASE DE DADOS E INTELIGÊNCIA GEOGRÁFICA
 // ==========================================
 const agroDB = {
   "soja": { 
-    nome: "Soja", 
-    ranking: "1º Liderança Nacional (R$ 260 Bi)",
-    imagem: "image/image/soja.png", 
+    nome: "Soja", ranking: "1º Liderança Nacional", imagem: "image/image/soja.png", 
     solo: "Solos profundos e bem drenados. Ph ideal 6.0 a 6.5.", 
     manejo: "Requer inoculação bacteriana. Plantio direto é essencial para mitigar impactos.",
-    pragas: [
-      { nome: "Percevejo-marrom", id: "Grãos chochos.", act: "Controle biológico com Telenomus podisi." }
-    ]
+    lat: -13.06, lon: -55.90, local: "Lucas do Rio Verde - MT",
+    laudoSatelite: "O NDVI deve mostrar grandes áreas em verde intenso (> 0.7). Manchas amareladas indicam possível ataque de percevejos ou falha de irrigação no talhão.",
+    pragas: [ { nome: "Percevejo-marrom", id: "Grãos chochos.", act: "Controle biológico com Telenomus podisi." } ]
   },
   "milho": { 
-    nome: "Milho", 
-    ranking: "3º Commodity (R$ 88 Bi)",
-    imagem: "image/image/milho.png", 
+    nome: "Milho", ranking: "3º Commodity no Brasil", imagem: "image/image/milho.png", 
     solo: "Solos férteis, de textura média e ricos em matéria orgânica.", 
     manejo: "Sucessão de culturas (soja/milho) é crucial.",
-    pragas: [
-      { nome: "Lagarta-do-cartucho", id: "Furos nas folhas.", act: "Inseticida biológico no cartucho." }
-    ]
+    lat: -17.79, lon: -50.92, local: "Rio Verde - GO",
+    laudoSatelite: "O verde uniforme garante boa taxa fotossintética. Zonas marrons no meio do ciclo da safrinha alertam para estresse hídrico severo ou lagartas.",
+    pragas: [ { nome: "Lagarta-do-cartucho", id: "Furos nas folhas.", act: "Inseticida biológico no cartucho." } ]
   },
   "cafe": { 
-    nome: "Café", 
-    ranking: "4º Ouro Verde (R$ 69 Bi)",
-    imagem: "image/image/cafe.png", 
+    nome: "Café", ranking: "4º Ouro Verde (Exportação)", imagem: "image/image/cafe.png", 
     solo: "Terrenos em altitude. Sensível ao alagamento.", 
     manejo: "Adoção de sistemas sombreados mitiga variações climáticas.",
-    pragas: [
-      { nome: "Bicho-mineiro", id: "Lesões nas folhas.", act: "Controle químico inicial rigoroso." }
-    ]
+    lat: -21.36, lon: -45.45, local: "Três Pontas - MG",
+    laudoSatelite: "Cultivo perene. O mapa deve manter-se verde escuro estável o ano todo. Quedas bruscas para amarelo sinalizam deficiência nutricional ou surto de bicho-mineiro.",
+    pragas: [ { nome: "Bicho-mineiro", id: "Lesões nas folhas.", act: "Controle químico inicial rigoroso." } ]
   },
   "algodao": { 
-    nome: "Algodão", 
-    ranking: "5º Maior Exportação",
-    imagem: "image/image/algodao.png", 
+    nome: "Algodão", ranking: "5º Maior Exportação Agrícola", imagem: "image/image/algodao.png", 
     solo: "Solos com mais de 1m de profundidade, boa umidade.", 
     manejo: "Cultura altamente tecnificada. Requer agricultura de precisão.",
-    pragas: [
-      { nome: "Bicudo-do-algodoeiro", id: "Botões caídos.", act: "Instalação de tubos mata-bicudo." }
-    ]
+    lat: -12.09, lon: -45.80, local: "Barreiras - BA",
+    laudoSatelite: "Na fase vegetativa deve apresentar verde intenso. Se a visualização for época de desfolha para colheita, o mapa deve apresentar cores quentes (laranja/marrom).",
+    pragas: [ { nome: "Bicudo-do-algodoeiro", id: "Botões caídos.", act: "Instalação de tubos mata-bicudo." } ]
   },
   "cana": { 
-    nome: "Cana-de-açúcar", 
-    ranking: "2º Maior VBP (R$ 105 Bi)",
-    imagem: "image/image/cana.png", 
+    nome: "Cana-de-açúcar", ranking: "2º Maior Valor Bruto", imagem: "image/image/cana.png", 
     solo: "Solos profundos (Latossolos), com boa aeração.", 
     manejo: "Colheita sem queima. Palhada protege contra estresse hídrico.",
-    pragas: [
-      { nome: "Broca-da-cana", id: "Furos nos colmos.", act: "Liberação preventiva de Cotesia flavipes." }
-    ]
+    lat: -21.22, lon: -47.80, local: "Ribeirão Preto - SP",
+    laudoSatelite: "Talhões marrons representam palhada no solo ou colheita recente. Verde escuro indica canavial denso em pleno desenvolvimento ou ponto de corte.",
+    pragas: [ { nome: "Broca-da-cana", id: "Furos nos colmos.", act: "Liberação preventiva de Cotesia flavipes." } ]
   }
 };
 
 let activeCrop = null;
 
+// ==========================================
+// 3. TELEMETRIA E CLIMA EM TEMPO REAL (API OPEN-METEO)
+// ==========================================
+
+async function fetchWeatherTelemetrics(lat, lon) {
+    // Efeitos de carregamento
+    document.getElementById('rt-temp').innerText = `--°C`;
+    document.getElementById('rt-aqi').innerText = `Buscando...`;
+    document.getElementById('rt-forecast').innerHTML = `<li>Aguardando satélite meteorológico...</li>`;
+
+    try {
+        // 1. Busca Clima e Previsão
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=America%2FSao_Paulo&forecast_days=4`;
+        const weatherRes = await fetch(weatherUrl);
+        const weatherData = await weatherRes.json();
+
+        // 2. Busca Qualidade do Ar (AQI)
+        const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi`;
+        const aqiRes = await fetch(aqiUrl);
+        const aqiData = await aqiRes.json();
+
+        // --- ATUALIZA A UI ---
+        
+        // Temperatura Atual
+        const currentTemp = Math.round(weatherData.current.temperature_2m);
+        document.getElementById('rt-temp').innerText = `${currentTemp}°C`;
+
+        // AQI (Qualidade do Ar)
+        const aqi = aqiData.current.us_aqi || 45; // 45 é fallback caso a api não tenha o dado exato na hora
+        let aqiText = "Boa"; let aqiColor = "#4caf50";
+        if(aqi > 50) { aqiText = "Moderada"; aqiColor = "#ff9800"; }
+        if(aqi > 100) { aqiText = "Ruim"; aqiColor = "#f44336"; }
+        
+        document.getElementById('rt-aqi').innerText = `${Math.round(aqi)} - ${aqiText}`;
+        document.getElementById('rt-aqi').style.color = aqiColor;
+
+        // Previsão 3 Dias (Converte código do clima em Emoji)
+        const getWeatherEmoji = (code) => {
+            if ([0, 1].includes(code)) return '☀️'; // Limpo
+            if ([2, 3].includes(code)) return '⛅'; // Parcialmente nublado
+            if ([45, 48].includes(code)) return '🌫️'; // Névoa
+            if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return '🌧️'; // Chuva
+            if ([71, 73, 75, 77, 85, 86].includes(code)) return '❄️'; // Neve
+            if ([95, 96, 99].includes(code)) return '⛈️'; // Tempestade
+            return '🌤️';
+        };
+
+        const daily = weatherData.daily;
+        document.getElementById('rt-forecast').innerHTML = `
+          <li><span>Amanhã</span> <span>${getWeatherEmoji(daily.weather_code[1])} ${Math.round(daily.temperature_2m_max[1])}°C</span></li>
+          <li><span>2 Dias</span> <span>${getWeatherEmoji(daily.weather_code[2])} ${Math.round(daily.temperature_2m_max[2])}°C</span></li>
+          <li><span>3 Dias</span> <span>${getWeatherEmoji(daily.weather_code[3])} ${Math.round(daily.temperature_2m_max[3])}°C</span></li>
+        `;
+
+    } catch (error) {
+        console.error("Erro Crítico na API de Clima:", error);
+        document.getElementById('rt-temp').innerText = `24°C (Offline)`;
+        document.getElementById('rt-aqi').innerText = `Offline`;
+    }
+}
+
+// Inicia com o clima de São Paulo (Padrão) ao carregar a página
+fetchWeatherTelemetrics(-23.55, -46.63);
+
+
+// ==========================================
+// 4. INTEGRAÇÃO API SATÉLITE (SENTINEL HUB)
+// ==========================================
+const SENTINEL_CONFIG = {
+    clientId: 
+    clientSecret: 
+};
+
+
+async function buscarImagemSatelite(data) {
+    const lat = data.lat;
+    const lon = data.lon;
+    
+    console.log(`🔴 1. Iniciando satélite para: ${data.nome} em ${data.local} (${lat}, ${lon})`);
+    
+    const imgElement = document.getElementById('img-satelite-real');
+    const infoSolo = document.getElementById('res-solo-info');
+    const infoNdvi = document.getElementById('res-ndvi');
+    const hudLegend = document.getElementById('ndviLegend');
+    
+    infoSolo.innerText = `Calibrando satélite para ${data.local}...`;
+    infoNdvi.innerText = "Processando bandas de espectrometria NDVI...";
+    imgElement.classList.remove('loaded');
+    hudLegend.classList.remove('visible');
+
+    try {
+        console.log("🔴 2. Pedindo token de acesso (Conexão Direta)...");
+        const tokenResponse = await fetch('https://services.sentinel-hub.com/oauth/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `grant_type=client_credentials&client_id=${SENTINEL_CONFIG.clientId}&client_secret=${SENTINEL_CONFIG.clientSecret}`
+        });
+        
+        if (!tokenResponse.ok) throw new Error("Erro nas credenciais ou bloqueio de CORS.");
+
+        const tokenData = await tokenResponse.json();
+        if (!tokenData.access_token) return;
+
+        console.log("🔴 3. Token recebido! Buscando mapa NDVI sem nuvens...");
+
+        const toDate = new Date();
+        const fromDate = new Date();
+        fromDate.setMonth(toDate.getMonth() - 3);
+
+        const bbox = [lon - 0.03, lat - 0.03, lon + 0.03, lat + 0.03];
+
+        const evalscriptNDVI = `
+            //VERSION=3
+            function setup() { return { input: ["B08", "B04", "dataMask"], output: { bands: 4 } }; }
+            function evaluatePixel(sample) {
+                let ndvi = (sample.B08 - sample.B04) / (sample.B08 + sample.B04 + 0.0001);
+                if (ndvi < 0.1) return [0.5, 0.5, 0.5, sample.dataMask];      
+                if (ndvi < 0.3) return [0.65, 0.35, 0.07, sample.dataMask];   
+                if (ndvi < 0.5) return [0.9, 0.9, 0.2, sample.dataMask];      
+                if (ndvi < 0.7) return [0.3, 0.8, 0.3, sample.dataMask];      
+                return [0.0, 0.4, 0.0, sample.dataMask];                      
+            }
+        `;
+
+        const response = await fetch('https://services.sentinel-hub.com/api/v1/process', {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${tokenData.access_token}`, 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                input: { 
+                    bounds: { bbox: bbox }, 
+                    data: [{ 
+                        type: "sentinel-2-l2a",
+                        dataFilter: {
+                            timeRange: { from: fromDate.toISOString(), to: toDate.toISOString() },
+                            maxCloudCoverage: 10 
+                        }
+                    }] 
+                },
+                output: { width: 800, height: 450, responses: [{ identifier: "default", format: { type: "image/png" } }] },
+                evalscript: evalscriptNDVI
+            })
+        });
+
+        if (!response.ok) throw new Error("Falha na geração da imagem NDVI pelo satélite.");
+
+        console.log("🔴 4. Renderizando...");
+        const blob = await response.blob();
+        imgElement.src = URL.createObjectURL(blob);
+        
+        imgElement.onload = () => {
+            console.log("✅ 5. MAPA NDVI PRONTO E EXIBIDO!");
+            imgElement.classList.add('loaded');
+            hudLegend.classList.add('visible'); 
+            
+            infoSolo.innerText = data.manejo;
+            infoNdvi.innerHTML = `<strong>Análise para ${data.nome}:</strong> ${data.laudoSatelite}`;
+        };
+        
+    } catch (error) {
+        console.error("❌ Erro Crítico:", error);
+        infoSolo.innerText = "Bloqueio de segurança. Verifique se a extensão do CORS está LIGADA.";
+        infoNdvi.innerText = "Aguardando liberação...";
+    }
+}
+
 function updateCropInsights(cropKey) {
   const data = agroDB[cropKey];
   if (!data) return;
 
-  // Atualiza os dados na tela Holográfica
+  // Atualiza Dados Esquerda
   document.getElementById('info-nome-cultura').innerText = data.nome;
   document.getElementById('info-ranking').innerText = data.ranking;
   document.getElementById('info-img-cultura').src = data.imagem;
   document.getElementById('info-solo-tipo').innerText = data.solo;
   document.getElementById('info-solo-manejo').innerText = data.manejo;
   
+  // Atualiza Localização
+  document.getElementById('rt-local').innerText = `LAT ${data.lat} | LON ${data.lon} (${data.local})`;
+  
   const panel = document.getElementById('panel-plantacao');
   if (panel) panel.classList.add('visible');
 
-  // Atualiza o painel de Pragas (Estágio 5)
+  // Atualiza Pragas
   const listPragas = document.getElementById('lista-pragas');
   if (listPragas) {
     listPragas.innerHTML = `<h3 class="floating-title">Ameaças Biológicas: <span style="color:var(--primary);">${data.nome}</span></h3>`;
@@ -123,19 +282,24 @@ function updateCropInsights(cropKey) {
       `;
     });
   }
+
+  // BUSCA CLIMA REAL NAQUELA COORDENADA ESPECÍFICA!
+  fetchWeatherTelemetrics(data.lat, data.lon);
+
+  // BUSCA IMAGEM SATÉLITE
+  buscarImagemSatelite(data); 
 }
 
-// Lógica Otimizada: Se clicar no rádio selecionado, ele desmarca e oculta a tela.
+// Botões das culturas
 document.querySelectorAll('.chip').forEach(chip => {
   const radio = chip.querySelector('input[type="radio"]');
   chip.addEventListener('click', function(e) {
     e.preventDefault(); 
-    
     if (activeCrop === radio.value) {
       radio.checked = false; 
       activeCrop = null;
       document.getElementById('panel-plantacao').classList.remove('visible');
-      document.getElementById('lista-pragas').innerHTML = `<h3 class="floating-title">Ameaças Biológicas: <span style="color:var(--muted);">Aguardando Seleção...</span></h3>`;
+      document.getElementById('ndviLegend').classList.remove('visible');
     } else {
       radio.checked = true; 
       activeCrop = radio.value;
@@ -144,61 +308,17 @@ document.querySelectorAll('.chip').forEach(chip => {
   });
 });
 
-// Geolocalização e Dados Climáticos Inteligentes
-function fetchWeatherTelemetrics() {
-  const setMockData = (cidade) => {
-    // Clima
-    const temp = Math.floor(Math.random() * (35 - 18) + 18);
-    document.getElementById('rt-temp').innerText = `${temp}°C`;
-    document.getElementById('rt-location').innerText = `📍 ${cidade}`;
-    
-    // AQI
-    const aqi = Math.floor(Math.random() * 120);
-    let aqiText = "Boa"; let aqiColor = "#4caf50";
-    if(aqi > 50) { aqiText = "Moderada"; aqiColor = "#ff9800"; }
-    if(aqi > 100) { aqiText = "Ruim"; aqiColor = "#f44336"; }
-    document.getElementById('rt-aqi').innerText = `${aqi} - ${aqiText}`;
-    document.getElementById('rt-aqi').style.color = aqiColor;
-
-    // Chuva
-    const rain = Math.floor(Math.random() * 100);
-    document.getElementById('rt-chuva').innerText = `${rain}%`;
-    document.getElementById('rt-forecast').innerHTML = `
-      <li><span>Amanhã</span> <span>${Math.random() > 0.5 ? '☀️' : '🌧️'} ${Math.floor(Math.random()*100)}%</span></li>
-      <li><span>2 Dias</span> <span>${Math.random() > 0.5 ? '🌤️' : '⛈️'} ${Math.floor(Math.random()*100)}%</span></li>
-      <li><span>3 Dias</span> <span>☀️ 0%</span></li>
-    `;
-    
-    document.getElementById('hud-location').innerText = `SATÉLITE SINCRONIZADO // 📍 ${cidade.toUpperCase()}`;
-  };
-
-  if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setMockData(`LAT ${pos.coords.latitude.toFixed(2)} | LON ${pos.coords.longitude.toFixed(2)}`),
-      () => setMockData("SÃO PAULO, BR (Padrão)")
-    );
-  } else {
-    setMockData("SISTEMA OFFLINE");
-  }
-}
-setTimeout(fetchWeatherTelemetrics, 1000);
-
-// Stepper Controle
+// ==========================================
+// 5. LÓGICA DO DIAGNÓSTICO E RESULTADOS
+// ==========================================
 const inputDias = document.getElementById('diasSeca');
 document.getElementById('btnMinus')?.addEventListener('click', () => { let v = parseInt(inputDias.value)||0; if(v>0) inputDias.value = v-1; });
 document.getElementById('btnPlus')?.addEventListener('click', () => { inputDias.value = (parseInt(inputDias.value)||0)+1; });
 
-// Compilação Final (Gera o Centro e as 4 Caixas de Resultado)
 document.getElementById('btnDiagnostico')?.addEventListener('click', () => {
   if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+  if (!activeCrop) { alert("Inicie selecionando a Cultura Predominante da Lavoura."); return; }
   
-  // Exige que a cultura tenha sido escolhida antes de ir para o resultado
-  if (!activeCrop) {
-    alert("Inicie selecionando a Cultura Predominante da Lavoura.");
-    document.querySelector('.journey-container').scrollTo({ top: 0, behavior: 'smooth' });
-    return;
-  }
-
   const culturaStr = activeCrop;
   const diasSeca = parseInt(inputDias.value) || 0;
   const calor = document.querySelector('input[name="calor"]:checked')?.value || "1";
@@ -218,14 +338,12 @@ document.getElementById('btnDiagnostico')?.addEventListener('click', () => {
   else if (pontos > 5 && pontos <= 8) { nivel = "ALERTA"; colorBadge = "#f44336"; glowBadge = "rgba(244, 67, 54, 0.4)"; }
   else if (pontos > 8) { nivel = "CRÍTICO"; colorBadge = "#d32f2f"; glowBadge = "rgba(211, 47, 47, 0.4)"; }
 
-  // 4 Cantos Telemetria
   const dbCultura = agroDB[culturaStr];
   document.getElementById('res-praga').innerText = pragas === "1" ? `Alerta vermelho para ${dbCultura.pragas[0].nome}. Pulverização corretiva necessária.` : `Índice biológico estável para ${dbCultura.nome}. Mantenha monitoramento.`;
   document.getElementById('res-solo').innerText = soloObs === "1" ? `Solo alagado. Suspenda maquinário pesado.` : `Condição aceitável. Mantenha os padrões de ${dbCultura.solo.split('.')[0]}.`;
   document.getElementById('res-chuva').innerText = diasSeca > 5 ? `Atenção: ${diasSeca} dias secos. Previsão de chuva: ${document.getElementById('rt-chuva').innerText}.` : `Regime hídrico satisfatório para a raiz da cultura.`;
   document.getElementById('res-clima').innerText = `Satélite registra ${document.getElementById('rt-temp').innerText} com AQI ${document.getElementById('rt-aqi').innerText.split('-')[0]}.`;
 
-  // Atualiza Card Central
   document.getElementById('riskBadge').innerText = nivel;
   document.getElementById('riskBadge').style.color = colorBadge;
 
@@ -249,7 +367,6 @@ document.getElementById('btnDiagnostico')?.addEventListener('click', () => {
     }
   });
 
-  // Recomendações em Lista Central
   const recList = document.getElementById('recList');
   recList.innerHTML = '';
   if (pontos === 0) recList.innerHTML = "<li>Mantenha as práticas atuais. Lavoura sem estressores severos.</li>";
@@ -258,7 +375,6 @@ document.getElementById('btnDiagnostico')?.addEventListener('click', () => {
 
   document.documentElement.style.setProperty('--primary', colorBadge);
   document.documentElement.style.setProperty('--glow', glowBadge);
-  
   document.querySelector('.journey-container').scrollTo({ top: document.getElementById('stage-resultado').offsetTop, behavior: 'smooth' });
 });
 
@@ -268,15 +384,15 @@ document.getElementById('btnRecomecar')?.addEventListener('click', () => {
   document.querySelectorAll('.factor-fill').forEach(el => el.style.width = '0%');
   document.documentElement.style.setProperty('--primary', '#4caf50');
   
-  // Reseta estado
   document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
   activeCrop = null;
   document.getElementById('panel-plantacao').classList.remove('visible');
+  document.getElementById('ndviLegend').classList.remove('visible');
   document.getElementById('lista-pragas').innerHTML = `<h3 class="floating-title">Ameaças Biológicas: <span style="color:var(--muted);">Aguardando Seleção...</span></h3>`;
 });
 
 // ==========================================
-// 3. ENGINE WEBGL (MOTOR OTIMIZADO)
+// 6. ENGINE WEBGL (PARTÍCULAS OTIMIZADAS A 60FPS)
 // ==========================================
 (() => {
   const canvas = document.getElementById('particleCanvas');
@@ -288,33 +404,12 @@ document.getElementById('btnRecomecar')?.addEventListener('click', () => {
   if (!gl) return;
 
   const config = {
-    maxDesktop: 28000, 
-    maxMobile: 12000,
-    sampleDesktop: 3, 
-    sampleMobile: 4,
-    pointDesktop: 2.3, 
-    pointMobile: 2.6,
-    returnIdle: 0.024,
-    returnActive: 0.0026,
-    friction: 0.953,
-    maxSpeed: 0.067,
-    mouseFollow: 0.00055,
-    mouseFollowRadiusDesktop: 185,
-    mouseFollowRadiusMobile: 128,
-    pathFollow: 0.0068,
-    pathTargetPull: 0.038,
-    pathEdgePull: 0.0085,
-    pathOrbit: 0.0024,
-    pathTubeDesktop: 178,
-    pathTubeMobile: 122,
-    pathEdgeDesktop: 64,
-    pathEdgeMobile: 42,
-    flow: 0.00172,
-    headPush: 0.0048,
-    noise: 0.00013,
-    settleDelay: 190,
-    releaseDelay: 520,
-    scrollEase: 0.045
+    maxDesktop: 28000, maxMobile: 12000, sampleDesktop: 3, sampleMobile: 4,
+    pointDesktop: 2.3, pointMobile: 2.6, returnIdle: 0.024, returnActive: 0.0026,
+    friction: 0.953, maxSpeed: 0.067, mouseFollow: 0.00055, mouseFollowRadiusDesktop: 185,
+    mouseFollowRadiusMobile: 128, pathFollow: 0.0068, pathTargetPull: 0.038, pathEdgePull: 0.0085,
+    pathOrbit: 0.0024, pathTubeDesktop: 178, pathTubeMobile: 122, pathEdgeDesktop: 64, pathEdgeMobile: 42,
+    flow: 0.00172, headPush: 0.0048, noise: 0.00013, settleDelay: 190, releaseDelay: 520, scrollEase: 0.045
   };
 
   const state = {
@@ -444,7 +539,6 @@ document.getElementById('btnRecomecar')?.addEventListener('click', () => {
   function createTextMask() {
     const { c, ctx, w, h } = getCanvas();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    
     const fs = clamp(w * (state.mobile ? 0.18 : 0.14), 50, state.mobile ? 100 : 180);
     ctx.font = `900 ${fs}px "SF Pro Display", Inter, sans-serif`; 
     ctx.lineWidth = Math.max(1.5, fs * 0.02);
