@@ -1,3 +1,4 @@
+
 /**
  * ============================================================================
  * ORBITAGRO COPILOT - GLOBAL SOLUTION
@@ -68,7 +69,7 @@ const agroDB = {
     "soja": { 
         nome: "Soja", 
         ranking: "1º Liderança Nacional", 
-        imagem: "image/image/soja.png", 
+        imagem: "assets/soja.png", 
         solo: "Solos profundos e bem drenados. Ph ideal 6.0 a 6.5.", 
         manejo: "Requer inoculação bacteriana. Plantio direto.",
         lat: -13.06, 
@@ -141,7 +142,7 @@ const agroDB = {
     "milho": { 
         nome: "Milho", 
         ranking: "3º Commodity no Brasil", 
-        imagem: "image/image/milho.png", 
+        imagem: "assets/milho.png", 
         solo: "Solos férteis, de textura média e ricos em matéria orgânica.", 
         manejo: "Sucessão de culturas (soja/milho) é crucial.",
         lat: -17.79, 
@@ -184,7 +185,7 @@ const agroDB = {
     "cana": { 
         nome: "Cana-de-açúcar", 
         ranking: "2º Maior Valor Bruto", 
-        imagem: "image/image/cana.png", 
+        imagem: "assets/cana.png", 
         solo: "Solos profundos (Latossolos), com boa aeração.", 
         manejo: "Colheita sem queima. Palhada protege o solo.",
         lat: -21.22, 
@@ -227,7 +228,7 @@ const agroDB = {
     "cafe": { 
         nome: "Café", 
         ranking: "4º Ouro Verde", 
-        imagem: "image/image/cafe.png", 
+        imagem: "assets/cafe.png", 
         solo: "Terrenos em altitude. Sensível ao alagamento.", 
         manejo: "Adoção de sistemas sombreados mitiga variações climáticas.",
         lat: -21.36, 
@@ -270,7 +271,7 @@ const agroDB = {
     "algodao": { 
         nome: "Algodão", 
         ranking: "5º Maior Exportação", 
-        imagem: "image/image/algodao.png", 
+        imagem: "assets/algodao.png", 
         solo: "Solos com boa umidade.", 
         manejo: "Requer agricultura de precisão.",
         lat: -12.09, 
@@ -403,9 +404,10 @@ fetchWeatherTelemetrics(-23.55, -46.63);
 // ==========================================
 
 const SENTINEL_CONFIG = {
-    clientId: 'SEU_CLIENT_ID', // COLOQUE AQUI SUA CHAVE DO SENTINEL HUB
-    clientSecret: 'SEU_CLIENT_SECRET' // COLOQUE AQUI SUA CHAVE DO SENTINEL HUB
+    clientId: 'a4eb4d97-3d8e-4c7c-a571-7d44816fbc3d',
+    clientSecret: 'Bt1GEagIaKmGDR8d3yAP0RoUpWmVNflp'
 };
+
 
 /**
  * Função responsável por chamar e desenhar os Mapas NDVI e NDMI
@@ -1445,3 +1447,52 @@ document.querySelector('.journey-container').addEventListener('scroll', (e) => {
 
     resize(); bindEvents(); requestAnimationFrame(render); 
 })();
+
+// ==========================================
+// 8. VALIDAÇÃO DE FORMULÁRIO (PÁGINA CONTATO)
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const contactForm = document.getElementById('contactForm');
+    const formFeedback = document.getElementById('formFeedback');
+
+    if (contactForm && formFeedback) {
+        contactForm.addEventListener('submit', function (event) {
+            // Exigência da FIAP: Impedir o recarregamento automático da página
+            event.preventDefault();
+
+            // Captura os valores dos campos removendo espaços em branco extras
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const mensagem = document.getElementById('mensagem').value.trim();
+
+            // Exigência da FIAP: Bloquear campos vazios e mostrar mensagem de erro
+            if (nome === '' || email === '' || mensagem === '') {
+                formFeedback.style.display = 'block';
+                formFeedback.style.color = '#f44336'; // Vermelho para erro
+                formFeedback.innerText = '❌ Erro: Todos os campos são obrigatórios. Por favor, preencha-os.';
+                return; // Interrompe a execução
+            }
+
+            // Validação simples de formato de e-mail
+            if (!email.includes('@') || !email.includes('.')) {
+                formFeedback.style.display = 'block';
+                formFeedback.style.color = '#ff9800'; // Laranja para aviso
+                formFeedback.innerText = '⚠️ Aviso: Por favor, insira um e-mail válido.';
+                return;
+            }
+
+            // Sucesso: Formulário válido
+            formFeedback.style.display = 'block';
+            formFeedback.style.color = '#4caf50'; // Verde para sucesso
+            formFeedback.innerText = '✅ Mensagem enviada com sucesso! Entraremos em contato em breve.';
+            
+            // Limpa o formulário após o envio bem-sucedido
+            contactForm.reset();
+            
+            // Oculta a mensagem de sucesso após 5 segundos
+            setTimeout(() => {
+                formFeedback.style.display = 'none';
+            }, 5000);
+        });
+    }
+});

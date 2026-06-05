@@ -7,14 +7,18 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div class="hud-element hud-top-left">ORBIT.SYS // V.2.4.1_BETA</div>
-  <div class="hud-element hud-bottom-right" id="hud-location">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
-  <div class="hud-element hud-vertical">DATA_STREAM_SYNC</div>
+  <div class="hud-element hud-top-left" aria-hidden="true">ORBIT.SYS // V.2.4.1_BETA</div>
+  <div class="hud-element hud-bottom-right" id="hud-location" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
+  <div class="hud-element hud-vertical" aria-hidden="true">DATA_STREAM_SYNC</div>
 
-  <header class="site-header" aria-label="Menu principal">
+  <header class="site-header">
     <div class="header-inner">
-      <a class="brand-logo" href="index.html"><span>orbitagro</span><span>copilot</span></a>
-      <nav class="desktop-nav">
+      <h1 class="site-title">
+        <a class="brand-logo" href="index.html" aria-label="OrbitAgro Copilot Home">
+          <span>orbitagro</span><span>copilot</span>
+        </a>
+      </h1>
+      <nav class="desktop-nav" aria-label="Navegação Principal">
         <a href="index.html">Home</a>
         <a href="pages/sobre.html">Sobre</a>
         <a href="#stage-plantacao">Solução</a>
@@ -22,33 +26,32 @@
         <a href="pages/contato.html">Contato</a>
         <a href="pages/integrantes.html" class="highlighted-link">Equipe</a>
       </nav>
-      <button class="menu-toggle" type="button" aria-label="Abrir menu">
+      <button class="menu-toggle" type="button" aria-label="Abrir menu mobile" aria-expanded="false" aria-controls="mobileMenu">
         <span></span><span></span><span></span>
       </button>
     </div>
   </header>
 
-  <nav class="mobile-menu" id="mobileMenu">
+  <nav class="mobile-menu" id="mobileMenu" aria-label="Navegação Mobile">
     <a href="index.html">Home</a>
     <a href="pages/sobre.html">Sobre</a>
     <a href="#stage-plantacao">Solução</a>
     <a href="pages/faq.html">FAQ</a>
     <a href="pages/contato.html">Contato</a>
-    <a href="pages/integrantes.html" style="color: #4caf50;">Equipe</a>
+    <a href="pages/integrantes.html" class="highlighted-link-mobile">Equipe</a>
   </nav>
 
   <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
-  <div id="hotspot-layer" class="hotspot-layer"></div>
+  <div id="hotspot-layer" class="hotspot-layer" aria-hidden="true"></div>
 
-  <div id="pestModal" class="pest-modal-overlay">
+  <div id="pestModal" class="pest-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalPestName">
     <div class="pest-modal">
-      <button class="close-modal" id="closeModal">&times;</button>
+      <button class="close-modal" id="closeModal" aria-label="Fechar Modal">&times;</button>
       <div class="carousel-container">
-        <div class="carousel-track" id="carouselTrack">
-          </div>
-        <button class="carousel-btn prev" id="btnPrev">&#10094;</button>
-        <button class="carousel-btn next" id="btnNext">&#10095;</button>
+        <div class="carousel-track" id="carouselTrack"></div>
+        <button class="carousel-btn prev" id="btnPrev" aria-label="Anterior">&#10094;</button>
+        <button class="carousel-btn next" id="btnNext" aria-label="Próximo">&#10095;</button>
       </div>
       <div class="pest-info">
         <h3 id="modalPestName" class="text-primary">Nome da Praga</h3>
@@ -59,23 +62,23 @@
 
   <main class="journey-container">
     
-    <section class="stage align-center" id="stage-hero" style="position: relative;">
+    <section class="stage align-center" id="stage-hero" aria-label="Início">
       <div class="scroll-hint">
-        <svg class="mouse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="7" ry="7"></rect><line x1="12" y1="6" x2="12" y2="10"></line></svg>
+        <svg class="mouse-icon mouse-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="7" ry="7"></rect><line x1="12" y1="6" x2="12" y2="10"></line></svg>
         <span>Iniciar Calibração de Satélite</span>
       </div>
     </section>
 
-    <section class="stage split-layout" id="stage-plantacao">
+    <section class="stage split-layout" id="stage-plantacao" aria-labelledby="titulo-lavoura">
       <div class="glass-card align-left">
-        <h2 class="split-text">Dados da Lavoura</h2>
-        <p class="animate-fade-up" style="transition-delay: 0.1s;">Parâmetros iniciais de cultivo.</p>
+        <h2 id="titulo-lavoura" class="split-text">Dados da Lavoura</h2>
+        <p class="animate-fade-up subtitle-spacing">Parâmetros iniciais de cultivo.</p>
         
-        <label class="animate-fade-up" style="transition-delay: 0.2s;">Identificação do talhão</label>
-        <input type="text" id="talhao" placeholder="Ex: Lote Alfa" class="text-input animate-fade-up" style="transition-delay: 0.3s;" />
+        <label class="animate-fade-up" for="talhao">Identificação do talhão</label>
+        <input type="text" id="talhao" placeholder="Ex: Lote Alfa" class="text-input animate-fade-up" />
         
-        <label class="animate-fade-up" style="transition-delay: 0.4s;">Cultura predominante</label>
-        <div class="chip-group animate-fade-up" style="transition-delay: 0.5s;">
+        <label class="animate-fade-up">Cultura predominante</label>
+        <div class="chip-group animate-fade-up" role="radiogroup" aria-label="Selecione a cultura">
           <label class="chip"><input type="radio" name="cultura" value="soja">🌿 Soja</label>
           <label class="chip"><input type="radio" name="cultura" value="cana">🎋 Cana</label>
           <label class="chip"><input type="radio" name="cultura" value="milho">🌽 Milho</label>
@@ -85,10 +88,13 @@
       </div>
       
       <article class="insights-panel align-right" id="panel-plantacao">
-        <div class="hologram-beam"></div> 
-        <div class="hologram-base"></div> 
+        <div class="hologram-beam" aria-hidden="true"></div> 
+        <div class="hologram-base" aria-hidden="true"></div> 
         <div class="crop-profile-row animate-fade-up">
-          <div class="image-scanner-container"><img src="" id="info-img-cultura" class="crop-image-large" alt="Grão da Cultura" /><div class="scanner-overlay"></div></div>
+          <div class="image-scanner-container">
+             <img src="" id="info-img-cultura" class="crop-image-large" alt="Grão da Cultura" />
+             <div class="scanner-overlay" aria-hidden="true"></div>
+          </div>
           <div class="crop-info-side">
              <span id="info-ranking">--</span>
              <h3 id="info-nome-cultura" class="huge-data small text-primary">--</h3>
@@ -101,7 +107,7 @@
       </article>
     </section>
 
-    <section class="stage monitoramento-stage" id="stage-sol">
+    <section class="stage monitoramento-stage" id="stage-sol" aria-label="Monitoramento NDVI">
       <aside class="telemetry-left">
         <div class="data-box">
           <h3 class="label">Temperatura Local</h3>
@@ -117,11 +123,11 @@
 
       <article class="satellite-viewer">
         <div class="viewer-border">
-          <img id="img-satelite-real" src="" alt="Aguardando API..." />
-          <div class="ndvi-legend" id="ndviLegend">
+          <img id="img-satelite-real" src="" alt="Mapa NDVI" />
+          <div class="ndvi-legend" id="ndviLegend" aria-hidden="true">
             <div class="legend-title">Índice Vegetativo (NDVI)</div>
             <div class="legend-bar"></div>
-            <div class="legend-labels"><span>Nuvens / Água</span><span>Solo Exposto</span><span>Deficiência</span><span>Saudável</span><span>Dossel Denso</span></div>
+            <div class="legend-labels"><span>Nuvens</span><span>Solo Nu</span><span>Deficiência</span><span>Saudável</span><span>Denso</span></div>
           </div>
         </div>
       </article>
@@ -139,19 +145,19 @@
       </div>
     </section>
 
-    <section class="stage monitoramento-stage" id="stage-chuva">
+    <section class="stage monitoramento-stage" id="stage-chuva" aria-label="Monitoramento NDMI">
       <aside class="telemetry-left">
         <div class="data-box">
           <h3 class="label text-blue">Chance de Chuva (Hoje)</h3>
           <div class="value text-blue" id="rt-chuva-chance">--%</div>
-          <p class="sub-label" id="rt-chuva-vol" style="color: #03a9f4;">Volume: -- mm</p>
+          <p class="sub-label text-blue" id="rt-chuva-vol">Volume: -- mm</p>
         </div>
       </aside>
 
       <article class="satellite-viewer">
         <div class="viewer-border ndmi-border">
-          <img id="img-satelite-umidade" src="" alt="Aguardando API Hídrica..." />
-          <div class="ndvi-legend ndmi-legend" id="ndmiLegend">
+          <img id="img-satelite-umidade" src="" alt="Mapa Hídrico NDMI" />
+          <div class="ndvi-legend ndmi-legend" id="ndmiLegend" aria-hidden="true">
             <div class="legend-title">Índice de Umidade do Solo (NDMI)</div>
             <div class="legend-bar"></div>
             <div class="legend-labels"><span>Seca Severa</span><span>Déficit</span><span>Ideal</span><span>Úmido</span><span>Alagado</span></div>
@@ -180,78 +186,86 @@
       </div>
     </section>
 
-    <section class="stage align-center" id="stage-pragas-interativas" style="position: relative;">
-      <div style="position: absolute; top: 15vh; text-align: center; z-index: 5;">
-        <h2 class="split-text" style="font-size: 42px;">Catálogo Biológico</h2>
-        <p style="color: var(--muted); max-width: 600px; margin: 0 auto; line-height: 1.6;">Passe o cursor e interaja com os pontos de luz sobre as folhas (3D) para identificar as ameaças comuns e aprender a reconhecer os sintomas na sua lavoura.</p>
+    <section class="stage align-center stage-relative" id="stage-pragas-interativas" aria-label="Catálogo Biológico">
+      <div class="text-center-wrapper disabled-pointer">
+        <h2 class="split-text pest-title">Catálogo Biológico</h2>
+        <p class="pest-subtitle">Interaja com os pontos luminosos sobre as folhas para identificar as ameaças comuns e aprender a reconhecer os sintomas na sua lavoura.</p>
       </div>
     </section>
 
-    <section class="stage split-layout" id="stage-inspecao">
-      <div class="glass-card align-left" style="max-width: 600px;">
-        <h2 class="split-text" style="font-size: 32px;">Laudo Analítico</h2>
-        <p class="animate-fade-up" style="margin-bottom: 24px;">Cruze as imagens orbitais com sua observação local.</p>
+    <section class="stage split-layout" id="stage-inspecao" aria-labelledby="titulo-laudo">
+      <div class="glass-card align-left compact-card">
+        <h2 id="titulo-laudo" class="split-text">Laudo Analítico</h2>
+        <p class="animate-fade-up">Cruze as imagens orbitais com sua observação local.</p>
         
-        <label class="animate-fade-up">1. Com base no Satélite NDVI, a saúde foliar atual é:</label>
-        <div class="radio-cards animate-fade-up" style="margin-bottom: 20px;">
-          <label class="radio-card"><input type="radio" name="saudeFoliar" value="1" checked><span class="title">Verde / Densa</span></label>
-          <label class="radio-card"><input type="radio" name="saudeFoliar" value="2"><span class="title">Amarelada / Falhas</span></label>
+        <fieldset class="custom-fieldset">
+          <legend class="custom-legend animate-fade-up">1. Com base no Satélite NDVI, a saúde foliar atual é:</legend>
+          <div class="radio-cards animate-fade-up mb-20">
+            <label class="radio-card"><input type="radio" name="saudeFoliar" value="1" checked><span class="title">Verde / Densa</span></label>
+            <label class="radio-card"><input type="radio" name="saudeFoliar" value="2"><span class="title">Amarelada / Falhas</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="custom-fieldset">
+          <legend class="custom-legend animate-fade-up">2. O Mapa Hídrico (NDMI) apresenta zonas críticas marrons?</legend>
+          <div class="radio-cards animate-fade-up mb-20">
+            <label class="radio-card"><input type="radio" name="stressHidrico" value="2"><span class="title">Sim (Déficit Hídrico)</span></label>
+            <label class="radio-card"><input type="radio" name="stressHidrico" value="1" checked><span class="title">Não (Ideal/Saturado)</span></label>
+          </div>
+        </fieldset>
+
+        <label class="animate-fade-up" for="diasSeca">3. Ocorreram dias seguidos sem precipitação na fazenda?</label>
+        <div class="stepper animate-fade-up mb-20 stepper-height">
+          <button type="button" class="step-btn" id="btnMinus" aria-label="Diminuir dias">-</button>
+          <input type="number" id="diasSeca" value="0" min="0" readonly aria-label="Quantidade de dias sem chuva" />
+          <button type="button" class="step-btn" id="btnPlus" aria-label="Aumentar dias">+</button>
         </div>
 
-        <label class="animate-fade-up">2. O Mapa Hídrico (NDMI) apresenta zonas críticas marrons?</label>
-        <div class="radio-cards animate-fade-up" style="margin-bottom: 20px;">
-          <label class="radio-card"><input type="radio" name="stressHidrico" value="2"><span class="title">Sim (Déficit Hídrico)</span></label>
-          <label class="radio-card"><input type="radio" name="stressHidrico" value="1" checked><span class="title">Não (Ideal/Saturado)</span></label>
-        </div>
+        <fieldset class="custom-fieldset">
+          <legend class="custom-legend animate-fade-up">4. Após o estudo interativo, identificou pragas na lavoura?</legend>
+          <div class="radio-cards column-cards-mobile animate-fade-up">
+            <label class="radio-card"><input type="radio" name="nivelPragas" value="3"><span class="icon" aria-hidden="true">🐛</span><span class="title">Infestação</span></label>
+            <label class="radio-card"><input type="radio" name="nivelPragas" value="2"><span class="icon" aria-hidden="true">🤔</span><span class="title">Foco Isolado</span></label>
+            <label class="radio-card"><input type="radio" name="nivelPragas" value="1" checked><span class="icon" aria-hidden="true">✅</span><span class="title">Sem Pragas</span></label>
+          </div>
+        </fieldset>
 
-        <label class="animate-fade-up">3. Ocorreram dias seguidos sem precipitação na fazenda?</label>
-        <div class="stepper animate-fade-up" style="height: 48px; margin-bottom: 20px;">
-          <button type="button" class="step-btn" id="btnMinus">-</button>
-          <input type="number" id="diasSeca" value="0" min="0" readonly />
-          <button type="button" class="step-btn" id="btnPlus">+</button>
-        </div>
-
-        <label class="animate-fade-up">4. Após o estudo interativo, identificou pragas na lavoura?</label>
-        <div class="radio-cards animate-fade-up">
-          <label class="radio-card"><input type="radio" name="nivelPragas" value="3"><span class="icon">🐛</span><span class="title">Infestação</span></label>
-          <label class="radio-card"><input type="radio" name="nivelPragas" value="2"><span class="icon">🤔</span><span class="title">Foco Isolado</span></label>
-          <label class="radio-card"><input type="radio" name="nivelPragas" value="1" checked><span class="icon">✅</span><span class="title">Sem Pragas</span></label>
-        </div>
-
-        <button id="btnDiagnostico" class="primary-btn animate-fade-up" style="margin-top: 35px;">Gerar Diagnóstico Final</button>
+        <button id="btnDiagnostico" class="primary-btn animate-fade-up mt-30">Gerar Diagnóstico Final</button>
       </div>
     </section>
 
-    <section class="stage final-stage" id="stage-resultado">
-      <div class="floating-corner top-left"><h4>Saúde Foliar</h4><p id="res-praga">Aguardando...</p></div>
-      <div class="floating-corner bottom-left"><h4>Condição do Solo</h4><p id="res-solo">Aguardando...</p></div>
-      <div class="floating-corner top-right"><h4>Balanço Hídrico</h4><p id="res-chuva">Aguardando...</p></div>
-      <div class="floating-corner bottom-right"><h4>Clima e Atmosfera</h4><p id="res-clima">Aguardando...</p></div>
+    <section class="stage final-stage" id="stage-resultado" aria-label="Resultado Analítico">
+      <div class="corners-container" aria-hidden="true">
+        <div class="floating-corner"><h4>Saúde Foliar</h4><p id="res-praga">Aguardando dados...</p></div>
+        <div class="floating-corner"><h4>Condição do Solo</h4><p id="res-solo">Aguardando dados...</p></div>
+        <div class="floating-corner"><h4>Balanço Hídrico</h4><p id="res-chuva">Aguardando dados...</p></div>
+        <div class="floating-corner"><h4>Clima e Atmosfera</h4><p id="res-clima">Aguardando dados...</p></div>
+      </div>
       
       <div class="glass-card result-card">
-        <h2 class="split-text">Decisão Agronómica</h2>
+        <h2 class="split-text">Decisão Agronômica</h2>
         
-        <div class="dashboard animate-fade-up" style="transition-delay: 0.1s;">
-          <div class="gauge-container">
+        <div class="dashboard animate-fade-up">
+          <div class="gauge-container" aria-hidden="true">
             <svg viewBox="0 0 100 55" class="gauge">
               <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 4"/>
-              <path id="gaugeFill" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#4caf50" stroke-width="6" stroke-linecap="round" stroke-dasharray="126" stroke-dashoffset="126" style="filter: drop-shadow(0 0 8px var(--primary));" />
+              <path id="gaugeFill" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#4caf50" stroke-width="6" stroke-linecap="round" stroke-dasharray="126" stroke-dashoffset="126" class="gauge-fill-path" />
             </svg>
             <div class="gauge-text" id="riskBadge">PROCESSAR</div>
           </div>
-          <div class="factors">
-            <div class="factor"><div class="factor-header"><span>NDVI (Saúde)</span></div><div class="factor-bar"><div class="factor-fill" id="barNdvi"></div></div></div>
-            <div class="factor"><div class="factor-header"><span>Hídrico</span></div><div class="factor-bar"><div class="factor-fill" id="barSeca"></div></div></div>
-            <div class="factor"><div class="factor-header"><span>Biológico</span></div><div class="factor-bar"><div class="factor-fill" id="barPraga"></div></div></div>
+          <div class="factors" aria-hidden="true">
+            <div class="factor"><div class="factor-header"><span>NDVI Foliar</span></div><div class="factor-bar"><div class="factor-fill" id="barNdvi"></div></div></div>
+            <div class="factor"><div class="factor-header"><span>Risco Hídrico</span></div><div class="factor-bar"><div class="factor-fill" id="barSeca"></div></div></div>
+            <div class="factor"><div class="factor-header"><span>Ameaça Biol.</span></div><div class="factor-bar"><div class="factor-fill" id="barPraga"></div></div></div>
           </div>
         </div>
 
-        <div class="recommendations animate-fade-up" style="transition-delay: 0.3s;">
-          <h3>Vetor de Ação Recomendada:</h3>
+        <div class="recommendations animate-fade-up mt-4">
+          <h3 class="text-primary mb-15">Parecer Inteligente Copilot:</h3>
           <ul id="recList"></ul>
         </div>
         
-        <button id="btnRecomecar" class="secondary-btn animate-fade-up" style="transition-delay: 0.4s; margin-top: 30px;">Nova Calibração</button>
+        <button id="btnRecomecar" class="secondary-btn animate-fade-up mt-30">Nova Calibração</button>
       </div>
     </section>
   </main>
