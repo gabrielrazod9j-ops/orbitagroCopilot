@@ -1,0 +1,271 @@
+/* =========================================================
+   Página Integrantes — Estética Interestelar & Layout Fixo
+   ========================================================= */
+
+/* 1. MATA O VAZAMENTO DE LINHAS DO STYLE.CSS E A DUPLA ROLAGEM */
+html, body.page-integrantes {
+    overflow-x: hidden;
+    overflow-y: auto; /* Apenas uma rolagem principal */
+    background: #010308 !important; /* Fundo hiper-escuro que valoriza as luzes quentes */
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+/* Esconde as decorações globais do body que causavam os riscos verticais */
+body.page-integrantes::before,
+body.page-integrantes::after,
+.page-integrantes .layer-blur {
+    display: none !important;
+}
+
+/* ===================== ESTRUTURA PRINCIPAL ===================== */
+.integrantes {
+    position: relative;
+    width: 100%;
+    min-height: 85vh; /* Ajuste para não bugar no mobile */
+    display: flex;
+    flex-direction: column; /* Organiza em coluna para alinhar texto e carrossel perfeitamente */
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    padding-top: 4rem; /* Espaço do header */
+}
+
+/* ===================== BURACO NEGRO ===================== */
+#blackHoleCanvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%); /* Ajustado visualmente para o centro do carrossel */
+    width: 1000px;
+    height: 1000px;
+    z-index: 1; /* Atrás das fotos */
+    pointer-events: none;
+    mix-blend-mode: screen; /* Efeito de luz vibrante espacial */
+}
+
+/* ===================== TEXTO CENTRAL ===================== */
+.integrantes__texto {
+    position: relative;
+    z-index: 3;
+    width: min(90%, 720px);
+    text-align: center;
+    pointer-events: none; /* Não rouba clique */
+    margin-bottom: 2rem;
+}
+
+.integrantes__texto h1 {
+    margin-bottom: 0.5rem;
+    font-family: var(--title-font);
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    letter-spacing: 0.15rem;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 200, 100, 0.2); /* Brilho quente */
+}
+
+.integrantes__texto p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* ===================== CARROSSEL 3D ===================== */
+.integrantes .slide {
+    --quantity: 5;
+    position: relative;
+    z-index: 10; 
+    width: 12.5rem;
+    height: 15.63rem;
+    transform-style: preserve-3d;
+    transform: perspective(62.5rem);
+    animation: autoRun 20s linear infinite;
+    pointer-events: none; /* Destrói a caixa 3D que engolia o mouse e travava o scroll */
+    margin-top: 2rem;
+}
+
+.integrantes .slide:hover {
+    animation-play-state: paused;
+}
+
+.integrantes .slide .item--1 { --position: 1; }
+.integrantes .slide .item--2 { --position: 2; }
+.integrantes .slide .item--3 { --position: 3; }
+.integrantes .slide .item--4 { --position: 4; }
+.integrantes .slide .item--5 { --position: 5; }
+
+.integrantes .slide .item {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: #000;
+    cursor: pointer;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.8);
+    transform: rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg)) translateZ(35.38rem);
+    transition: filter 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+    pointer-events: auto; /* O clique funciona APENAS na foto */
+}
+
+.integrantes .slide .item:hover,
+.integrantes .slide .item:focus-visible {
+    filter: brightness(1.2);
+    border-color: rgba(255, 180, 80, 0.7); /* Borda Dourada Interestelar */
+    box-shadow: 0 0 35px rgba(255, 160, 50, 0.3);
+    outline: none;
+}
+
+.integrantes .slide .item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ===================== CAIXA DE DETALHES ===================== */
+.integrante-detalhes {
+    width: min(1000px, calc(100% - 2rem));
+    margin: 4rem auto;
+    display: none; /* JS ativa */
+    opacity: 0;
+    transform: translateY(2rem);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.integrante-detalhes.ativo {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.integrante-detalhes__card {
+    display: grid;
+    grid-template-columns: minmax(260px, 350px) 1fr;
+    gap: 3rem;
+    align-items: center;
+    padding: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    background: rgba(4, 7, 15, 0.65);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+}
+
+.integrante-detalhes__card img {
+    width: 100%;
+    height: 450px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.integrante-detalhes__conteudo { text-align: left; }
+
+.integrante-detalhes__tag {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid rgba(255, 180, 80, 0.5);
+    border-radius: 999px;
+    background: rgba(255, 160, 50, 0.1);
+    color: #ffb74d;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.1rem;
+    text-transform: uppercase;
+}
+
+.integrante-detalhes__conteudo h2 {
+    margin-bottom: 0.5rem;
+    color: #fff;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+.integrante-detalhes__turma,
+.integrante-detalhes__cargo,
+.integrante-detalhes__rm {
+    margin-bottom: 0.4rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 700;
+}
+
+.integrante-detalhes__conteudo p#detalhe-descricao {
+    margin-top: 1.5rem;
+    max-width: 640px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.8;
+}
+
+/* ===================== BOTÕES SOCIAIS ===================== */
+.social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.social-link:hover {
+    transform: translateY(-3px);
+    border-color: #ffb74d;
+    background: rgba(255, 160, 50, 0.1);
+    box-shadow: 0 10px 20px rgba(255, 160, 50, 0.15);
+}
+
+.social-link__icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+}
+
+/* ===================== RESPONSIVIDADE ===================== */
+@keyframes autoRun {
+    from { transform: perspective(62.5rem) rotateX(-10deg) rotateY(0deg); }
+    to { transform: perspective(62.5rem) rotateX(-10deg) rotateY(360deg); }
+}
+
+@media (max-width: 1024px) {
+    .integrantes .slide { width: 11rem; height: 14rem; }
+    .integrantes .slide .item { transform: rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg)) translateZ(28rem); }
+}
+
+@media (max-width: 768px) {
+    .integrantes { min-height: 80vh; padding-top: 6rem; }
+    .integrantes .slide { width: 9rem; height: 12rem; transform: perspective(50rem); margin-top: 1rem; }
+    .integrantes .slide .item { transform: rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg)) translateZ(20rem); }
+    .integrante-detalhes__card { grid-template-columns: 1fr; gap: 1.5rem; }
+    .integrante-detalhes__card img { height: 380px; }
+    @keyframes autoRun {
+        from { transform: perspective(50rem) rotateX(-8deg) rotateY(0deg); }
+        to { transform: perspective(50rem) rotateX(-8deg) rotateY(360deg); }
+    }
+}
+
+@media (max-width: 480px) {
+    .integrantes__texto { margin-bottom: 0; }
+    .integrantes .slide { width: 7.5rem; height: 10rem; transform: perspective(40rem); }
+    .integrantes .slide .item { transform: rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg)) translateZ(14.5rem); }
+    .integrante-detalhes__card { padding: 1.25rem; }
+    .integrante-detalhes__card img { height: 300px; }
+    #blackHoleCanvas { width: 150vw; height: 150vw; max-width: 600px; max-height: 600px; }
+    @keyframes autoRun {
+        from { transform: perspective(40rem) rotateX(-6deg) rotateY(0deg); }
+        to { transform: perspective(40rem) rotateX(-6deg) rotateY(360deg); }
+    }
+}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contato | OrbitAgro Copilot</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="layer-blur"></div>
+
+    <div class="conteiner">
+        <header>
+            <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-principal">
+                <span></span><span></span><span></span>
+            </button>
+            <nav class="main-menu" id="menu-principal" aria-label="Menu principal">
+                <a href="../index.html">INÍCIO</a>
+                <a href="sobre.html">SOBRE</a>
+                <a href="como-funciona.html">SOLUÇÃO</a>
+                <a href="faq.html">FAQ</a>
+                <a href="contato.html" class="active" style="color: var(--primary);">CONTATO</a>
+                <a href="integrantes.html">EQUIPE</a>
+            </nav>
+            <a href="../index.html#stage-plantacao" class="login-corner">ABRIR COPILOT</a>
+        </header>
+
+        <main class="contato page-content">
+            <section class="page-hero">
+                <span class="page-tag" style="color: var(--primary); border-color: var(--primary);">Suporte e Vendas</span>
+                <h1>Fale com a OrbitAgro</h1>
+                <p>Tem dúvidas sobre a implementação do monitoramento via satélite na sua lavoura? Nossa equipe de engenheiros agrônomos está pronta para ajudar.</p>
+            </section>
+
+            <ul class="contato-lista" aria-label="Canais de contato">
+                <li><span class="contact-icon" style="color: var(--primary); border-color: var(--primary);">@</span><strong>Email Profissional</strong><a href="mailto:contato@orbitagro.com.br">contato@orbitagro.com.br</a></li>
+                <li><span class="contact-icon" style="color: var(--primary); border-color: var(--primary);">☎</span><strong>Telefone / WhatsApp</strong><a href="tel:+5511999999999">(11) 99999-9999</a></li>
+                <li><span class="contact-icon" style="color: var(--primary); border-color: var(--primary);">⌖</span><strong>Escritório Central</strong><span>São Paulo/SP - FIAP Paulista 1100</span></li>
+            </ul>
+
+            <form id="contactForm" class="contact-form" novalidate>
+                <span class="form-tag" style="color: var(--primary); border-color: var(--primary);">Contato Direto</span>
+                <h2>Envie sua mensagem</h2>
+                <p class="form-helper">Preencha os dados da sua propriedade abaixo. Nossa inteligência fará a triagem inicial.</p>
+                
+                <div class="form-grid">
+                    <label class="form-field">
+                        Nome do Produtor / Empresa
+                        <input type="text" id="nome" placeholder="Ex: Fazenda Alvorada" required>
+                    </label>
+                    <label class="form-field">
+                        E-mail
+                        <input type="email" id="email" placeholder="seuemail@fazenda.com" required>
+                    </label>
+                    <label class="form-field form-field--full">
+                        Qual é o seu desafio atual?
+                        <textarea id="mensagem" placeholder="Ex: Preciso monitorar o déficit hídrico de 500 hectares de soja..." required></textarea>
+                    </label>
+                </div>
+                
+                <div id="formFeedback" style="font-size: 14px; font-weight: bold; margin-top: 10px; display: none;"></div>
+                
+                <button class="form-button" type="submit" style="background: var(--primary); color: #000; border: none; font-weight: bold; margin-top: 15px;">Enviar Solicitação</button>
+            </form>
+        </main>
+
+        <footer>
+            <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px;">© 2026 OrbitAgro Copilot - Todos os direitos reservados</p>
+        </footer>
+    </div>
+
+    <script src="../js/script.js"></script>
+</body>
+</html>

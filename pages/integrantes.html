@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipe | OrbitAgro Copilot</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/integrantes.css">
+</head>
+<body class="page-integrantes">
+    
+    <header>
+        <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-principal">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="main-menu" id="menu-principal" aria-label="Menu principal">
+            <a href="../index.html">INÍCIO</a>
+            <a href="sobre.html">SOBRE</a>
+            <a href="solucao.html">SOLUÇÃO</a>
+            <a href="experiencia.html">EXPERIÊNCIA</a>
+            <a href="integrantes.html" class="active">EQUIPE</a>
+            <a href="contato.html">CONTATO</a>
+            <a href="faq.html">FAQ</a>
+        </nav>
+        <a href="../index.html#stage-plantacao" class="login-corner">ABRIR COPILOT</a>
+    </header>
+
+    <main>
+        <section class="integrantes" aria-labelledby="titulo-integrantes">
+            
+            <canvas id="blackHoleCanvas" aria-hidden="true"></canvas>
+
+            <div class="integrantes__texto">
+                <h1 id="titulo-integrantes">A Equipe</h1>
+                <p>Clique em uma imagem do carrossel orbital para visualizar as informações do tripulante.</p>
+            </div>
+
+            <div class="slide" aria-label="Carrossel de integrantes">
+                <button class="item item--1" type="button" data-nome="Diogo Guilherme"
+                    data-cargo="Front-End Design Engineering" data-rm="573301" data-turma="1TDSPF"
+                    data-github="https://github.com/DioohReis" data-linkedin="https://www.linkedin.com/in/diogo-guilherme-de-assis-reis-95b11624b/"
+                    data-descricao="Diogo é responsável pelo desenvolvimento da interface do projeto, garantindo uma experiência responsiva e imersiva no Copilot."
+                    data-imagem="../assets/DiogoRM573301.jpg">
+                    <img src="../assets/DiogoRM573301.jpg" alt="Diogo Guilherme">
+                </button>
+
+                <button class="item item--2" type="button" data-nome="Gabriel Ricardo"
+                    data-cargo="Software Engineering" data-rm="573302" data-turma="1TDSPF"
+                    data-github="https://github.com/gabriel-ricardo-ADS" data-linkedin="https://www.linkedin.com/in/gabriel-ricardo-lima/"
+                    data-descricao="Gabriel é responsável pela engenharia de software e estruturação do negócio, focado no setor do agronegócio."
+                    data-imagem="../assets/Gabriel_Ricardo-01.jpeg">
+                    <img src="../assets/Gabriel_Ricardo-01.jpeg" alt="Gabriel Ricardo">
+                </button>
+
+                <button class="item item--3" type="button" data-nome="Matheus Rodrigues"
+                    data-cargo="Relational Database" data-rm="570469" data-turma="1TDSPF"
+                    data-github="https://github.com/MatheusRodriguesSerrao" data-linkedin="https://www.linkedin.com/in/matheus-rodrigues-06060a3a6/"
+                    data-descricao="Matheus projeta a arquitetura relacional que sustenta o registro das lavouras e garante a eficiência do banco de dados."
+                    data-imagem="../assets/Matheus_Rodrigues.jpeg">
+                    <img src="../assets/Matheus_Rodrigues.jpeg" alt="Matheus Rodrigues">
+                </button>
+
+                <button class="item item--4" type="button" data-nome="Luiz Henrique Alves"
+                    data-cargo="Computational Thinking" data-rm="572727" data-turma="1TDSPF"
+                    data-github="https://github.com/LuizHenriqueAAlbarello" data-linkedin="https://www.linkedin.com/in/luiz-henrique-alves-albarello-82297b410/?skipRedirect=true"
+                    data-descricao="Luiz é responsável pelo processamento de dados e desenvolvimento de algoritmos analíticos usando Python."
+                    data-imagem="../assets/LuizHenrique572727.jpeg">
+                    <img src="../assets/LuizHenrique572727.jpeg" alt="Luiz Henrique Alves">
+                </button>
+
+                <button class="item item--5" type="button" data-nome="Gabriel Razo"
+                    data-cargo="AI & Chatbot" data-rm="572244" data-turma="1TDSPF"
+                    data-github="https://github.com/gabrielrazod9j-ops" data-linkedin="https://www.linkedin.com/in/gabriel-razo-dantas-34724b301"
+                    data-descricao="Razo é responsável pelos fluxos conversacionais do Chatbot e integração da Inteligência Artificial."
+                    data-imagem="../assets/razo.01.jpeg">
+                    <img src="../assets/razo.01.jpeg" alt="Razo">
+                </button>
+            </div>
+        </section>
+
+        <section class="integrante-detalhes" id="integrante-detalhes" aria-live="polite">
+            <div class="integrante-detalhes__card">
+                <img id="detalhe-imagem" src="../assets/DiogoRM573301.jpg" alt="Foto">
+
+                <div class="integrante-detalhes__conteudo">
+                    <span class="integrante-detalhes__tag">Tripulação OrbitAgro</span>
+                    <h2 id="detalhe-nome">Clique em um integrante</h2>
+                    <p class="integrante-detalhes__turma" id="detalhe-turma">Turma: --</p>
+                    <p class="integrante-detalhes__cargo" id="detalhe-cargo">Aguardando dados...</p>
+                    <p class="integrante-detalhes__rm" id="detalhe-rm">RM: --</p>
+                    <p id="detalhe-descricao"></p>
+                    <div id="detalhe-links" class="social-links"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/menu.js"></script>
+    <script src="../js/integrantes.js"></script>
+</body>
+</html>
