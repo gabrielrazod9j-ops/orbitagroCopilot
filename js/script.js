@@ -404,8 +404,8 @@ fetchWeatherTelemetrics(-23.55, -46.63);
 // ==========================================
 
 const SENTINEL_CONFIG = {
-    clientId: 'a4eb4d97-3d8e-4c7c-a571-7d44816fbc3d',
-    clientSecret: 'Bt1GEagIaKmGDR8d3yAP0RoUpWmVNflp'
+    clientId: 
+    clientSecret: 
 };
 
 
