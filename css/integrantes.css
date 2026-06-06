@@ -1,6 +1,21 @@
 /* =========================================================
    Página Integrantes — CSS OrbitAgro (Corte 3D Erradicado)
    ========================================================= */
+.orbit-header, 
+header {
+    position: relative !important;
+    z-index: 99999 !important; /* Força a ficar acima de tudo */
+    pointer-events: auto !important; /* Obriga o navegador a aceitar os cliques */
+}
+
+.desktop-nav {
+    position: relative;
+    z-index: 99999 !important;
+}
+
+.desktop-nav a {
+    pointer-events: auto !important;
+}
 
 html {
     overflow-x: hidden;
