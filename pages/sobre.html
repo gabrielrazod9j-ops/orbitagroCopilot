@@ -6,40 +6,41 @@
     <title>Sobre | OrbitAgro Copilot</title>
     <link rel="stylesheet" href="../css/style.css" />
 </head>
-<body>
-    <header class="site-header" aria-label="Sobre">
-    <div class="header-inner">
-      <a class="brand-logo" href="../index.html" aria-label="OrbitAgro Copilot - Página de Sobre">
-        <span>orbitagro</span><span>copilot</span>
-      </a>
+<body style="background:#050505;">
+  <div class="hud-element hud-top-left" aria-hidden="true">ORBIT.SYS // V.2.4.1_BETA</div>
+  <div class="hud-element hud-bottom-right" id="hud-location" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
+  <div class="hud-element hud-vertical" aria-hidden="true">DATA_STREAM_SYNC</div>
 
-      <nav class="desktop-nav" aria-label="Navegação principal">
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="site-title">
+        <a class="brand-logo" href="../index.html" aria-label="OrbitAgro Copilot Home">
+          <span>orbitagro</span><span>copilot</span>
+        </a>
+      </h1>
+      <nav class="desktop-nav" aria-label="Navegação Principal">
         <a href="../index.html">Home</a>
-        <a href="sobre.html" class="active">Sobre</a>
-        <a href="solucao.html">Solução</a>
-        <a href="experiencia.html">Experiência</a>
-        <a href="integrantes.html">Integrantes</a>
+        <a href="sobre.html">Sobre</a>
+        <a href="#stage-plantacao">Solução</a>
         <a href="faq.html">FAQ</a>
         <a href="contato.html">Contato</a>
-        <a href="login.html">Login</a>
+        <a href="integrantes.html" class="highlighted-link">Equipe</a>
       </nav>
-
-      <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+      <button class="menu-toggle" type="button" aria-label="Abrir menu mobile" aria-expanded="false" aria-controls="mobileMenu">
         <span></span><span></span><span></span>
       </button>
     </div>
   </header>
 
-  <nav class="mobile-menu" id="mobileMenu" aria-label="Menu mobile">
+  <nav class="mobile-menu" id="mobileMenu" aria-label="Navegação Mobile">
     <a href="../index.html">Home</a>
-    <a href="sobre.html" class="active">Sobre</a>
-    <a href="solucao.html">Solução</a>
-    <a href="experiencia.html">Experiência</a>
-    <a href="integrantes.html">Integrantes</a>
+    <a href="sobre.html">Sobre</a>
+    <a href="#stage-plantacao">Solução</a>
     <a href="faq.html">FAQ</a>
     <a href="contato.html">Contato</a>
-    <a href="login.html">Login</a>
+    <a href="integrantes.html" class="highlighted-link-mobile">Equipe</a>
   </nav>
+
   <canvas id="particleCanvas" aria-hidden="true"></canvas>
   <main class="journey-container">
     <!--Apresentação do projeto-->
@@ -102,6 +103,6 @@
 
   </main>
   <!--conectando a pagina HTML com o arquivo javascript-->
-   <script src="../js/script.js"></script>
+  <script src="../js/script.js"></script>
 </body>
 </html> 
