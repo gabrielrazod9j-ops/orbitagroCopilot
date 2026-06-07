@@ -65,359 +65,401 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =======================================================
-    // 2. MOTOR WEBGL (Mesma Lógica da Home, Foco Orbital)
+    // 2. MOTOR WEBGL — Proto E (Gargantua Final, 60fps)
+    //    Partículas claras (photon sphere + disco interno) = ESTÁTICAS
+    //    Partículas externas/halo = DINÂMICAS (mouse trail completo)
     // =======================================================
     const canvas = document.getElementById('blackHoleCanvas');
-    const gl = canvas ? canvas.getContext('webgl', { alpha: true, antialias: false, depth: false }) : null;
+    const gl = canvas ? canvas.getContext('webgl', {
+        alpha: true, antialias: false, depth: false,
+        premultipliedAlpha: false, preserveDrawingBuffer: false
+    }) : null;
 
-    if (gl) {
-        // As mesmas constantes físicas da Home para o comportamento do rato
-        const config = {
-            maxDesktop: 50000, maxMobile: 22000,
-            pointDesktop: 2.5, pointMobile: 2.9,
-            returnForce: 0.02, friction: 0.95,
-            maxSpeed: 0.07,
-            mouseFollowRadius: 180, mouseFollow: 0.0006,
-            pathFollow: 0.007, pathEdgePull: 0.008,
-            pathTube: 150, flow: 0.0015
-        };
+    if (!gl) return;
 
-        const state = {
-            width: 1, height: 1, dpr: 1, mobile: false, count: 0,
-            positions: null, velocities: null, angles: null, radii: null, speeds: null, alphas: null, colors: null, seeds: null,
-            trail: [], pointer: { active: false, px: 0, py: 0, lastX: 0, lastY: 0, lastTime: 0 }
-        };
+    // Dimensões lógicas fixas — correspondem ao CSS do canvas (1400×900)
+    const CW = 1400, CH = 900;
 
-        const clamp = (v, min, max) => Math.max(min, Math.min(max, v)); 
-        const pxToClipX = px => (px / state.width) * 2 - 1; 
-        const pxToClipY = py => 1 - (py / state.height) * 2; 
-        const clipToPxX = x => (x + 1) * 0.5 * state.width; 
-        const clipToPxY = y => (1 - y) * 0.5 * state.height;
+    const C = {
+        countD: 42000, countM: 16000,
+        ptD: 2.6,      ptM: 3.0,
+        INCLINE:     0.28,
+        EH:          0.18,
+        PS_END:      0.28,
+        ID_END:      0.68,
+        BEAM_BRIGHT: 3.4,
+        BEAM_DIM:    0.16,
+        returnIdle:   0.028,
+        returnActive: 0.0022,
+        friction:     0.954,
+        maxSpeed:     0.065,
+        noise:        0.00012,
+        mouseFollowR: 195,
+        mouseFollow:  0.00052,
+        pathTube:     178,
+        pathEdge:     62,
+        pathFollow:   0.0065,
+        pathTargetPull: 0.034,
+        pathEdgePull: 0.0082,
+        pathOrbit:    0.0023,
+        flow:         0.00168,
+        headPush:     0.0046,
+        settleDelay:  190,
+        releaseDelay: 520,
+    };
 
-        // SHADERS — mesma qualidade visual da home page
-        const vertexSource = `
-            attribute vec3 aPosition;
-            attribute float aAlpha;
-            attribute vec3 aColor;
-            attribute float aSeed;
-            uniform float uPointSize;
-            uniform float uDpr;
-            varying float vAlpha;
-            varying vec3 vColor;
-            varying float vSeed;
-            void main() {
-                vAlpha = aAlpha;
-                vColor = aColor;
-                vSeed  = aSeed;
-                gl_Position = vec4(aPosition, 1.0);
-                float depth = 1.0 + aPosition.z * 0.22;
-                gl_PointSize = uPointSize * uDpr * depth * 1.2;
-            }
-        `;
+    const S = {
+        mob: false, dpr: 1, count: 0,
+        pos: null, vel: null, alp: null, seeds: null, col: null,
+        ang: null, rad: null, spd: null, dyn: null,
+        trail: [],
+        ptr: { px: 0, py: 0, lastX: 0, lastY: 0, lastT: 0 },
+        lastMove: -9999,
+    };
 
-        const fragmentSource = `
-            precision highp float;
-            varying float vAlpha;
-            varying vec3 vColor;
-            varying float vSeed;
-            void main() {
-                vec2 uv = gl_PointCoord - 0.5;
-                float d = length(uv);
-                float dotMask = smoothstep(0.48, 0.075, d);
-                float core    = smoothstep(0.18,  0.0,   d) * 0.22;
-                float rim     = smoothstep(0.50,  0.26,  d) * 0.16;
-                float shimmer = 1.0 + sin(vSeed * 44.0) * 0.22;
-                float alpha   = (dotMask + core + rim) * vAlpha * shimmer;
-                gl_FragColor  = vec4(vColor, alpha);
-            }
-        `;
+    const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+    const cx2px = x  => (x  + 1) * 0.5 * CW;
+    const cy2py = y  => (1  - y)  * 0.5 * CH;
+    const px2cx = px => (px / CW) * 2 - 1;
+    const px2cy = py => 1 - (py / CH) * 2;
 
-        function createShader(type, source) { 
-            const shader = gl.createShader(type); 
-            gl.shaderSource(shader, source); 
-            gl.compileShader(shader); 
-            return shader; 
+    // Shaders — qualidade idêntica à home
+    const VERT = `
+        attribute vec3  aPosition;
+        attribute float aAlpha;
+        attribute float aSeed;
+        attribute vec3  aColor;
+        uniform float   uPointSize;
+        uniform float   uDpr;
+        varying float   vAlpha;
+        varying float   vSeed;
+        varying vec3    vColor;
+        void main() {
+            vAlpha = aAlpha; vSeed = aSeed; vColor = aColor;
+            gl_Position = vec4(aPosition, 1.0);
+            float depth      = 1.0 + aPosition.z * 0.22;
+            float outerBoost = 1.0 + max(0.0, length(aPosition.xy) - 0.45) * 0.48;
+            gl_PointSize = uPointSize * uDpr * depth * 1.25 * outerBoost;
         }
-
-        const program = gl.createProgram(); 
-        gl.attachShader(program, createShader(gl.VERTEX_SHADER, vertexSource)); 
-        gl.attachShader(program, createShader(gl.FRAGMENT_SHADER, fragmentSource)); 
-        gl.linkProgram(program);
-
-        const locations = {
-            position:  gl.getAttribLocation(program,  'aPosition'),
-            alpha:     gl.getAttribLocation(program,  'aAlpha'),
-            color:     gl.getAttribLocation(program,  'aColor'),
-            seed:      gl.getAttribLocation(program,  'aSeed'),
-            pointSize: gl.getUniformLocation(program, 'uPointSize'),
-            dpr:       gl.getUniformLocation(program, 'uDpr')
-        };
-
-        const bufs = { pos: gl.createBuffer(), alpha: gl.createBuffer(), color: gl.createBuffer(), seed: gl.createBuffer() };
-
-        // CONSTRUÇÃO REALISTA DO BURACO NEGRO (física de disco de acreção)
-        function buildParticles() {
-            state.mobile = window.innerWidth < 720;
-            state.width  = canvas.parentElement.offsetWidth  || window.innerWidth;
-            state.height = canvas.parentElement.offsetHeight || window.innerHeight;
-
-            const count = state.mobile ? config.maxMobile : config.maxDesktop;
-            state.count = count;
-
-            state.positions  = new Float32Array(count * 3);
-            state.velocities = new Float32Array(count * 3);
-            state.colors     = new Float32Array(count * 3);
-            state.alphas     = new Float32Array(count);
-            state.seeds      = new Float32Array(count);
-            state.angles     = new Float32Array(count);
-            state.radii      = new Float32Array(count);
-            state.speeds     = new Float32Array(count);
-
-            const aspect  = state.width / state.height;
-            const INCLINE = 0.26;   // Inclinação do disco
-            const EH      = 0.20;   // Event Horizon — vazio abaixo disso
-            const PS_END  = 0.30;   // Photon Sphere
-            const ID_END  = 0.70;   // Disco interno
-            // Beaming factor: gravitational + relativistic beaming
-            // Lado esquerdo (sin>0) se aproxima → fótons doppler-boosted → visualmente muito mais brilhante
-            const BEAM_BRIGHT = 1.85;  // factor multiplicador no lado que se aproxima
-            const BEAM_DIM    = 0.30;  // factor multiplicador no lado que se afasta
-
-            for (let i = 0; i < count; i++) {
-                const o     = i * 3;
-                const angle = Math.random() * Math.PI * 2;
-                state.angles[i] = angle;
-
-                let r, cr, cg, cb, alpha;
-                const zone = Math.random();
-
-                if (zone < 0.30) {
-                    // PHOTON SPHERE — 30% — anel ultra-brilhante branco-azulado
-                    // r concentrado próximo do event horizon (pow 1.2 → mais partículas perto de EH)
-                    r = EH + (PS_END - EH) * Math.pow(Math.random(), 1.2);
-                    const heat = 1.0 - (r - EH) / (PS_END - EH);
-                    cr = 0.80 + heat * 0.20;
-                    cg = 0.86 + heat * 0.14;
-                    cb = 1.0;
-                    alpha = 0.50 + heat * 0.50;
-
-                } else if (zone < 0.62) {
-                    // DISCO INTERNO — 32% — branco-quente → laranja
-                    r = PS_END + Math.pow(Math.random(), 1.6) * (ID_END - PS_END);
-                    const t = (r - PS_END) / (ID_END - PS_END);
-                    cr = 1.0;
-                    cg = Math.max(0.10, 0.98 - t * 0.82);
-                    cb = Math.max(0.0,  0.30 - t * 0.28);
-                    alpha = (0.65 - t * 0.22) * (0.55 + Math.random() * 0.45);
-
-                } else if (zone < 0.88) {
-                    // DISCO EXTERNO — 26% — laranja-vermelho, esfriando
-                    r = ID_END + Math.pow(Math.random(), 1.1) * 0.95;
-                    const t = (r - ID_END) / 0.95;
-                    cr = Math.max(0.20, 0.88 - t * 0.55);
-                    cg = Math.max(0.0,  0.14 - t * 0.12);
-                    cb = 0.02;
-                    alpha = (0.24 - t * 0.20) * (0.35 + Math.random() * 0.65);
-
-                } else {
-                    // HALO — 12% — partículas capturadas na periferia
-                    r = 1.65 + Math.pow(Math.random(), 0.50) * 0.75;
-                    cr = 0.55; cg = 0.08; cb = 0.02;
-                    alpha = 0.02 + Math.random() * 0.06;
-                }
-
-                state.radii[i]  = r;
-                state.seeds[i]  = Math.random();
-                state.speeds[i] = (0.0019 / Math.sqrt(r)) * (0.74 + Math.random() * 0.52);
-
-                state.positions[o]   = (Math.cos(angle) * r) / aspect;
-                state.positions[o+1] = Math.sin(angle) * r * INCLINE;
-                // Espessura vertical mínima do disco — simula espessura física real
-                state.positions[o+2] = (Math.random() - 0.5) * 0.04;
-
-                // EFEITO DOPPLER + BEAMING RELATIVÍSTICO:
-                // sin(angle) > 0 → lado esquerdo se aproxima → blueshift + brightening extremo
-                // sin(angle) < 0 → lado direito se afasta  → redshift + dimming extremo
-                const doppler = Math.sin(angle);
-
-                // Fator de beaming: mapeia [-1,1] para [BEAM_DIM, BEAM_BRIGHT]
-                const beamFactor = doppler > 0
-                    ? 1.0 + (BEAM_BRIGHT - 1.0) * doppler
-                    : 1.0 - (1.0 - BEAM_DIM)   * (-doppler);
-
-                // Blueshift: lado que se aproxima fica mais azul e mais brilhante
-                const blueShift = Math.max(0, doppler) * 0.50;
-
-                state.colors[o]   = clamp(cr * (1.0 - blueShift * 0.15) * beamFactor, 0, 1);
-                state.colors[o+1] = clamp(cg * (1.0 + blueShift * 0.10) * beamFactor, 0, 1);
-                state.colors[o+2] = clamp((cb + blueShift * 0.55)       * beamFactor, 0, 1);
-                state.alphas[i]   = clamp(alpha * beamFactor, 0.005, 1.0);
-            }
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alpha); gl.bufferData(gl.ARRAY_BUFFER, state.alphas, gl.STATIC_DRAW);
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.color); gl.bufferData(gl.ARRAY_BUFFER, state.colors, gl.STATIC_DRAW);
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.seed);  gl.bufferData(gl.ARRAY_BUFFER, state.seeds,  gl.STATIC_DRAW);
+    `;
+    const FRAG = `
+        precision highp float;
+        varying float vAlpha; varying float vSeed; varying vec3 vColor;
+        void main() {
+            vec2  uv      = gl_PointCoord - 0.5;
+            float d       = length(uv);
+            float dotMask = smoothstep(0.48, 0.075, d);
+            float core    = smoothstep(0.18, 0.0, d) * 0.22;
+            float rim     = smoothstep(0.50, 0.26, d) * 0.16;
+            float shimmer = 1.0 + sin(vSeed * 44.0) * 0.22;
+            float alpha   = (dotMask + core + rim) * vAlpha * shimmer;
+            gl_FragColor  = vec4(vColor, alpha);
         }
+    `;
 
-        // LÓGICA DO RASTRO DO RATO (Exatamente a mesma física da Home)
-        function sampleTrail(px, py) { 
-            let best = null; let bestScore = 0; 
-            if (state.trail.length < 2) return null; 
-            for (let i = 1; i < state.trail.length; i++) { 
-                const a = state.trail[i - 1]; const b = state.trail[i]; 
-                const abx = b.x - a.x; const aby = b.y - a.y; const len2 = abx * abx + aby * aby || 1; 
-                const u = clamp(((px - a.x) * abx + (py - a.y) * aby) / len2, 0, 1); 
-                const cx = a.x + abx * u; const cy = a.y + aby * u; 
-                const dx = px - cx; const dy = py - cy; const d2 = dx * dx + dy * dy; 
-                const trailAge = (state.trail.length - i) / Math.max(1, state.trail.length); 
-                const r = config.pathTube * (1.08 - trailAge * 0.4); 
-
-                if (d2 < r * r) { 
-                    const d = Math.sqrt(d2) || 1; const len = Math.sqrt(len2) || 1; 
-                    const score = Math.pow(1.0 - d / r, 1.25) * ((a.life * (1.0 - u) + b.life * u) * (1.0 - trailAge * 0.2)); 
-                    if (score > bestScore) { 
-                        bestScore = score; 
-                        best = { 
-                            x: cx, y: cy, d, tx: abx/len, ty: aby/len, 
-                            nx: d > 1 ? dx/d : -aby/len, ny: d > 1 ? dy/d : abx/len, 
-                            vx: a.vx*(1-u) + b.vx*u, vy: a.vy*(1-u) + b.vy*u, 
-                            score, head: i > state.trail.length - 5 
-                        }; 
-                    } 
-                } 
-            } 
-            return best; 
-        }
-
-        function pushPointer(x, y) { 
-            const now = performance.now(); const dt = Math.max(16, now - (state.pointer.lastTime || now)); 
-            const vx = state.pointer.lastTime ? (x - state.pointer.lastX) / dt * 16.67 : 0; 
-            const vy = state.pointer.lastTime ? (y - state.pointer.lastY) / dt * 16.67 : 0; 
-            
-            state.pointer.active = true; state.pointer.px = x; state.pointer.py = y; 
-            state.pointer.lastX = x; state.pointer.lastY = y; state.pointer.lastTime = now; 
-
-            const prev = state.trail[state.trail.length - 1]; 
-            if (!prev || Math.hypot(x - prev.x, y - prev.y) > 2.8) { 
-                state.trail.push({ x, y, vx, vy, life: 1.0 }); 
-                while (state.trail.length > 128) state.trail.shift(); 
-            } 
-        }
-
-        window.addEventListener('mousemove', e => {
-            const rect = canvas.getBoundingClientRect();
-            pushPointer(e.clientX - rect.left, e.clientY - rect.top);
-        }, { passive: true });
-        
-        window.addEventListener('mouseleave', () => { state.pointer.active = false; state.trail.length = 0; }); 
-
-        // O MOTOR DE ATUALIZAÇÃO FÍSICA
-        function updatePhysics() { 
-            for (let t = state.trail.length - 1; t >= 0; t--) { 
-                state.trail[t].life *= 0.94; 
-                if (state.trail[t].life < 0.05) state.trail.splice(t, 1); 
-            } 
-
-            const invW = 2 / state.width; const invH = 2 / state.height; 
-            const aspect = state.width / state.height;
-
-            for (let i = 0; i < state.count; i++) { 
-                const o = i * 3; 
-                let x = state.positions[o], y = state.positions[o+1], z = state.positions[o+2]; 
-                let vx = state.velocities[o], vy = state.velocities[o+1], vz = state.velocities[o+2]; 
-                
-                // Órbita
-                state.angles[i] += state.speeds[i];
-                const hx = (Math.cos(state.angles[i]) * state.radii[i]) / aspect;
-                const hy = Math.sin(state.angles[i]) * state.radii[i] * 0.26;
-
-                vx += (hx - x) * config.returnForce; 
-                vy += (hy - y) * config.returnForce; 
-                vz += (0 - z) * config.returnForce; 
-
-                // Interação com o Mouse (Magia da Home Page)
-                if (state.trail.length) { 
-                    const px = clipToPxX(x), py = clipToPxY(y); 
-                    const mx = state.pointer.px, my = state.pointer.py; 
-                    const mdx = mx - px, mdy = my - py; 
-                    const md2 = mdx * mdx + mdy * mdy; 
-
-                    if (md2 < config.mouseFollowRadius * config.mouseFollowRadius) { 
-                        const md = Math.sqrt(md2) || 1.0; 
-                        const ms = Math.pow(1.0 - md / config.mouseFollowRadius, 1.45); 
-                        vx += (mdx / md) * config.mouseFollow * ms * invW * 260.0; 
-                        vy += -(mdy / md) * config.mouseFollow * ms * invH * 260.0; 
-                    } 
-
-                    const hit = sampleTrail(px, py); 
-                    if (hit) { 
-                        const s = hit.score; const gesture = Math.hypot(hit.vx, hit.vy); 
-                        let dirX = hit.tx, dirY = hit.ty; 
-                        if (gesture > 0.01 && dirX * hit.vx + dirY * hit.vy < 0.0) { dirX *= -1; dirY *= -1; } 
-
-                        const headBoost = hit.head ? 1.6 : 1.0; 
-                        vx += (dirX * invW) * config.pathFollow * s * 400.0; 
-                        vy += (-dirY * invH) * config.pathFollow * s * 400.0; 
-                        vx += (hit.nx * invW) * config.pathEdgePull * s * 550.0 * headBoost; 
-                        vy += (-hit.ny * invH) * config.pathEdgePull * s * 550.0 * headBoost; 
-                    } 
-                } 
-
-                vx *= config.friction; vy *= config.friction; vz *= 0.94; 
-                const speed = Math.hypot(vx, vy); 
-                if (speed > config.maxSpeed) { vx *= config.maxSpeed / speed; vy *= config.maxSpeed / speed; } 
-
-                x += vx; y += vy; z = clamp(z + vz, -0.4, 0.4); 
-
-                state.positions[o] = x; state.positions[o+1] = y; state.positions[o+2] = z; 
-                state.velocities[o] = vx; state.velocities[o+1] = vy; state.velocities[o+2] = vz; 
-            } 
-        }
-
-        function render() { 
-            if (!state.positions || !state.count) { requestAnimationFrame(render); return; } 
-            updatePhysics(); 
-
-            gl.viewport(0, 0, canvas.width, canvas.height); 
-            // Fundo totalmente transparente para que a cor azul do CSS se veja
-            gl.clearColor(0, 0, 0, 0); 
-            gl.clear(gl.COLOR_BUFFER_BIT); 
-            
-            gl.useProgram(program); 
-            gl.enable(gl.BLEND); 
-            gl.blendFunc(gl.SRC_ALPHA, gl.ONE); 
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.pos); gl.bufferData(gl.ARRAY_BUFFER, state.positions, gl.DYNAMIC_DRAW); 
-            gl.enableVertexAttribArray(locations.position); gl.vertexAttribPointer(locations.position, 3, gl.FLOAT, false, 0, 0); 
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alpha); gl.enableVertexAttribArray(locations.alpha); gl.vertexAttribPointer(locations.alpha, 1, gl.FLOAT, false, 0, 0);
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.color); gl.enableVertexAttribArray(locations.color); gl.vertexAttribPointer(locations.color, 3, gl.FLOAT, false, 0, 0);
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.seed);  gl.enableVertexAttribArray(locations.seed);  gl.vertexAttribPointer(locations.seed,  1, gl.FLOAT, false, 0, 0);
-
-            gl.uniform1f(locations.pointSize, state.mobile ? config.pointMobile : config.pointDesktop);
-            gl.uniform1f(locations.dpr, state.dpr);
-
-            gl.drawArrays(gl.POINTS, 0, state.count);
-            requestAnimationFrame(render); 
-        }
-
-        function resize() { 
-            state.width = canvas.parentElement.offsetWidth || 1400; 
-            state.height = canvas.parentElement.offsetHeight || 900; 
-            state.mobile = window.innerWidth < 720; 
-            state.dpr = Math.min(window.devicePixelRatio || 1, state.mobile ? 1.4 : 1.6); 
-            
-            canvas.width = Math.floor(state.width * state.dpr); 
-            canvas.height = Math.floor(state.height * state.dpr); 
-            
-            buildParticles(); 
-        }
-
-        let resizeTimer = 0; 
-        window.addEventListener('resize', () => { 
-            clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); 
-        }); 
-
-        resize(); requestAnimationFrame(render); 
+    function mkShader(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src); gl.compileShader(s); return s;
     }
+    const prog = gl.createProgram();
+    gl.attachShader(prog, mkShader(gl.VERTEX_SHADER,   VERT));
+    gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const loc = {
+        pos:  gl.getAttribLocation(prog,  'aPosition'),
+        alp:  gl.getAttribLocation(prog,  'aAlpha'),
+        seed: gl.getAttribLocation(prog,  'aSeed'),
+        col:  gl.getAttribLocation(prog,  'aColor'),
+        ps:   gl.getUniformLocation(prog, 'uPointSize'),
+        dpr:  gl.getUniformLocation(prog, 'uDpr'),
+    };
+    const bufs = {
+        pos:  gl.createBuffer(), alp:  gl.createBuffer(),
+        seed: gl.createBuffer(), col:  gl.createBuffer(),
+    };
+
+    function buildParticles() {
+        S.mob   = window.innerWidth < 720;
+        S.dpr   = Math.min(window.devicePixelRatio || 1, S.mob ? 1.4 : 1.7);
+        canvas.width  = Math.round(CW * S.dpr);
+        canvas.height = Math.round(CH * S.dpr);
+        S.count = S.mob ? C.countM : C.countD;
+
+        S.pos   = new Float32Array(S.count * 3);
+        S.vel   = new Float32Array(S.count * 3);
+        S.alp   = new Float32Array(S.count);
+        S.seeds = new Float32Array(S.count);
+        S.col   = new Float32Array(S.count * 3);
+        S.ang   = new Float32Array(S.count);
+        S.rad   = new Float32Array(S.count);
+        S.spd   = new Float32Array(S.count);
+        S.dyn   = new Uint8Array(S.count);  // 0=estático, 1=dinâmico
+
+        const aspect = CW / CH;
+        const { EH, PS_END, ID_END, INCLINE, BEAM_BRIGHT, BEAM_DIM } = C;
+        const rand = Math.random.bind(Math);
+
+        for (let i = 0; i < S.count; i++) {
+            const o    = i * 3;
+            const zone = rand();
+            S.seeds[i] = rand();
+            const angle = rand() * Math.PI * 2;
+            S.ang[i] = angle;
+
+            let r, cr, cg, cb, alpha;
+
+            if (zone < 0.28) {
+                // Photon sphere — estática, branca-amarelada
+                r = EH + (PS_END - EH) * Math.pow(rand(), 1.6);
+                const heat = 1.0 - (r - EH) / (PS_END - EH);
+                cr = 0.96 + heat * 0.04; cg = 0.88 + heat * 0.10; cb = 0.65 + heat * 0.14;
+                alpha = 0.62 + heat * 0.38;
+                S.dyn[i] = 0;
+
+            } else if (zone < 0.52) {
+                // Disco interno — estático, branco-quente → laranja-dourado
+                r  = PS_END + Math.pow(rand(), 1.4) * (ID_END - PS_END);
+                const t = (r - PS_END) / (ID_END - PS_END);
+                cr = 1.0; cg = Math.max(0.10, 0.98 - t * 0.80); cb = Math.max(0.00, 0.28 - t * 0.26);
+                alpha = (0.70 - t * 0.24) * (0.55 + rand() * 0.45);
+                S.dyn[i] = 0;
+
+            } else if (zone < 0.76) {
+                // Disco externo — dinâmico, VIOLETA-ROXO
+                r  = ID_END + Math.pow(rand(), 0.85) * 1.25;
+                const t = (r - ID_END) / 1.25;
+                cr = Math.max(0.10, 0.62 - t * 0.40);
+                cg = Math.max(0.00, 0.04 - t * 0.03);
+                cb = Math.max(0.20, 0.88 - t * 0.45);
+                alpha = (0.32 - t * 0.26) * (0.42 + rand() * 0.58);
+                S.dyn[i] = 1;
+
+            } else {
+                // Halo — dinâmico, ROXO PROFUNDO, mais espalhado
+                r  = 1.55 + Math.pow(rand(), 0.38) * 1.20;
+                cr = 0.30; cg = 0.00; cb = 0.80;
+                alpha = 0.018 + rand() * 0.065;
+                S.dyn[i] = 1;
+            }
+
+            S.rad[i] = r;
+            S.spd[i] = (0.0019 / Math.sqrt(r)) * (0.74 + rand() * 0.52);
+
+            const zJitter = zone < 0.28 ? 0.025 : zone < 0.52 ? 0.05 : 0.14;
+            S.pos[o]   = (Math.cos(angle) * r) / aspect;
+            S.pos[o+1] = Math.sin(angle) * r * INCLINE;
+            S.pos[o+2] = (rand() - 0.5) * zJitter;
+
+            const doppler = Math.sin(angle);
+            const beam    = doppler > 0
+                ? 1.0 + (BEAM_BRIGHT - 1.0) * doppler
+                : 1.0 - (1.0 - BEAM_DIM) * (-doppler);
+            const blue    = Math.max(0, doppler) * 0.45;
+
+            S.col[o]   = clamp(cr * (1.0 - blue * 0.12) * beam, 0, 1);
+            S.col[o+1] = clamp(cg * (1.0 + blue * 0.08) * beam, 0, 1);
+            S.col[o+2] = clamp((cb + blue * 0.52) * beam, 0, 1);
+            S.alp[i]   = clamp(alpha * beam, 0.004, 1.0);
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alp);
+        gl.bufferData(gl.ARRAY_BUFFER, S.alp,   gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufs.seed);
+        gl.bufferData(gl.ARRAY_BUFFER, S.seeds, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufs.col);
+        gl.bufferData(gl.ARRAY_BUFFER, S.col,   gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufs.pos);
+        gl.bufferData(gl.ARRAY_BUFFER, S.pos,   gl.DYNAMIC_DRAW);
+    }
+
+    // Trail — reutiliza objeto para evitar alocação por frame
+    const _hit = { x:0, y:0, d:0, tx:0, ty:0, nx:0, ny:0, vx:0, vy:0, score:0, head:false };
+    let _hitValid = false;
+
+    function sampleTrail(px, py) {
+        _hitValid = false;
+        if (S.trail.length < 2) return;
+        let bestScore = 0;
+        const R = C.pathTube;
+        for (let i = 1; i < S.trail.length; i++) {
+            const a = S.trail[i-1], b = S.trail[i];
+            const abx = b.x-a.x, aby = b.y-a.y;
+            const len2 = abx*abx + aby*aby || 1;
+            const u = clamp(((px-a.x)*abx + (py-a.y)*aby) / len2, 0, 1);
+            const cx = a.x+abx*u, cy = a.y+aby*u;
+            const dx = px-cx, dy = py-cy, d2 = dx*dx+dy*dy;
+            const age = (S.trail.length-i) / Math.max(1, S.trail.length);
+            const r = R * (1.08 - age * 0.42);
+            if (d2 < r*r) {
+                const d = Math.sqrt(d2)||1, len = Math.sqrt(len2)||1;
+                const sc = Math.pow(1-d/r, 1.25) * (a.life*(1-u)+b.life*u) * (1-age*0.18);
+                if (sc > bestScore) {
+                    bestScore = sc; _hitValid = true;
+                    _hit.x = cx; _hit.y = cy; _hit.d = d;
+                    _hit.tx = abx/len; _hit.ty = aby/len;
+                    _hit.nx = d > 1 ? dx/d : -aby/len;
+                    _hit.ny = d > 1 ? dy/d :  abx/len;
+                    _hit.vx = a.vx*(1-u)+b.vx*u;
+                    _hit.vy = a.vy*(1-u)+b.vy*u;
+                    _hit.score = sc;
+                    _hit.head  = i > S.trail.length - 5;
+                }
+            }
+        }
+    }
+
+    function pushPointer(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        // Converte coordenadas da janela para o espaço lógico do canvas (CW×CH)
+        const x = (clientX - rect.left) * (CW / (rect.width  || CW));
+        const y = (clientY - rect.top)  * (CH / (rect.height || CH));
+        const now = performance.now();
+        const dt  = Math.max(16, now - (S.ptr.lastT || now));
+        S.ptr.vx  = (x - S.ptr.lastX) / dt * 16.67;
+        S.ptr.vy  = (y - S.ptr.lastY) / dt * 16.67;
+        S.ptr.px = x; S.ptr.py = y;
+        S.ptr.lastX = x; S.ptr.lastY = y; S.ptr.lastT = now;
+        S.lastMove = now;
+        const prev = S.trail[S.trail.length - 1];
+        if (!prev || (x-prev.x)*(x-prev.x)+(y-prev.y)*(y-prev.y) > 7.8) {
+            S.trail.push({ x, y, vx: S.ptr.vx, vy: S.ptr.vy, life: 1.0 });
+            if (S.trail.length > 128) S.trail.shift();
+        }
+    }
+
+    function updatePhysics(now) {
+        const activating  = now - S.lastMove < C.settleDelay;
+        const recentlyMvd = now - S.lastMove < C.releaseDelay;
+        const rf  = recentlyMvd ? C.returnActive : C.returnIdle;
+        const inv2W = 2 / CW, inv2H = 2 / CH;
+        const asp   = CW / CH;
+        const { INCLINE, friction, maxSpeed, noise } = C;
+
+        for (let t = S.trail.length - 1; t >= 0; t--) {
+            S.trail[t].life *= activating ? 0.968 : 0.87;
+            if (S.trail[t].life < 0.025) S.trail.splice(t, 1);
+        }
+
+        for (let i = 0; i < S.count; i++) {
+            const o = i * 3;
+            let x = S.pos[o], y = S.pos[o+1], z = S.pos[o+2];
+            let vx = S.vel[o], vy = S.vel[o+1], vz = S.vel[o+2];
+
+            S.ang[i] += S.spd[i];
+            const r  = S.rad[i];
+            const hx = (Math.cos(S.ang[i]) * r) / asp;
+            const hy = Math.sin(S.ang[i]) * r * INCLINE;
+
+            if (S.dyn[i] === 0) {
+                // ESTÁTICAS — mola rígida, sem mouse, sem ruído
+                vx += (hx - x) * 0.058;
+                vy += (hy - y) * 0.058;
+                vz += (0  - z) * 0.040;
+                vx *= 0.88; vy *= 0.88; vz *= 0.80;
+
+            } else {
+                // DINÂMICAS — mola normal + trail completo
+                vx += (hx - x) * rf;
+                vy += (hy - y) * rf;
+                vz += (0  - z) * rf * 0.52;
+
+                if (activating && S.trail.length > 0) {
+                    const px = cx2px(x), py = cy2py(y);
+                    const mdx = S.ptr.px - px, mdy = S.ptr.py - py;
+                    const md2 = mdx*mdx + mdy*mdy;
+                    const mR  = C.mouseFollowR;
+                    if (md2 < mR*mR) {
+                        const md = Math.sqrt(md2) || 1;
+                        const ms = Math.pow(1 - md/mR, 1.45);
+                        vx += (mdx/md) * C.mouseFollow * ms * inv2W * 260;
+                        vy -= (mdy/md) * C.mouseFollow * ms * inv2H * 260;
+                    }
+                    sampleTrail(px, py);
+                    if (_hitValid) {
+                        const sc = _hit.score;
+                        const gesture = Math.hypot(_hit.vx, _hit.vy);
+                        let dirX = _hit.tx, dirY = _hit.ty;
+                        if (gesture > 0.01 && dirX*_hit.vx + dirY*_hit.vy < 0) { dirX=-dirX; dirY=-dirY; }
+                        const hb   = _hit.head ? 1.65 : 1.0;
+                        const side = S.seeds[i] > 0.5 ? 1 : -1;
+                        const dOff = C.pathEdge * side;
+                        const tpx  = _hit.x + _hit.nx * dOff;
+                        const tpy  = _hit.y + _hit.ny * dOff;
+                        vx += (px2cx(tpx) - x) * Math.min(0.066, C.pathTargetPull * sc * hb);
+                        vy += (px2cy(tpy) - y) * Math.min(0.066, C.pathTargetPull * sc * hb);
+                        vx += (_hit.tx  * inv2W) * C.pathFollow   * sc * 430;
+                        vy += (-_hit.ty * inv2H) * C.pathFollow   * sc * 430;
+                        const ef = clamp((dOff - _hit.d*side) / 70, -1, 1);
+                        vx += (_hit.nx  * inv2W) * C.pathEdgePull * ef * sc * 610 * hb;
+                        vy += (-_hit.ny * inv2H) * C.pathEdgePull * ef * sc * 610 * hb;
+                        vx += (-_hit.ty * inv2W) * C.pathOrbit    * sc * side * 165;
+                        vy += (-_hit.tx * inv2H) * C.pathOrbit    * sc * side * 165;
+                        vx += (_hit.tx  * inv2W) * C.flow         * sc * gesture * 1.45;
+                        vy += (-_hit.ty * inv2H) * C.flow         * sc * gesture * 1.45;
+                        vx += (_hit.nx  * inv2W) * C.headPush     * sc * (_hit.head ? 72 : 22);
+                        vy += (-_hit.ny * inv2H) * C.headPush     * sc * (_hit.head ? 72 : 22);
+                        vz += Math.sin(S.seeds[i] * 100) * 0.003 * sc;
+                    }
+                }
+                vx += Math.sin(now * 0.0011 + S.seeds[i] * 78) * noise;
+                vy += Math.cos(now * 0.0009 + S.seeds[i] * 43) * noise;
+                vx *= friction; vy *= friction; vz *= 0.934;
+            }
+
+            const sp = vx*vx + vy*vy;
+            if (sp > maxSpeed*maxSpeed) {
+                const inv = maxSpeed / Math.sqrt(sp);
+                vx *= inv; vy *= inv;
+            }
+            x += vx; y += vy; z = clamp(z + vz, -0.44, 0.44);
+            S.pos[o]=x; S.pos[o+1]=y; S.pos[o+2]=z;
+            S.vel[o]=vx; S.vel[o+1]=vy; S.vel[o+2]=vz;
+        }
+    }
+
+    function render(now) {
+        updatePhysics(now);
+
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufs.pos);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, S.pos);   // bufferSubData = sem GC
+        gl.enableVertexAttribArray(loc.pos);
+        gl.vertexAttribPointer(loc.pos, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alp);
+        gl.enableVertexAttribArray(loc.alp);
+        gl.vertexAttribPointer(loc.alp, 1, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufs.seed);
+        gl.enableVertexAttribArray(loc.seed);
+        gl.vertexAttribPointer(loc.seed, 1, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, bufs.col);
+        gl.enableVertexAttribArray(loc.col);
+        gl.vertexAttribPointer(loc.col, 3, gl.FLOAT, false, 0, 0);
+
+        gl.uniform1f(loc.ps,  S.mob ? C.ptM : C.ptD);
+        gl.uniform1f(loc.dpr, S.dpr);
+        gl.drawArrays(gl.POINTS, 0, S.count);
+        requestAnimationFrame(render);
+    }
+
+    window.addEventListener('mousemove',  e => pushPointer(e.clientX, e.clientY), { passive: true });
+    window.addEventListener('touchmove',  e => { if(e.touches[0]) pushPointer(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    function clearTrail() { S.ptr.lastT = 0; S.trail.length = 0; S.lastMove = -9999; }
+    window.addEventListener('mouseleave', clearTrail);
+    window.addEventListener('touchend',   clearTrail);
+
+    let rt = 0;
+    window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(buildParticles, 150); });
+
+    buildParticles();
+    requestAnimationFrame(render);
 });
