@@ -420,91 +420,92 @@ fetchWeatherTelemetrics(-23.55, -46.63);
 // ==========================================
 
 const SENTINEL_CONFIG = {
-    clientId: 'a4eb4d97-3d8e-4c7c-a571-7d44816fbc3d',
+    clientId:     'a4eb4d97-3d8e-4c7c-a571-7d44816fbc3d',
     clientSecret: 'Bt1GEagIaKmGDR8d3yAP0RoUpWmVNflp'
 };
 
-
+// O endpoint /oauth/token do Sentinel Hub bloqueia CORS em browser por design (OAuth client_credentials).
+// Roteamos APENAS o pedido de token por um proxy CORS público — o /api/v1/process já aceita browser diretamente.
+const CORS_PROXY = 'https://corsproxy.io/?';
 
 /**
  * Função responsável por chamar e desenhar os Mapas NDVI e NDMI
+ * via Sentinel-2 L2A (10 m de resolução)
  */
 async function buscarImagemSatelite(data) {
     const { lat, lon } = data;
-    
+
     // Referências do DOM - NDVI (Saúde)
     const imgNDVI = document.getElementById('img-satelite-real');
     const infoSolo = document.getElementById('res-solo-info');
     const infoNdvi = document.getElementById('res-ndvi');
     const hudLegendNDVI = document.getElementById('ndviLegend');
-    
+
     // Referências do DOM - NDMI (Umidade)
     const imgNDMI = document.getElementById('img-satelite-umidade');
     const infoLaudoNDMI = document.getElementById('res-ndmi-laudo');
     const hudLegendNDMI = document.getElementById('ndmiLegend');
-    
+
     // Reset da UI
     infoSolo.innerText = `Calibrando satélites para ${data.local}...`;
-    infoNdvi.innerText = "Processando bandas...";
-    infoLaudoNDMI.innerText = "Calculando absorção hídrica do terreno...";
-    
+    infoNdvi.innerText = 'Processando bandas Sentinel-2...';
+    infoLaudoNDMI.innerText = 'Calculando absorção hídrica do terreno...';
+
     imgNDVI.classList.remove('loaded');
     hudLegendNDVI.classList.remove('visible');
     imgNDMI.classList.remove('loaded');
     hudLegendNDMI.classList.remove('visible');
 
     try {
-        // --- 1. Autenticação na Agência Espacial Europeia ---
-        const tokenResponse = await fetch('https://services.sentinel-hub.com/oauth/token', {
+        // 1. Autenticação — token OAuth roteado por proxy CORS (o Process API aceita browser diretamente)
+        const tokenUrl = 'https://services.sentinel-hub.com/oauth/token';
+        const tokenResponse = await fetch(CORS_PROXY + encodeURIComponent(tokenUrl), {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `grant_type=client_credentials&client_id=${SENTINEL_CONFIG.clientId}&client_secret=${SENTINEL_CONFIG.clientSecret}`
         });
-        
-        if (!tokenResponse.ok) throw new Error("Erro nas Credenciais de Acesso ou CORS Bloqueado.");
-        
-        const tokenData = await tokenResponse.json();
-        if (!tokenData.access_token) return;
 
-        // Configuração de Tempo (Janela de 3 meses para filtrar nuvens) e Bounding Box
+        if (!tokenResponse.ok) throw new Error('Falha na autenticação Sentinel Hub.');
+
+        const tokenData = await tokenResponse.json();
+        if (!tokenData.access_token) throw new Error('Token inválido.');
+
+        // Janela de 3 meses (filtra nuvens) e bounding box
         const toDate = new Date();
         const fromDate = new Date();
         fromDate.setMonth(toDate.getMonth() - 3);
         const bbox = [lon - 0.03, lat - 0.03, lon + 0.03, lat + 0.03];
 
-        // --- 2. Pedido do Mapa NDVI (Saúde Vegetativa) ---
+        // 2. Mapa NDVI (Saúde Vegetativa)
         const evalscriptNDVI = `
             //VERSION=3
             function setup() { return { input: ["B08", "B04", "dataMask"], output: { bands: 4 } }; }
             function evaluatePixel(sample) {
                 let ndvi = (sample.B08 - sample.B04) / (sample.B08 + sample.B04 + 0.0001);
-                if (ndvi < 0.1) return [0.5, 0.5, 0.5, sample.dataMask];      // Nuvens/Água (Cinza)
-                if (ndvi < 0.3) return [0.65, 0.35, 0.07, sample.dataMask];   // Solo Nu (Marrom)
-                if (ndvi < 0.5) return [0.9, 0.9, 0.2, sample.dataMask];      // Fraca (Amarelo)
-                if (ndvi < 0.7) return [0.3, 0.8, 0.3, sample.dataMask];      // Saudável (Verde Claro)
-                return [0.0, 0.4, 0.0, sample.dataMask];                      // Dossel Denso (Verde Escuro)
+                if (ndvi < 0.1) return [0.5, 0.5, 0.5, sample.dataMask];
+                if (ndvi < 0.3) return [0.65, 0.35, 0.07, sample.dataMask];
+                if (ndvi < 0.5) return [0.9, 0.9, 0.2, sample.dataMask];
+                if (ndvi < 0.7) return [0.3, 0.8, 0.3, sample.dataMask];
+                return [0.0, 0.4, 0.0, sample.dataMask];
             }
         `;
 
-        fetch('https://services.sentinel-hub.com/api/v1/process', {
-            method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${tokenData.access_token}`, 
-                'Content-Type': 'application/json'
+        const sentinelBody = (evalscript) => JSON.stringify({
+            input: {
+                bounds: { bbox },
+                data: [{ type: 'sentinel-2-l2a', dataFilter: { timeRange: { from: fromDate.toISOString(), to: toDate.toISOString() }, maxCloudCoverage: 10 } }]
             },
-            body: JSON.stringify({
-                input: { 
-                    bounds: { bbox: bbox }, 
-                    data: [{ 
-                        type: "sentinel-2-l2a", 
-                        dataFilter: { timeRange: { from: fromDate.toISOString(), to: toDate.toISOString() }, maxCloudCoverage: 10 } 
-                    }] 
-                },
-                output: { width: 800, height: 450, responses: [{ identifier: "default", format: { type: "image/png" } }] },
-                evalscript: evalscriptNDVI
-            })
+            output: { width: 800, height: 450, responses: [{ identifier: 'default', format: { type: 'image/png' } }] },
+            evalscript
+        });
+
+        const authHeaders = {
+            'Authorization': `Bearer ${tokenData.access_token}`,
+            'Content-Type': 'application/json'
+        };
+
+        fetch('https://services.sentinel-hub.com/api/v1/process', {
+            method: 'POST', headers: authHeaders, body: sentinelBody(evalscriptNDVI)
         })
         .then(res => res.blob())
         .then(blob => {
@@ -517,37 +518,22 @@ async function buscarImagemSatelite(data) {
             };
         });
 
-        // --- 3. Pedido do Mapa NDMI (Umidade do Solo) ---
+        // 3. Mapa NDMI (Umidade do Solo)
         const evalscriptNDMI = `
             //VERSION=3
             function setup() { return { input: ["B08", "B11", "dataMask"], output: { bands: 4 } }; }
             function evaluatePixel(sample) {
                 let ndmi = (sample.B08 - sample.B11) / (sample.B08 + sample.B11 + 0.0001);
-                if (ndmi < -0.2) return [0.54, 0.27, 0.07, sample.dataMask]; // Seca Severa (Marrom Escuro)
-                if (ndmi < 0.0) return [0.82, 0.70, 0.54, sample.dataMask];  // Déficit (Marrom Claro)
-                if (ndmi < 0.2) return [1.0, 1.0, 1.0, sample.dataMask];     // Ideal (Branco)
-                if (ndmi < 0.4) return [0.53, 0.80, 0.92, sample.dataMask];  // Úmido (Azul Claro)
-                return [0.0, 0.0, 1.0, sample.dataMask];                     // Saturado (Azul Forte)
+                if (ndmi < -0.2) return [0.54, 0.27, 0.07, sample.dataMask];
+                if (ndmi < 0.0)  return [0.82, 0.70, 0.54, sample.dataMask];
+                if (ndmi < 0.2)  return [1.0,  1.0,  1.0,  sample.dataMask];
+                if (ndmi < 0.4)  return [0.53, 0.80, 0.92, sample.dataMask];
+                return [0.0, 0.0, 1.0, sample.dataMask];
             }
         `;
 
         fetch('https://services.sentinel-hub.com/api/v1/process', {
-            method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${tokenData.access_token}`, 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                input: { 
-                    bounds: { bbox: bbox }, 
-                    data: [{ 
-                        type: "sentinel-2-l2a", 
-                        dataFilter: { timeRange: { from: fromDate.toISOString(), to: toDate.toISOString() }, maxCloudCoverage: 10 } 
-                    }] 
-                },
-                output: { width: 800, height: 450, responses: [{ identifier: "default", format: { type: "image/png" } }] },
-                evalscript: evalscriptNDMI
-            })
+            method: 'POST', headers: authHeaders, body: sentinelBody(evalscriptNDMI)
         })
         .then(res => res.blob())
         .then(blob => {
@@ -555,12 +541,13 @@ async function buscarImagemSatelite(data) {
             imgNDMI.onload = () => {
                 imgNDMI.classList.add('loaded');
                 hudLegendNDMI.classList.add('visible');
-                infoLaudoNDMI.innerHTML = `Identificadas faixas de absorção hídrica. Avalie zonas em <span style="color:#8b4513;font-weight:bold;">marrom</span> para ajustar a pressão do pivô central de irrigação.`;
+                infoLaudoNDMI.innerText = 'Identificadas faixas de absorção hídrica. Avalie zonas marrons para ajustar a pressão do pivô central de irrigação.';
             };
         });
 
-    } catch (error) { 
-        console.error("Erro Crítico na Execução do Satélite:", error); 
+    } catch (error) {
+        console.error('Erro Sentinel Hub:', error);
+        infoNdvi.innerText = 'Falha na autenticação. Verifique as credenciais Sentinel Hub.';
     }
 }
 
@@ -580,7 +567,16 @@ if (hotspotLayer) hotspotLayer.style.pointerEvents = 'none';
  */
 function setupPestHotspots(pragas) {
     hotspotLayer.innerHTML = '';
-    
+
+    const hudCount = document.getElementById('pestHudCount');
+    const hudRisk  = document.getElementById('pestHudRisk');
+    if (hudCount) hudCount.textContent = pragas.length;
+    if (hudRisk) {
+        const isHigh = pragas.length >= 3;
+        hudRisk.textContent = pragas.length >= 5 ? 'CRÍTICO' : isHigh ? 'ALTO' : 'MÉDIO';
+        hudRisk.className   = isHigh ? 'pest-hud-value pest-hud-critical' : 'pest-hud-value';
+    }
+
     pragas.forEach((praga) => {
         const spot = document.createElement('div');
         spot.className = 'hotspot';
@@ -629,6 +625,17 @@ function updateCropInsights(cropKey) {
     const data = agroDB[cropKey];
     if (!data) return;
 
+    // Status do scanner: "escaneando..."
+    const status = document.getElementById('scanner-status');
+    if (status) {
+        status.textContent = `ESCANEANDO: ${data.nome.toUpperCase()}...`;
+        status.classList.add('scanning');
+        setTimeout(() => {
+            status.textContent = `CULTURA CONFIRMADA — ${data.nome.toUpperCase()}`;
+            status.classList.remove('scanning');
+        }, 1400);
+    }
+
     // Atualiza UI
     document.getElementById('info-nome-cultura').innerText = data.nome;
     document.getElementById('info-ranking').innerText = data.ranking;
@@ -636,35 +643,63 @@ function updateCropInsights(cropKey) {
     document.getElementById('info-solo-tipo').innerText = data.solo;
     document.getElementById('info-solo-manejo').innerText = data.manejo;
     document.getElementById('rt-local').innerText = `LAT ${data.lat} | LON ${data.lon} (${data.local})`;
-    
+
     document.getElementById('panel-plantacao').classList.add('visible');
 
     // Prepara os hotspots e as APIs
     setupPestHotspots(data.pragas);
     fetchWeatherTelemetrics(data.lat, data.lon);
-    buscarImagemSatelite(data); 
+    buscarImagemSatelite(data);
 }
 
-// Botões das culturas (Chips)
-document.querySelectorAll('.chip').forEach(chip => {
-    const radio = chip.querySelector('input[type="radio"]');
-    chip.addEventListener('click', function(e) {
+// Cultura cards (seleção de cultura)
+document.querySelectorAll('.cultura-card').forEach(card => {
+    const radio = card.querySelector('input[type="radio"]');
+    card.addEventListener('click', function(e) {
         e.preventDefault();
 
         if (activeCrop === radio.value) {
             radio.checked = false;
             activeCrop = null;
+            localStorage.removeItem('orbitagro_cultura');
             document.getElementById('panel-plantacao').classList.remove('visible');
             document.querySelectorAll('.ndvi-legend').forEach(el => el.classList.remove('visible'));
             hotspotLayer.innerHTML = '';
+            const status = document.getElementById('scanner-status');
+            if (status) status.textContent = 'AGUARDANDO CULTURA...';
         } else {
             radio.checked = true;
             activeCrop = radio.value;
+            localStorage.setItem('orbitagro_cultura', radio.value);
             updateCropInsights(radio.value);
+
+            // Auto-scroll para NDVI se o talhão já foi preenchido
+            if (inputTalhao && inputTalhao.value.trim()) {
+                setTimeout(() => {
+                    document.querySelector('.journey-container')?.scrollTo({
+                        top: document.getElementById('stage-sol')?.offsetTop,
+                        behavior: 'smooth'
+                    });
+                }, 750);
+            }
         }
         updateLaudoPreview();
     });
 });
+
+// Persiste o nome do talhão entre visitas
+const inputTalhao = document.getElementById('talhao');
+if (inputTalhao) {
+    const savedTalhao = localStorage.getItem('orbitagro_talhao');
+    if (savedTalhao) inputTalhao.value = savedTalhao;
+    inputTalhao.addEventListener('input', () => {
+        if (inputTalhao.value.trim()) {
+            localStorage.setItem('orbitagro_talhao', inputTalhao.value.trim());
+        } else {
+            localStorage.removeItem('orbitagro_talhao');
+        }
+    });
+}
 
 // Stepper de Dias Secos
 const inputDias = document.getElementById('diasSeca');
@@ -784,8 +819,13 @@ document.getElementById('btnDiagnostico')?.addEventListener('click', () => {
         document.getElementById('barSeca').style.width = (stressHidrico === "2" ? '100%' : (diasSeca > 5 ? '50%' : '15%')); 
         document.getElementById('barSeca').style.background = (stressHidrico === "2" ? '#f44336' : (diasSeca > 5 ? '#ff9800' : '#4caf50'));
         
-        document.getElementById('barPraga').style.width = (nivelPragas === "3" ? '100%' : (nivelPragas === "2" ? '50%' : '15%')); 
+        document.getElementById('barPraga').style.width = (nivelPragas === "3" ? '100%' : (nivelPragas === "2" ? '50%' : '15%'));
         document.getElementById('barPraga').style.background = (nivelPragas === "3" ? '#f44336' : (nivelPragas === "2" ? '#ff9800' : '#4caf50'));
+
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setVal('valNdvi',  saudeFoliar   === "2" ? 'ALTO' : 'OK');
+        setVal('valSeca',  stressHidrico === "2" ? 'ALTO' : (diasSeca > 5 ? 'MED' : 'OK'));
+        setVal('valPraga', nivelPragas   === "3" ? 'ALTO' : (nivelPragas === "2" ? 'MED' : 'OK'));
     }, 500);
 
     // Recomendações Dinâmicas da Inteligência
@@ -840,6 +880,18 @@ if (_journeyContainer) {
     });
 }
 
+
+// Restaura cultura selecionada da sessão anterior (após inputDias estar declarado)
+const savedCrop = localStorage.getItem('orbitagro_cultura');
+if (savedCrop && agroDB[savedCrop]) {
+    const chipToRestore = document.querySelector(`.cultura-card input[value="${savedCrop}"]`);
+    if (chipToRestore) {
+        chipToRestore.checked = true;
+        activeCrop = savedCrop;
+        updateCropInsights(savedCrop);
+        updateLaudoPreview();
+    }
+}
 
 // ==========================================
 // 7. ENGINE WEBGL 3D (O MOTOR ORIGINAL EXPANDIDO)
@@ -1508,7 +1560,121 @@ if (_journeyContainer) {
 })();
 
 // ==========================================
-// 8. VALIDAÇÃO DE FORMULÁRIO (PÁGINA CONTATO)
+// 8. RAIN CANVAS (ETAPA CHUVA)
+// ==========================================
+(() => {
+    const canvas = document.getElementById('rainCanvas');
+    if (!canvas) return;
+
+    const ctx   = canvas.getContext('2d');
+    const COUNT = 60;
+    const drops = [];
+    let   animId, running = false;
+
+    function resize() {
+        const parent = canvas.parentElement;
+        canvas.width  = parent ? parent.offsetWidth  : window.innerWidth;
+        canvas.height = parent ? parent.offsetHeight : window.innerHeight;
+    }
+
+    function initDrops() {
+        drops.length = 0;
+        for (let i = 0; i < COUNT; i++) {
+            drops.push({
+                x:       Math.random() * canvas.width,
+                y:       Math.random() * canvas.height,
+                speed:   3.5 + Math.random() * 3.5,
+                len:     12  + Math.random() * 24,
+                opacity: 0.06 + Math.random() * 0.22,
+            });
+        }
+    }
+
+    function tick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const sinA = Math.sin(-0.18);
+        const cosA = Math.cos(-0.18);
+
+        drops.forEach(d => {
+            ctx.beginPath();
+            ctx.moveTo(d.x, d.y);
+            ctx.lineTo(d.x + sinA * d.len, d.y + cosA * d.len);
+            ctx.strokeStyle = `rgba(148, 202, 255, ${d.opacity})`;
+            ctx.lineWidth   = 0.75;
+            ctx.stroke();
+
+            d.x += sinA * d.speed * 0.55;
+            d.y += cosA * d.speed;
+
+            if (d.y > canvas.height + d.len) {
+                d.y = -d.len;
+                d.x = Math.random() * (canvas.width + 40) - 20;
+                d.speed   = 3.5 + Math.random() * 3.5;
+                d.len     = 12  + Math.random() * 24;
+                d.opacity = 0.06 + Math.random() * 0.22;
+            }
+        });
+        animId = requestAnimationFrame(tick);
+    }
+
+    function start() { if (!running) { running = true;  tick();                           } }
+    function stop()  { if (running)  { running = false; cancelAnimationFrame(animId);     } }
+
+    resize();
+    initDrops();
+
+    window.addEventListener('resize', () => { resize(); initDrops(); });
+
+    const stageEl = document.getElementById('stage-chuva');
+    if (stageEl) {
+        new IntersectionObserver(entries => {
+            entries[0].isIntersecting ? start() : stop();
+        }, { threshold: 0.05 }).observe(stageEl);
+    }
+})();
+
+// ==========================================
+// 9. SATELLITE LIGHTBOX
+// ==========================================
+(() => {
+    const lightbox   = document.getElementById('satelliteLightbox');
+    const lbImg      = document.getElementById('lightboxImg');
+    const lbLabel    = document.getElementById('lightboxLabel');
+    const lbImgWrap  = document.getElementById('lightboxImgWrap');
+    const btnClose   = document.getElementById('btnCloseLightbox');
+    if (!lightbox || !lbImg) return;
+
+    function open(srcId, label, isNdmi) {
+        const src = document.getElementById(srcId)?.src || '';
+        if (!src || src === location.href) return;
+        lbImg.src          = src;
+        lbImg.alt          = label;
+        if (lbLabel)   { lbLabel.textContent = label; lbLabel.className = isNdmi ? 'lightbox-sat-label ndmi' : 'lightbox-sat-label'; }
+        if (lbImgWrap) { lbImgWrap.className = isNdmi ? 'lightbox-img-wrap ndmi-wrap' : 'lightbox-img-wrap'; }
+        lightbox.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function close() {
+        lightbox.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('btnExpandNdvi')?.addEventListener('click', () =>
+        open('img-satelite-real',     'SENTINEL-2 // NDVI', false));
+
+    document.getElementById('btnExpandNdmi')?.addEventListener('click', () =>
+        open('img-satelite-umidade',  'SENTINEL-2 // NDMI', true));
+
+    btnClose?.addEventListener('click', close);
+
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) close(); });
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+})();
+
+// ==========================================
+// 10. VALIDAÇÃO DE FORMULÁRIO (PÁGINA CONTATO)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const contactForm = document.getElementById('contactForm');
@@ -1524,33 +1690,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = document.getElementById('email').value.trim();
             const mensagem = document.getElementById('mensagem').value.trim();
 
-            // Exigência da FIAP: Bloquear campos vazios e mostrar mensagem de erro
             if (nome === '' || email === '' || mensagem === '') {
-                formFeedback.style.display = 'block';
-                formFeedback.style.color = '#f44336'; // Vermelho para erro
-                formFeedback.innerText = '❌ Erro: Todos os campos são obrigatórios. Por favor, preencha-os.';
-                return; // Interrompe a execução
-            }
-
-            // Validação simples de formato de e-mail
-            if (!email.includes('@') || !email.includes('.')) {
-                formFeedback.style.display = 'block';
-                formFeedback.style.color = '#ff9800'; // Laranja para aviso
-                formFeedback.innerText = '⚠️ Aviso: Por favor, insira um e-mail válido.';
+                formFeedback.className = 'feedback--erro';
+                formFeedback.innerText = '❌ Todos os campos são obrigatórios. Por favor, preencha-os.';
                 return;
             }
 
-            // Sucesso: Formulário válido
-            formFeedback.style.display = 'block';
-            formFeedback.style.color = '#4caf50'; // Verde para sucesso
+            if (!email.includes('@') || !email.includes('.')) {
+                formFeedback.className = 'feedback--aviso';
+                formFeedback.innerText = '⚠️ Por favor, insira um e-mail válido.';
+                return;
+            }
+
+            formFeedback.className = 'feedback--sucesso';
             formFeedback.innerText = '✅ Mensagem enviada com sucesso! Entraremos em contato em breve.';
-            
-            // Limpa o formulário após o envio bem-sucedido
             contactForm.reset();
-            
-            // Oculta a mensagem de sucesso após 5 segundos
+
             setTimeout(() => {
-                formFeedback.style.display = 'none';
+                formFeedback.className = '';
+                formFeedback.innerText = '';
             }, 5000);
         });
     }
