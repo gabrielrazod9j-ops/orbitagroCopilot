@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solução | OrbitAgro Copilot</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
 </head>
-<body style="background:#050505;">
+<body class="sub-page">
+
   <div class="hud-element hud-top-left" aria-hidden="true">ORBIT.SYS // V.2.4.1_BETA</div>
-  <div class="hud-element hud-bottom-right" id="hud-location" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
+  <div class="hud-element hud-bottom-right" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
   <div class="hud-element hud-vertical" aria-hidden="true">DATA_STREAM_SYNC</div>
 
   <header class="site-header">
@@ -21,7 +23,8 @@
       <nav class="desktop-nav" aria-label="Navegação Principal">
         <a href="../index.html">Home</a>
         <a href="sobre.html">Sobre</a>
-        <a href="#stage-plantacao">Solução</a>
+        <a href="solucao.html" aria-current="page">Solução</a>
+        <a href="como-funciona.html">Como Funciona</a>
         <a href="faq.html">FAQ</a>
         <a href="contato.html">Contato</a>
         <a href="integrantes.html" class="highlighted-link">Equipe</a>
@@ -35,15 +38,130 @@
   <nav class="mobile-menu" id="mobileMenu" aria-label="Navegação Mobile">
     <a href="../index.html">Home</a>
     <a href="sobre.html">Sobre</a>
-    <a href="#stage-plantacao">Solução</a>
+    <a href="solucao.html">Solução</a>
+    <a href="como-funciona.html">Como Funciona</a>
     <a href="faq.html">FAQ</a>
     <a href="contato.html">Contato</a>
     <a href="integrantes.html" class="highlighted-link-mobile">Equipe</a>
   </nav>
 
-  
   <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
-    
+  <main class="sub-page-main">
+
+    <section class="page-hero">
+      <span class="page-tag">Global Solution 2026/1 — FIAP</span>
+      <h1>A Solução OrbitAgro</h1>
+      <p>Inteligência orbital a serviço da segurança alimentar. Dados de satélite, clima e IA unidos para proteger a lavoura brasileira.</p>
+    </section>
+
+    <section class="solution-section" aria-label="Problema e Proposta">
+      <div class="solution-grid">
+
+        <article class="solution-card">
+          <span class="card-icon" aria-hidden="true">⚠️</span>
+          <h2>O Problema</h2>
+          <p>O Brasil enfrenta uma contradição: é uma das maiores potências agrícolas do mundo, mas milhões de pequenos e médios produtores operam sem acesso a ferramentas de precisão. O resultado:</p>
+          <ul>
+            <li>Perdas de até 30% da produção por pragas identificadas tardiamente</li>
+            <li>Desperdício de água e insumos por irrigação sem dados reais</li>
+            <li>Decisões baseadas em intuição em vez de dados espaciais</li>
+            <li>Exclusão digital do campo da revolução da agricultura 4.0</li>
+          </ul>
+        </article>
+
+        <article class="solution-card accent">
+          <span class="card-icon" aria-hidden="true">🛰️</span>
+          <h2>Nossa Proposta</h2>
+          <p>O OrbitAgro Copilot democratiza o acesso à agricultura de precisão. Em vez de equipamentos caros e técnicos especializados, o produtor acessa pelo navegador e obtém:</p>
+          <ul>
+            <li>Mapa de saúde foliar NDVI via satélite Sentinel-2</li>
+            <li>Mapa hídrico NDMI com zonas de deficit e saturação</li>
+            <li>Previsão meteorológica local em tempo real</li>
+            <li>Catálogo interativo de pragas por cultura</li>
+            <li>Diagnóstico agronômico com recomendações práticas</li>
+          </ul>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="tech-section" aria-label="Tecnologias Utilizadas">
+      <h2 class="section-title">Tecnologias Utilizadas</h2>
+      <p class="section-sub">Stack 100% front-end, sem frameworks — HTML semântico, CSS modular e JavaScript puro.</p>
+
+      <div class="tech-grid">
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">🌍</span>
+          <h3>Sentinel-2 / ESA</h3>
+          <p>Satélites da Agência Espacial Europeia com resolução de 10m/pixel. Fonte das imagens NDVI e NDMI para monitoramento da cobertura vegetal e umidade do solo.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">🌦️</span>
+          <h3>Open-Meteo API</h3>
+          <p>API meteorológica de código aberto com dados climáticos em tempo real: temperatura, qualidade do ar (AQI), precipitação e previsão para os próximos 7 dias.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">📍</span>
+          <h3>Geolocation API</h3>
+          <p>API nativa do navegador para capturar a latitude e longitude do dispositivo do produtor, permitindo a geolocalização automática da lavoura sem configurações manuais.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">✨</span>
+          <h3>WebGL / Canvas</h3>
+          <p>Motor de partículas renderizado em WebGL via Canvas 2D para criar o ambiente visual imersivo do sistema, sem bibliotecas externas como Three.js.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">🧠</span>
+          <h3>Motor de IA Local</h3>
+          <p>Algoritmo de diagnóstico agronômico em JavaScript puro, que pondera dados de satélite, clima, pragas e solo para gerar recomendações priorizadas.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">📐</span>
+          <h3>CSS Grid + Flexbox</h3>
+          <p>Layout totalmente responsivo com CSS puro — sem Bootstrap ou qualquer framework. Breakpoints para mobile (≤480px), tablet (≤768px) e desktop (≥992px).</p>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="impact-section" aria-label="Impacto da Solução">
+      <h2 class="section-title">Impacto Potencial</h2>
+      <p class="section-sub">Números que mostram a escala do problema que estamos resolvendo.</p>
+
+      <div class="impact-grid">
+
+        <article class="impact-card">
+          <p class="impact-number">4.9M</p>
+          <p>Estabelecimentos agropecuários no Brasil que podem se beneficiar do monitoramento via satélite</p>
+        </article>
+
+        <article class="impact-card">
+          <p class="impact-number">30%</p>
+          <p>Redução potencial de perdas por pragas quando o diagnóstico é feito antes dos sintomas visuais</p>
+        </article>
+
+        <article class="impact-card">
+          <p class="impact-number">5 dias</p>
+          <p>Frequência de atualização das imagens Sentinel-2, permitindo monitoramento contínuo da lavoura</p>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 OrbitAgro Copilot — Todos os direitos reservados</p>
+  </footer>
+
+  <script src="../js/script.js"></script>
+  <script src="../js/pages.js"></script>
 </body>
 </html>
