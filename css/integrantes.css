@@ -59,8 +59,8 @@ html {
 
 body.page-integrantes {
     overflow-x: hidden;
-    overflow-y: auto !important; 
-    background: radial-gradient(ellipse at center, #060b19 0%, #010205 100%) !important;
+    overflow-y: auto !important;
+    background: #000 !important;
     color: #fff;
     margin: 0;
     padding: 0;
@@ -150,13 +150,13 @@ body.page-integrantes::after,
 
 #blackHoleCanvas {
     position: absolute;
-    top: 50%;
+    top: 58%;
     left: 50%;
-    transform: translate(-50%, -50%) translateZ(0); 
+    transform: translate(-50%, -50%) translateZ(0);
     width: 1400px;
     height: 900px;
     pointer-events: none;
-    mix-blend-mode: screen; 
+    mix-blend-mode: screen;
 }
 
 /* =========================================================
@@ -167,17 +167,19 @@ body.page-integrantes::after,
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); 
-    width: 240px; 
+    transform: translate(-50%, -50%);
+    width: 240px;
     height: 320px;
     transform-style: preserve-3d;
-    animation: autoRun 24s linear infinite;
-    pointer-events: none; 
+    animation: autoRun 24s linear infinite, gravitationalTide 11s ease-in-out infinite;
+    pointer-events: none;
     overflow: visible !important;
+    will-change: scale;
 }
 
 .slide:hover {
-    animation-play-state: paused;
+    /* pausa autoRun, mantém gravitationalTide */
+    animation-play-state: paused, running;
 }
 
 .slide .item--1 { --position: 1; }
@@ -332,7 +334,14 @@ body.page-integrantes::after,
    ========================================================= */
 @keyframes autoRun {
     from { transform: translate(-50%, -50%) rotateX(-8deg) rotateY(0deg); }
-    to { transform: translate(-50%, -50%) rotateX(-8deg) rotateY(360deg); }
+    to   { transform: translate(-50%, -50%) rotateX(-8deg) rotateY(360deg); }
+}
+
+/* Maré gravitacional — o carrossel é sugado e liberado pelo buraco negro */
+@keyframes gravitationalTide {
+    0%, 100% { scale: 1.00; }
+    35%      { scale: 0.78; }
+    55%      { scale: 0.78; }
 }
 
 @media (max-width: 1024px) {
@@ -379,38 +388,28 @@ body.page-integrantes::after,
    Fica ANTES do canvas no DOM; o canvas usa mix-blend-mode:screen,
    então pixeis transparentes (centro sem partículas) deixam ver este elemento.
    ========================================================= */
+/* Event horizon — elipse calculada pelo INCLINE=0.28 do disco.
+   rw = (EH/aspect) * (canvasW/2) * 1.05 = (0.18/1.556)*700*1.05 ≈ 85px
+   rh = EH * INCLINE * (canvasH/2) * 1.05 = 0.18*0.28*450*1.05 ≈ 24px */
 #blackHoleCore {
     position: absolute;
-    top: 50%;
+    top: 58%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 220px;
-    height: 62px;
+    width: 170px;
+    height: 48px;
     border-radius: 50%;
     background: radial-gradient(ellipse at center,
-        #000000 38%,
-        rgba(0, 0, 0, 0.94) 54%,
-        rgba(0, 0, 0, 0.72) 70%,
-        rgba(0, 0, 0, 0.38) 84%,
+        #000000 44%,
+        rgba(0, 0, 0, 0.96) 60%,
+        rgba(0, 0, 0, 0.78) 74%,
+        rgba(0, 0, 0, 0.35) 88%,
         transparent 100%
     );
     pointer-events: none;
-    /* Sem z-index — fica abaixo do canvas pela ordem DOM */
-    /* Uma sombra extra reforça o efeito gravitacional */
     filter: drop-shadow(0 0 18px rgba(0, 0, 0, 0.95));
 }
 
-/* Halo de penumbra gravitacional — anel escuro ao redor do core */
-#blackHoleCore::after {
-    content: '';
-    position: absolute;
-    inset: -40% -18%;
-    border-radius: 50%;
-    background: radial-gradient(ellipse at center,
-        transparent 50%,
-        rgba(0, 0, 0, 0.28) 68%,
-        rgba(0, 0, 0, 0.14) 82%,
-        transparent 100%
-    );
-    pointer-events: none;
+@media (max-width: 480px) {
+    #blackHoleCore { width: 100px; height: 28px; }
 }
