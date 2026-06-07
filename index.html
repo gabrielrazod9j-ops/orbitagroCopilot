@@ -73,20 +73,30 @@
 
     <section class="stage split-layout" id="stage-plantacao" aria-labelledby="titulo-lavoura">
       <div class="glass-card align-left">
+
+        <span class="laudo-tag">CALIBRAÇÃO ORBITAL — ETAPA 1 DE 6</span>
         <h2 id="titulo-lavoura" class="split-text">Dados da Lavoura</h2>
-        <p class="animate-fade-up subtitle-spacing">Parâmetros iniciais de cultivo.</p>
-        
-        <label class="animate-fade-up" for="talhao">Identificação do talhão</label>
-        <input type="text" id="talhao" placeholder="Ex: Lote Alfa" class="text-input animate-fade-up" />
-        
-        <label class="animate-fade-up">Cultura predominante</label>
-        <div class="chip-group animate-fade-up" role="radiogroup" aria-label="Selecione a cultura">
-          <label class="chip"><input type="radio" name="cultura" value="soja">🌿 Soja</label>
-          <label class="chip"><input type="radio" name="cultura" value="cana">🎋 Cana</label>
-          <label class="chip"><input type="radio" name="cultura" value="milho">🌽 Milho</label>
-          <label class="chip"><input type="radio" name="cultura" value="cafe">☕ Café</label>
-          <label class="chip"><input type="radio" name="cultura" value="algodao">☁️ Algodão</label>
+        <p class="subtitle-spacing">Identifique o talhão e selecione a cultura predominante.</p>
+
+        <div class="field-group">
+          <label class="step-label" for="talhao">Identificação do Talhão</label>
+          <div class="field-input-wrap">
+            <span class="field-icon" aria-hidden="true">📍</span>
+            <input type="text" id="talhao" placeholder="Ex: Lote Alfa — Fazenda Terra Nova" class="field-input" />
+          </div>
         </div>
+
+        <div class="field-group">
+          <label class="step-label">Cultura Predominante</label>
+          <div class="cultura-grid animate-fade-up" role="radiogroup" aria-label="Selecione a cultura">
+            <label class="cultura-card"><input type="radio" name="cultura" value="soja"><span class="cultura-icon" aria-hidden="true">🌿</span><span class="cultura-name">Soja</span></label>
+            <label class="cultura-card"><input type="radio" name="cultura" value="cana"><span class="cultura-icon" aria-hidden="true">🎋</span><span class="cultura-name">Cana</span></label>
+            <label class="cultura-card"><input type="radio" name="cultura" value="milho"><span class="cultura-icon" aria-hidden="true">🌽</span><span class="cultura-name">Milho</span></label>
+            <label class="cultura-card"><input type="radio" name="cultura" value="cafe"><span class="cultura-icon" aria-hidden="true">☕</span><span class="cultura-name">Café</span></label>
+            <label class="cultura-card"><input type="radio" name="cultura" value="algodao"><span class="cultura-icon" aria-hidden="true">☁️</span><span class="cultura-name">Algodão</span></label>
+          </div>
+        </div>
+
       </div>
       
       <article class="insights-panel align-right" id="panel-plantacao">
@@ -94,16 +104,28 @@
         <div class="hologram-base" aria-hidden="true"></div> 
         <div class="crop-profile-row animate-fade-up">
           <div class="image-scanner-container">
-             <img src="" id="info-img-cultura" class="crop-image-large" alt="Grão da Cultura" />
-             <div class="scanner-overlay" aria-hidden="true"></div>
+            <img src="" id="info-img-cultura" class="crop-image-large" alt="Grão da Cultura" />
+            <div class="scanner-overlay" aria-hidden="true">
+              <div class="scan-line" aria-hidden="true"></div>
+            </div>
+            <div class="scanner-corners" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="scanner-status" id="scanner-status" aria-live="polite">AGUARDANDO CULTURA...</div>
           </div>
           <div class="crop-info-side">
-             <span id="info-ranking">--</span>
-             <h3 id="info-nome-cultura" class="huge-data small text-primary">--</h3>
-             <div class="insight-label mt-3">Requisitos Edáficos (Solo)</div>
-             <div class="insight-value-side" id="info-solo-tipo">-</div>
-             <div class="insight-label mt-3">Preparo e Manejo Sustentável</div>
-             <div class="insight-value-side text-muted" id="info-solo-manejo">-</div>
+            <span class="crop-rank-tag" id="info-ranking">--</span>
+            <h3 id="info-nome-cultura" class="huge-data small text-primary">--</h3>
+            <div class="crop-data-row">
+              <div class="crop-data-block">
+                <span class="insight-label">Requisitos do Solo</span>
+                <p class="insight-value-side" id="info-solo-tipo">—</p>
+              </div>
+              <div class="crop-data-block">
+                <span class="insight-label">Manejo Sustentável</span>
+                <p class="insight-value-side text-muted" id="info-solo-manejo">—</p>
+              </div>
+            </div>
           </div>
         </div>
       </article>
@@ -111,6 +133,7 @@
 
     <section class="stage monitoramento-stage" id="stage-sol" aria-label="Monitoramento NDVI">
       <aside class="telemetry-left">
+        <span class="telemetry-tag">ETAPA 2 DE 6</span>
         <div class="data-box">
           <h3 class="label">Temperatura Local</h3>
           <div class="value" id="rt-temp">--°C</div>
@@ -124,8 +147,12 @@
       </aside>
 
       <article class="satellite-viewer">
+        <div class="viewer-stage-label" aria-hidden="true">SENTINEL-2 // NDVI</div>
         <div class="viewer-border">
           <img id="img-satelite-real" src="" alt="Mapa NDVI" />
+          <button class="viewer-expand-btn" id="btnExpandNdvi" aria-label="Expandir mapa NDVI">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          </button>
           <div class="ndvi-legend" id="ndviLegend" aria-hidden="true">
             <div class="legend-title">Índice Vegetativo (NDVI)</div>
             <div class="legend-bar"></div>
@@ -142,13 +169,15 @@
       </aside>
 
       <div class="soil-info-bar">
-        <div class="info-item"><h4>Manejo Recomendado</h4><p id="res-solo-info">Sincronizando com satélite Sentinel-2...</p></div>
-        <div class="info-item"><h4>Laudo Agronômico Orbital</h4><p id="res-ndvi">Processando imagem espectral...</p></div>
+        <div class="info-item"><span class="info-item-tag">Manejo Recomendado</span><p id="res-solo-info">Sincronizando com satélite Sentinel-2...</p></div>
+        <div class="info-item"><span class="info-item-tag">Laudo Agronômico Orbital</span><p id="res-ndvi">Processando imagem espectral...</p></div>
       </div>
     </section>
 
     <section class="stage monitoramento-stage" id="stage-chuva" aria-label="Monitoramento NDMI">
+      <canvas id="rainCanvas" aria-hidden="true"></canvas>
       <aside class="telemetry-left">
+        <span class="telemetry-tag">ETAPA 3 DE 6</span>
         <div class="data-box">
           <h3 class="label text-blue">Chance de Chuva (Hoje)</h3>
           <div class="value text-blue" id="rt-chuva-chance">--%</div>
@@ -157,8 +186,12 @@
       </aside>
 
       <article class="satellite-viewer">
+        <div class="viewer-stage-label" aria-hidden="true">SENTINEL-2 // NDMI</div>
         <div class="viewer-border ndmi-border">
           <img id="img-satelite-umidade" src="" alt="Mapa Hídrico NDMI" />
+          <button class="viewer-expand-btn viewer-expand-ndmi" id="btnExpandNdmi" aria-label="Expandir mapa NDMI">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          </button>
           <div class="ndvi-legend ndmi-legend" id="ndmiLegend" aria-hidden="true">
             <div class="legend-title">Índice de Umidade do Solo (NDMI)</div>
             <div class="legend-bar"></div>
@@ -178,11 +211,11 @@
 
       <div class="soil-info-bar ndmi-bar">
         <div class="info-item">
-          <h4 class="text-blue">Diretriz de Irrigação</h4>
+          <span class="info-item-tag text-blue">Diretriz de Irrigação</span>
           <p id="res-irrigacao-info">Aguardando dados meteorológicos...</p>
         </div>
         <div class="info-item">
-          <h4 class="text-blue">Laudo Hídrico Orbital</h4>
+          <span class="info-item-tag text-blue">Laudo Hídrico Orbital</span>
           <p id="res-ndmi-laudo">Processando satélite de umidade...</p>
         </div>
       </div>
@@ -190,100 +223,180 @@
 
     <section class="stage align-center stage-relative" id="stage-pragas-interativas" aria-label="Catálogo Biológico">
       <div class="text-center-wrapper disabled-pointer">
+        <span class="laudo-tag pest-etapa-tag">ANÁLISE BIOLÓGICA — ETAPA 4 DE 6</span>
         <h2 class="split-text pest-title">Catálogo Biológico</h2>
-        <p class="pest-subtitle">Interaja com os pontos luminosos sobre as folhas para identificar as ameaças comuns e aprender a reconhecer os sintomas na sua lavoura.</p>
+        <p class="pest-subtitle">Toque nos pontos luminosos sobre as folhas para identificar ameaças e aprender a reconhecer os sintomas na sua lavoura.</p>
+        <div class="pest-hud-row" aria-hidden="true">
+          <div class="pest-hud-item">
+            <span class="pest-hud-label">AMEAÇAS</span>
+            <span class="pest-hud-value" id="pestHudCount">--</span>
+          </div>
+          <div class="pest-hud-sep"></div>
+          <div class="pest-hud-item">
+            <span class="pest-hud-label">RISCO</span>
+            <span class="pest-hud-value pest-hud-critical" id="pestHudRisk">ALTO</span>
+          </div>
+          <div class="pest-hud-sep"></div>
+          <div class="pest-hud-item">
+            <span class="pest-hud-label">BASE</span>
+            <span class="pest-hud-value">EMBRAPA</span>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="stage split-layout" id="stage-inspecao" aria-labelledby="titulo-laudo">
-      <div class="glass-card align-left compact-card">
-        <h2 id="titulo-laudo" class="split-text">Laudo Analítico</h2>
-        <p class="animate-fade-up">Cruze as imagens orbitais com sua observação local.</p>
-        
-        <fieldset class="custom-fieldset">
-          <legend class="custom-legend animate-fade-up">1. Com base no Satélite NDVI, a saúde foliar atual é:</legend>
-          <div class="radio-cards animate-fade-up mb-20">
-            <label class="radio-card"><input type="radio" name="saudeFoliar" value="1" checked><span class="title">Verde / Densa</span></label>
-            <label class="radio-card"><input type="radio" name="saudeFoliar" value="2"><span class="title">Amarelada / Falhas</span></label>
-          </div>
-        </fieldset>
+    <section class="stage align-center" id="stage-inspecao" aria-labelledby="titulo-laudo">
+      <div class="laudo-card">
 
-        <fieldset class="custom-fieldset">
-          <legend class="custom-legend animate-fade-up">2. O Mapa Hídrico (NDMI) apresenta zonas críticas marrons?</legend>
-          <div class="radio-cards animate-fade-up mb-20">
-            <label class="radio-card"><input type="radio" name="stressHidrico" value="2"><span class="title">Sim (Déficit Hídrico)</span></label>
-            <label class="radio-card"><input type="radio" name="stressHidrico" value="1" checked><span class="title">Não (Ideal/Saturado)</span></label>
-          </div>
-        </fieldset>
-
-        <label class="animate-fade-up" for="diasSeca">3. Ocorreram dias seguidos sem precipitação na fazenda?</label>
-        <div class="stepper animate-fade-up mb-20 stepper-height">
-          <button type="button" class="step-btn" id="btnMinus" aria-label="Diminuir dias">-</button>
-          <input type="number" id="diasSeca" value="0" min="0" readonly aria-label="Quantidade de dias sem chuva" />
-          <button type="button" class="step-btn" id="btnPlus" aria-label="Aumentar dias">+</button>
+        <div class="laudo-header">
+          <span class="laudo-tag">ANÁLISE ORBITAL — ETAPA 5 DE 6</span>
+          <h2 id="titulo-laudo" class="split-text">Laudo Analítico</h2>
+          <p>Cruze os dados orbitais com sua observação em campo.</p>
         </div>
 
-        <fieldset class="custom-fieldset">
-          <legend class="custom-legend animate-fade-up">4. Após o estudo interativo, identificou pragas na lavoura?</legend>
-          <div class="radio-cards column-cards-mobile animate-fade-up">
-            <label class="radio-card"><input type="radio" name="nivelPragas" value="3"><span class="icon" aria-hidden="true">🐛</span><span class="title">Infestação</span></label>
-            <label class="radio-card"><input type="radio" name="nivelPragas" value="2"><span class="icon" aria-hidden="true">🤔</span><span class="title">Foco Isolado</span></label>
-            <label class="radio-card"><input type="radio" name="nivelPragas" value="1" checked><span class="icon" aria-hidden="true">✅</span><span class="title">Sem Pragas</span></label>
+        <!-- Step 1: Saúde Foliar -->
+        <div class="laudo-step">
+          <div class="step-indicator">
+            <span class="step-num">01</span>
+            <div class="step-line"></div>
           </div>
-        </fieldset>
-
-        <button id="btnDiagnostico" class="primary-btn animate-fade-up mt-30">Gerar Diagnóstico Final</button>
-      </div>
-
-      <div class="glass-card laudo-preview-card" aria-live="polite" aria-label="Pré-visualização do diagnóstico em tempo real">
-        <div class="preview-header">
-          <span class="preview-tag">LIVE</span>
-          <h3 class="preview-title">Pré-visualização</h3>
+          <fieldset class="step-content">
+            <legend class="step-label">Saúde Foliar — Satélite NDVI</legend>
+            <div class="toggle-group" role="radiogroup" aria-label="Saúde foliar">
+              <label class="toggle-opt toggle-good">
+                <input type="radio" name="saudeFoliar" value="1" checked>
+                <span class="opt-icon" aria-hidden="true">🌿</span>
+                <span class="opt-info">
+                  <span class="opt-name">Verde / Densa</span>
+                  <span class="opt-status">Saudável</span>
+                </span>
+              </label>
+              <label class="toggle-opt toggle-bad">
+                <input type="radio" name="saudeFoliar" value="2">
+                <span class="opt-icon" aria-hidden="true">🍂</span>
+                <span class="opt-info">
+                  <span class="opt-name">Amarelada / Falhas</span>
+                  <span class="opt-status">Atenção</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
         </div>
 
-        <div class="preview-cultura">
-          <span class="preview-label">Cultura Selecionada</span>
-          <span class="preview-value" id="preview-cultura-nome">Nenhuma selecionada</span>
+        <!-- Step 2: Balanço Hídrico -->
+        <div class="laudo-step">
+          <div class="step-indicator">
+            <span class="step-num">02</span>
+            <div class="step-line"></div>
+          </div>
+          <fieldset class="step-content">
+            <legend class="step-label">Balanço Hídrico — Mapa NDMI</legend>
+            <div class="toggle-group" role="radiogroup" aria-label="Balanço hídrico">
+              <label class="toggle-opt toggle-bad">
+                <input type="radio" name="stressHidrico" value="2">
+                <span class="opt-icon" aria-hidden="true">🏜️</span>
+                <span class="opt-info">
+                  <span class="opt-name">Déficit Hídrico</span>
+                  <span class="opt-status">Crítico</span>
+                </span>
+              </label>
+              <label class="toggle-opt toggle-good">
+                <input type="radio" name="stressHidrico" value="1" checked>
+                <span class="opt-icon" aria-hidden="true">💧</span>
+                <span class="opt-info">
+                  <span class="opt-name">Ideal / Saturado</span>
+                  <span class="opt-status">Normal</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
         </div>
 
-        <div class="preview-risk-area">
-          <div class="preview-risk-label">Risco Estimado</div>
-          <div class="preview-risk-badge" id="preview-risk-badge">NOMINAL</div>
-          <div class="preview-bar-track">
-            <div class="preview-bar-fill" id="preview-bar-fill"></div>
+        <!-- Step 3: Dias sem chuva -->
+        <div class="laudo-step">
+          <div class="step-indicator">
+            <span class="step-num">03</span>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <label class="step-label" for="diasSeca">Dias Consecutivos sem Precipitação</label>
+            <div class="dias-control">
+              <button type="button" class="dias-btn" id="btnMinus" aria-label="Diminuir dias">−</button>
+              <div class="dias-display">
+                <input type="number" id="diasSeca" value="0" min="0" readonly aria-label="Quantidade de dias sem chuva" />
+                <span class="dias-unit">dias</span>
+              </div>
+              <button type="button" class="dias-btn" id="btnPlus" aria-label="Aumentar dias">+</button>
+            </div>
           </div>
         </div>
 
-        <div class="preview-factors">
-          <div class="preview-factor">
-            <span>NDVI Foliar</span>
-            <div class="mini-bar"><div class="mini-bar-fill" id="prev-bar-ndvi"></div></div>
+        <!-- Step 4: Pragas -->
+        <div class="laudo-step">
+          <div class="step-indicator">
+            <span class="step-num">04</span>
           </div>
-          <div class="preview-factor">
-            <span>Risco Hídrico</span>
-            <div class="mini-bar"><div class="mini-bar-fill" id="prev-bar-seca"></div></div>
-          </div>
-          <div class="preview-factor">
-            <span>Ameaça Biológica</span>
-            <div class="mini-bar"><div class="mini-bar-fill" id="prev-bar-praga"></div></div>
-          </div>
+          <fieldset class="step-content">
+            <legend class="step-label">Nível de Infestação por Pragas</legend>
+            <div class="praga-group" role="radiogroup" aria-label="Nível de pragas">
+              <label class="praga-card praga-critical">
+                <input type="radio" name="nivelPragas" value="3">
+                <span class="praga-icon" aria-hidden="true">🐛</span>
+                <span class="praga-name">Infestação</span>
+                <span class="praga-desc">Alta densidade, ataque generalizado</span>
+              </label>
+              <label class="praga-card praga-warning">
+                <input type="radio" name="nivelPragas" value="2">
+                <span class="praga-icon" aria-hidden="true">⚠️</span>
+                <span class="praga-name">Foco Isolado</span>
+                <span class="praga-desc">Ocorrência pontual, monitorar</span>
+              </label>
+              <label class="praga-card praga-safe">
+                <input type="radio" name="nivelPragas" value="1" checked>
+                <span class="praga-icon" aria-hidden="true">✅</span>
+                <span class="praga-name">Sem Pragas</span>
+                <span class="praga-desc">Lavoura limpa, sem ocorrências</span>
+              </label>
+            </div>
+          </fieldset>
         </div>
 
-        <p class="preview-hint">Ajuste os campos ao lado e clique em <strong>Gerar Diagnóstico</strong> para ver a análise completa na próxima tela.</p>
+        <button id="btnDiagnostico" class="laudo-cta">
+          <span>Gerar Diagnóstico Final</span>
+          <span class="laudo-cta-arrow" aria-hidden="true">→</span>
+        </button>
+
       </div>
     </section>
 
     <section class="stage final-stage" id="stage-resultado" aria-label="Resultado Analítico">
       <div class="corners-container" aria-hidden="true">
-        <div class="floating-corner top-left"><h4>Saúde Foliar</h4><p id="res-praga">Aguardando dados...</p></div>
-        <div class="floating-corner top-right"><h4>Condição do Solo</h4><p id="res-solo">Aguardando dados...</p></div>
-        <div class="floating-corner bottom-left"><h4>Balanço Hídrico</h4><p id="res-chuva">Aguardando dados...</p></div>
-        <div class="floating-corner bottom-right"><h4>Clima e Atmosfera</h4><p id="res-clima">Aguardando dados...</p></div>
+        <div class="floating-corner top-left">
+          <span class="corner-status-dot"></span>
+          <h4>Saúde Foliar</h4>
+          <p id="res-praga">Aguardando dados...</p>
+        </div>
+        <div class="floating-corner top-right">
+          <span class="corner-status-dot"></span>
+          <h4>Condição do Solo</h4>
+          <p id="res-solo">Aguardando dados...</p>
+        </div>
+        <div class="floating-corner bottom-left">
+          <span class="corner-status-dot"></span>
+          <h4>Balanço Hídrico</h4>
+          <p id="res-chuva">Aguardando dados...</p>
+        </div>
+        <div class="floating-corner bottom-right">
+          <span class="corner-status-dot"></span>
+          <h4>Clima e Atmosfera</h4>
+          <p id="res-clima">Aguardando dados...</p>
+        </div>
       </div>
       
       <div class="glass-card result-card">
+        <span class="laudo-tag">DIAGNÓSTICO ORBITAL — ETAPA 6 DE 6</span>
         <h2 class="split-text">Decisão Agronômica</h2>
-        
+
         <div class="dashboard animate-fade-up">
           <div class="gauge-container" aria-hidden="true">
             <svg viewBox="0 0 100 55" class="gauge">
@@ -293,21 +406,57 @@
             <div class="gauge-text" id="riskBadge">PROCESSAR</div>
           </div>
           <div class="factors" aria-hidden="true">
-            <div class="factor"><div class="factor-header"><span>NDVI Foliar</span></div><div class="factor-bar"><div class="factor-fill" id="barNdvi"></div></div></div>
-            <div class="factor"><div class="factor-header"><span>Risco Hídrico</span></div><div class="factor-bar"><div class="factor-fill" id="barSeca"></div></div></div>
-            <div class="factor"><div class="factor-header"><span>Ameaça Biol.</span></div><div class="factor-bar"><div class="factor-fill" id="barPraga"></div></div></div>
+            <div class="factor">
+              <div class="factor-header"><span>NDVI Foliar</span></div>
+              <div class="factor-bar"><div class="factor-fill" id="barNdvi"></div></div>
+              <span class="factor-value" id="valNdvi">--</span>
+            </div>
+            <div class="factor">
+              <div class="factor-header"><span>Risco Hídrico</span></div>
+              <div class="factor-bar"><div class="factor-fill" id="barSeca"></div></div>
+              <span class="factor-value" id="valSeca">--</span>
+            </div>
+            <div class="factor">
+              <div class="factor-header"><span>Ameaça Biol.</span></div>
+              <div class="factor-bar"><div class="factor-fill" id="barPraga"></div></div>
+              <span class="factor-value" id="valPraga">--</span>
+            </div>
           </div>
         </div>
 
-        <div class="recommendations animate-fade-up mt-4">
-          <h3 class="text-primary mb-15">Parecer Inteligente Copilot:</h3>
-          <ul id="recList"></ul>
+        <div class="rec-block animate-fade-up">
+          <div class="rec-header">
+            <span class="rec-tag">PARECER</span>
+            <span class="rec-title">Inteligência Copilot</span>
+          </div>
+          <ul id="recList" class="rec-list"></ul>
         </div>
-        
-        <button id="btnRecomecar" class="secondary-btn animate-fade-up mt-30">Nova Calibração</button>
+
+        <button id="btnRecomecar" class="laudo-cta laudo-cta--secondary animate-fade-up">
+          <span>Nova Calibração</span>
+          <span class="laudo-cta-arrow" aria-hidden="true">↩</span>
+        </button>
       </div>
     </section>
   </main>
-  <script src="js/script.js"></script>
+  <footer class="site-footer">
+    <p>© 2026 OrbitAgro Copilot — Todos os direitos reservados</p>
+  </footer>
+  <!-- Satellite Image Lightbox -->
+  <div class="satellite-lightbox" id="satelliteLightbox" role="dialog" aria-modal="true" aria-label="Visualização ampliada do satélite">
+    <div class="lightbox-panel">
+      <div class="lightbox-top-bar">
+        <span class="lightbox-sat-label" id="lightboxLabel">SENTINEL-2 // NDVI</span>
+        <button class="lightbox-close" id="btnCloseLightbox" aria-label="Fechar visualização">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="lightbox-img-wrap" id="lightboxImgWrap">
+        <img id="lightboxImg" src="" alt="Mapa Satélite Ampliado" />
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js" defer></script>
 </body>
 </html>

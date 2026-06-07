@@ -42,8 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             entries.forEach((entry, i) => {
                 if (entry.isIntersecting) {
                     setTimeout(() => {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
+                        entry.target.classList.add('is-visible');
                     }, 60 * i);
                     revealObserver.unobserve(entry.target);
                 }
@@ -51,9 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { threshold: 0.1 });
 
         revealEls.forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            el.classList.add('page-reveal');
             revealObserver.observe(el);
         });
     }

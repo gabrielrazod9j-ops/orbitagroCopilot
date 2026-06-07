@@ -4,6 +4,8 @@
 
 FIAP — Global Solution 2026/1 | Disciplina: Front-End Design Engineering | Turma: 1TDSPF
 
+### [github.com/DioohReis/orbitagroCopilot](https://github.com/DioohReis/orbitagroCopilot)
+
 ---
 
 ## Sumario
@@ -763,17 +765,47 @@ O projeto usa **4 breakpoints** sem nenhum framework CSS:
 
 ---
 
+## Screenshots
+
+> Projeto rodando localmente — abra `index.html` com Live Server para ver a versão interativa completa.
+
+| Home — Copiloto (Stage Hero) | Laudo Analitico — Stage 6 | Equipe — Buraco Negro WebGL |
+|---|---|---|
+| Particulas WebGL orbitando em campo aberto | Formulario de diagnostico + preview de risco em tempo real | Disco de acrecao com fisica Kepleriana + carrossel 3D |
+
+**Repositorio publico:** [github.com/DioohReis/orbitagroCopilot](https://github.com/DioohReis/orbitagroCopilot)
+
+---
+
 ## Equipe
 
 Turma **1TDSPF** — FIAP Sao Paulo — Global Solution 2026/1
 
-| Nome | RM | Disciplina | GitHub | LinkedIn |
-|---|---|---|---|---|
-| Diogo Guilherme | 573301 | Front-End Design Engineering | [DioohReis](https://github.com/DioohReis) | [LinkedIn](https://www.linkedin.com/in/diogo-guilherme-de-assis-reis-95b11624b/) |
-| Gabriel Ricardo | 573302 | Software Engineering | [gabriel-ricardo-ADS](https://github.com/gabriel-ricardo-ADS) | [LinkedIn](https://www.linkedin.com/in/gabriel-ricardo-lima/) |
-| Matheus Rodrigues | 570469 | Relational Database | [MatheusRodriguesSerrao](https://github.com/MatheusRodriguesSerrao) | [LinkedIn](https://www.linkedin.com/in/matheus-rodrigues-06060a3a6/) |
-| Luiz Henrique Alves | 572727 | Computational Thinking | [LuizHenriqueAAlbarello](https://github.com/LuizHenriqueAAlbarello) | [LinkedIn](https://www.linkedin.com/in/luiz-henrique-alves-albarello-82297b410/) |
-| Gabriel Razo | 572244 | AI & Chatbot | [gabrielrazod9j-ops](https://github.com/gabrielrazod9j-ops) | [LinkedIn](https://www.linkedin.com/in/gabriel-razo-dantas-34724b301) |
+| Foto | Nome | RM | Disciplina | Links |
+|:---:|---|:---:|---|---|
+| <img src="assets/DiogoRM573301.jpg" width="80" alt="Diogo Guilherme de Assis Reis"> | **Diogo Guilherme de Assis Reis** | 573301 | Front-End Design Engineering | [GitHub](https://github.com/DioohReis) · [LinkedIn](https://www.linkedin.com/in/diogo-guilherme-de-assis-reis-95b11624b/) |
+| <img src="assets/Gabriel_Ricardo-01.jpeg" width="80" alt="Gabriel Ricardo Lima"> | **Gabriel Ricardo Lima** | 573302 | Software Engineering | [GitHub](https://github.com/gabriel-ricardo-ADS) · [LinkedIn](https://www.linkedin.com/in/gabriel-ricardo-lima/) |
+| <img src="assets/Matheus_Rodrigues.jpeg" width="80" alt="Matheus Rodrigues Serrão"> | **Matheus Rodrigues Serrão** | 570469 | Relational Database | [GitHub](https://github.com/MatheusRodriguesSerrao) · [LinkedIn](https://www.linkedin.com/in/matheus-rodrigues-06060a3a6/) |
+| <img src="assets/LuizHenrique572727.jpeg" width="80" alt="Luiz Henrique Alves Albarello"> | **Luiz Henrique Alves Albarello** | 572727 | Computational Thinking | [GitHub](https://github.com/LuizHenriqueAAlbarello) · [LinkedIn](https://www.linkedin.com/in/luiz-henrique-alves-albarello-82297b410/) |
+| <img src="assets/razo.01.jpeg" width="80" alt="Gabriel Razo Dantas"> | **Gabriel Razo Dantas** | 572244 | AI & Chatbot | [GitHub](https://github.com/gabrielrazod9j-ops) · [LinkedIn](https://www.linkedin.com/in/gabriel-razo-dantas-34724b301) |
+
+---
+
+---
+
+## Contato
+
+Para duvidas tecnicas, sugestoes ou parceria academica:
+
+| Integrante | Email / LinkedIn |
+|---|---|
+| Diogo Guilherme de Assis Reis (lead dev) | [linkedin.com/in/diogo-guilherme-de-assis-reis-95b11624b](https://www.linkedin.com/in/diogo-guilherme-de-assis-reis-95b11624b/) |
+| Gabriel Ricardo Lima | [linkedin.com/in/gabriel-ricardo-lima](https://www.linkedin.com/in/gabriel-ricardo-lima/) |
+| Matheus Rodrigues Serrão | [linkedin.com/in/matheus-rodrigues-06060a3a6](https://www.linkedin.com/in/matheus-rodrigues-06060a3a6/) |
+| Luiz Henrique Alves Albarello | [linkedin.com/in/luiz-henrique-alves-albarello-82297b410](https://www.linkedin.com/in/luiz-henrique-alves-albarello-82297b410/) |
+| Gabriel Razo Dantas | [linkedin.com/in/gabriel-razo-dantas-34724b301](https://www.linkedin.com/in/gabriel-razo-dantas-34724b301) |
+
+Repositorio: [github.com/DioohReis/orbitagroCopilot](https://github.com/DioohReis/orbitagroCopilot)
 
 ---
 
