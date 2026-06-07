@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width='device-width', initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Como Funciona | OrbitAgro Copilot</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
 </head>
-<body style="background:#050505;">
+<body class="sub-page">
+
   <div class="hud-element hud-top-left" aria-hidden="true">ORBIT.SYS // V.2.4.1_BETA</div>
-  <div class="hud-element hud-bottom-right" id="hud-location" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
+  <div class="hud-element hud-bottom-right" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
   <div class="hud-element hud-vertical" aria-hidden="true">DATA_STREAM_SYNC</div>
 
   <header class="site-header">
@@ -21,7 +23,8 @@
       <nav class="desktop-nav" aria-label="Navegação Principal">
         <a href="../index.html">Home</a>
         <a href="sobre.html">Sobre</a>
-        <a href="#stage-plantacao">Solução</a>
+        <a href="solucao.html">Solução</a>
+        <a href="como-funciona.html" aria-current="page">Como Funciona</a>
         <a href="faq.html">FAQ</a>
         <a href="contato.html">Contato</a>
         <a href="integrantes.html" class="highlighted-link">Equipe</a>
@@ -35,15 +38,303 @@
   <nav class="mobile-menu" id="mobileMenu" aria-label="Navegação Mobile">
     <a href="../index.html">Home</a>
     <a href="sobre.html">Sobre</a>
-    <a href="#stage-plantacao">Solução</a>
+    <a href="solucao.html">Solução</a>
+    <a href="como-funciona.html">Como Funciona</a>
     <a href="faq.html">FAQ</a>
     <a href="contato.html">Contato</a>
     <a href="integrantes.html" class="highlighted-link-mobile">Equipe</a>
   </nav>
 
-  
   <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
-    
+  <main class="sub-page-main">
+
+    <section class="page-hero">
+      <span class="page-tag">Guia de Uso</span>
+      <h1>Como Funciona</h1>
+      <p>Cinco etapas para transformar dados orbitais em decisões agronômicas precisas. Sem equipamentos especiais, sem conhecimento técnico avançado.</p>
+    </section>
+
+    <section class="steps-section" aria-label="Etapas de uso do Copilot">
+      <ol class="steps-list">
+
+        <li class="step-item">
+          <div class="step-number" aria-label="Etapa 1">01</div>
+          <div class="step-content">
+            <span class="step-tag">Etapa 01 — Configuração</span>
+            <h3>Identifique sua Lavoura</h3>
+            <p>Informe o nome do seu talhão e selecione a cultura predominante (Soja, Milho, Cana, Café ou Algodão). O Copilot carrega automaticamente o perfil agronômico da cultura: tipo de solo ideal, práticas de manejo sustentável, ranking de produção nacional e as pragas mais comuns da região.</p>
+            <span class="step-highlight">↳ O sistema usa a geolocalização do seu dispositivo para identificar a região</span>
+            <figure class="step-figure" aria-label="Interface da Etapa 1 — Seleção de Cultura">
+              <div class="fig-bar">
+                <span class="fig-dot fig-dot-red"></span>
+                <span class="fig-dot fig-dot-yel"></span>
+                <span class="fig-dot fig-dot-grn"></span>
+                <span class="fig-bar-title">index.html — #stage-plantacao</span>
+              </div>
+              <div class="fig-body">
+                <div class="fig-chip-row">
+                  <span class="fig-chip active">Soja</span>
+                  <span class="fig-chip">Milho</span>
+                  <span class="fig-chip">Cana</span>
+                  <span class="fig-chip">Café</span>
+                  <span class="fig-chip">Algodão</span>
+                </div>
+                <div class="fig-stats">
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Solo Ideal</span>
+                    <span class="fig-stat-val">Argiloso / Latossolo</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Prod. Brasil</span>
+                    <span class="fig-stat-val">4º no mundo</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Saúde NDVI</span>
+                    <span class="fig-stat-val ok">0.72 — Saudável</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Chuva 7d</span>
+                    <span class="fig-stat-val">12.4 mm</span>
+                  </div>
+                </div>
+              </div>
+              <figcaption>Painel de seleção de cultura + hologramas com dados agronômicos em tempo real</figcaption>
+            </figure>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number" aria-label="Etapa 2">02</div>
+          <div class="step-content">
+            <span class="step-tag">Etapa 02 — NDVI</span>
+            <h3>Monitore a Saúde Foliar via Satélite</h3>
+            <p>O sistema busca a imagem mais recente do satélite Sentinel-2 (ESA) para a sua coordenada. O mapa NDVI codificado em cores revela áreas com vegetação densa e saudável (verde intenso), zonas de deficiência (amarelo/marrom) e solo exposto (cinza). Dados de temperatura e qualidade do ar local complementam o panorama.</p>
+            <span class="step-highlight">↳ Imagens atualizadas a cada 5 dias com resolução de 10 metros</span>
+            <figure class="step-figure" aria-label="Interface da Etapa 2 — Mapa NDVI">
+              <div class="fig-bar">
+                <span class="fig-dot fig-dot-red"></span>
+                <span class="fig-dot fig-dot-yel"></span>
+                <span class="fig-dot fig-dot-grn"></span>
+                <span class="fig-bar-title">index.html — #stage-sol — Mapa NDVI</span>
+              </div>
+              <div class="fig-body">
+                <div class="fig-map fig-map-ndvi" aria-label="Simulação do mapa NDVI com gradiente de cores">
+                  <span class="fig-map-label">NDVI — Sentinel-2 / ESA</span>
+                </div>
+                <div class="fig-stats">
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Temp. Local</span>
+                    <span class="fig-stat-val">24.3°C</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">AQI</span>
+                    <span class="fig-stat-val ok">12 — Bom</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">NDVI Médio</span>
+                    <span class="fig-stat-val ok">0.68 — Saudável</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Vento</span>
+                    <span class="fig-stat-val">14 km/h NO</span>
+                  </div>
+                </div>
+              </div>
+              <figcaption>Mapa NDVI codificado em pseudocor: verde = saudável, vermelho = estresse foliar</figcaption>
+            </figure>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number" aria-label="Etapa 3">03</div>
+          <div class="step-content">
+            <span class="step-tag">Etapa 03 — NDMI</span>
+            <h3>Analise o Balanço Hídrico</h3>
+            <p>O mapa NDMI (Índice de Umidade) exibe o teor de água no solo e na vegetação. Zonas azuis indicam saturação hídrica; marrons indicam seca severa. Combinado com a previsão de chuva para os próximos 7 dias e a porcentagem de precipitação esperada, o Copilot orienta a estratégia de irrigação.</p>
+            <span class="step-highlight">↳ Previsão meteorológica atualizada em tempo real pela API Open-Meteo</span>
+            <figure class="step-figure" aria-label="Interface da Etapa 3 — Mapa NDMI Hídrico">
+              <div class="fig-bar">
+                <span class="fig-dot fig-dot-red"></span>
+                <span class="fig-dot fig-dot-yel"></span>
+                <span class="fig-dot fig-dot-grn"></span>
+                <span class="fig-bar-title">index.html — #stage-chuva — Mapa Hídrico</span>
+              </div>
+              <div class="fig-body">
+                <div class="fig-map fig-map-ndmi" aria-label="Simulação do mapa NDMI com zonas de seca e saturação">
+                  <span class="fig-map-label">NDMI — Índice de Umidade</span>
+                </div>
+                <div class="fig-stats">
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">NDMI Médio</span>
+                    <span class="fig-stat-val warn">-0.12 — Estresse</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Chuva Prevista</span>
+                    <span class="fig-stat-val">3d: 8.2 mm</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Laudo Hídrico</span>
+                    <span class="fig-stat-val warn">Déficit Moderado</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Irrigação</span>
+                    <span class="fig-stat-val">Recomendada</span>
+                  </div>
+                </div>
+              </div>
+              <figcaption>Mapa NDMI: azul = solo úmido / marrom = déficit hídrico crítico (zona de irrigação)</figcaption>
+            </figure>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number" aria-label="Etapa 4">04</div>
+          <div class="step-content">
+            <span class="step-tag">Etapa 04 — Catálogo Biológico</span>
+            <h3>Identifique Ameaças no Campo</h3>
+            <p>Explore o catálogo interativo de pragas específicas da sua cultura. Clique nos pontos luminosos sobrepostos à lavoura para visualizar fotos do inseto e dos danos causados na planta, com descrições técnicas dos sintomas. Essa etapa prepara o produtor para a observação de campo e para o preenchimento do Laudo.</p>
+            <span class="step-highlight">↳ Catálogo com as principais pragas para cada uma das 5 culturas suportadas</span>
+            <figure class="step-figure" aria-label="Interface da Etapa 4 — Mapa Interativo de Pragas">
+              <div class="fig-bar">
+                <span class="fig-dot fig-dot-red"></span>
+                <span class="fig-dot fig-dot-yel"></span>
+                <span class="fig-dot fig-dot-grn"></span>
+                <span class="fig-bar-title">index.html — #stage-pragas-interativas</span>
+              </div>
+              <div class="fig-body">
+                <div class="fig-map fig-map-pragas" style="height:110px" aria-label="Mapa com pontos interativos de pragas">
+                  <div class="fig-hotspot" style="top:30%;left:25%" aria-hidden="true"></div>
+                  <div class="fig-hotspot" style="top:55%;left:60%;animation-delay:0.4s" aria-hidden="true"></div>
+                  <div class="fig-hotspot" style="top:20%;left:70%;animation-delay:0.8s" aria-hidden="true"></div>
+                  <div class="fig-hotspot" style="top:65%;left:35%;animation-delay:1.2s" aria-hidden="true"></div>
+                  <span class="fig-map-label">Clique no ponto para ver a praga</span>
+                </div>
+                <div class="fig-stats">
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Focos Mapeados</span>
+                    <span class="fig-stat-val warn">4 pontos ativos</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">Praga Principal</span>
+                    <span class="fig-stat-val">Lagarta da Soja</span>
+                  </div>
+                </div>
+              </div>
+              <figcaption>Pontos luminosos no mapa revelam focos de pragas — clique para ver detalhes do inseto e danos</figcaption>
+            </figure>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number" aria-label="Etapa 5">05</div>
+          <div class="step-content">
+            <span class="step-tag">Etapa 05 — Diagnóstico</span>
+            <h3>Gere o Laudo e Receba Recomendações</h3>
+            <p>Preencha o Laudo Analítico com suas observações de campo: saúde foliar aparente, presença de zonas críticas no mapa hídrico, dias sem chuva e nível de infestação de pragas. O algoritmo Copilot pondera todos os dados e gera um Diagnóstico Final com nível de risco e uma lista priorizada de ações agronômicas.</p>
+            <span class="step-highlight">↳ Diagnóstico: NOMINAL / ATENÇÃO / CRÍTICO — com parecer técnico por escrito</span>
+            <figure class="step-figure" aria-label="Interface da Etapa 5 — Laudo e Dashboard Final">
+              <div class="fig-bar">
+                <span class="fig-dot fig-dot-red"></span>
+                <span class="fig-dot fig-dot-yel"></span>
+                <span class="fig-dot fig-dot-grn"></span>
+                <span class="fig-bar-title">index.html — #stage-inspecao + #stage-resultado</span>
+              </div>
+              <div class="fig-body">
+                <div class="fig-stats">
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">1. Saúde Foliar</span>
+                    <span class="fig-stat-val">[Verde] [Amarelada]</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">2. Zonas NDMI</span>
+                    <span class="fig-stat-val">[Sim] [Não]</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">3. Dias sem chuva</span>
+                    <span class="fig-stat-val">— 7 dias —</span>
+                  </div>
+                  <div class="fig-stat">
+                    <span class="fig-stat-key">4. Pragas</span>
+                    <span class="fig-stat-val">[Infest.] [Foco] [Ok]</span>
+                  </div>
+                </div>
+                <div class="fig-gauge-row">
+                  <div class="fig-gauge" aria-label="Gauge de risco ATENÇÃO">
+                    <span class="fig-gauge-val">ATENÇÃO</span>
+                  </div>
+                  <div class="fig-bars">
+                    <div class="fig-bar-row">
+                      <span class="fig-bar-name">NDVI Foliar</span>
+                      <div class="fig-bar-track"><div class="fig-bar-fill" style="width:15%;background:#4caf50"></div></div>
+                    </div>
+                    <div class="fig-bar-row">
+                      <span class="fig-bar-name">Risco Hídrico</span>
+                      <div class="fig-bar-track"><div class="fig-bar-fill" style="width:50%;background:#ff9800"></div></div>
+                    </div>
+                    <div class="fig-bar-row">
+                      <span class="fig-bar-name">Ameaça Biol.</span>
+                      <div class="fig-bar-track"><div class="fig-bar-fill" style="width:50%;background:#ff9800"></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <figcaption>Laudo Analítico (esq.) cruza observações de campo com dados satelitais → Dashboard Final (dir.) com gauge de risco e recomendações</figcaption>
+            </figure>
+          </div>
+        </li>
+
+      </ol>
+    </section>
+
+    <section class="data-section" aria-label="Fontes de Dados">
+      <h2 class="section-title">Fontes de Dados</h2>
+      <p class="section-sub">Todas as informações utilizadas pelo Copilot são públicas, abertas e confiáveis.</p>
+
+      <div class="data-cards">
+
+        <article class="data-card">
+          <span class="data-card-icon" aria-hidden="true">🛰️</span>
+          <div>
+            <h4>Copernicus / ESA — Sentinel-2</h4>
+            <p>Programa espacial europeu de observação da Terra. As imagens multiespectrais são disponibilizadas gratuitamente para uso científico e comercial. Fornecem as bandas NIR e SWIR para cálculo de NDVI e NDMI.</p>
+          </div>
+        </article>
+
+        <article class="data-card">
+          <span class="data-card-icon" aria-hidden="true">🌦️</span>
+          <div>
+            <h4>Open-Meteo API</h4>
+            <p>API meteorológica open-source com dados de 80+ modelos climáticos globais. Fornece temperatura atual, qualidade do ar, probabilidade de precipitação e previsão para 7 dias com resolução de 1km.</p>
+          </div>
+        </article>
+
+        <article class="data-card">
+          <span class="data-card-icon" aria-hidden="true">🗺️</span>
+          <div>
+            <h4>Embrapa — Base Agronômica</h4>
+            <p>Os perfis de solo, práticas de manejo e dados de pragas foram compilados a partir de publicações técnicas da Empresa Brasileira de Pesquisa Agropecuária (Embrapa), a maior instituição de pesquisa agrícola do Brasil.</p>
+          </div>
+        </article>
+
+        <article class="data-card">
+          <span class="data-card-icon" aria-hidden="true">📍</span>
+          <div>
+            <h4>Geolocation Web API</h4>
+            <p>API nativa do navegador (W3C) que captura as coordenadas GPS do dispositivo do produtor com permissão explícita. Nenhuma coordenada é armazenada em servidores — o processamento é feito localmente.</p>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 OrbitAgro Copilot — Todos os direitos reservados</p>
+  </footer>
+
+  <script src="../js/script.js"></script>
+  <script src="../js/pages.js"></script>
 </body>
 </html>

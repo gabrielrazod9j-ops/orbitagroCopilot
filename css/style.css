@@ -14,8 +14,8 @@
   --glow: rgba(76, 175, 80, 0.3);
   --blue: #03a9f4;
   
-  --glass-bg: rgba(10, 10, 12, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(6, 8, 6, 0.88);
+  --glass-border: rgba(76, 175, 80, 0.14);
   
   --ease: cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -410,8 +410,8 @@ label {
   flex: 1;
   position: relative;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(4, 10, 4, 0.72);
+  border: 1px solid rgba(76, 175, 80, 0.12);
   border-radius: 12px;
   padding: 16px;
   text-align: center;
@@ -1080,7 +1080,155 @@ label {
 
 
 /* =========================================
-   9. DASHBOARD FINAL (ESTÁGIO 7)
+   9. LAUDO — PRÉ-VISUALIZAÇÃO EM TEMPO REAL
+   ========================================= */
+.laudo-preview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: fit-content;
+  align-self: center;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.preview-tag {
+  background: var(--primary);
+  color: #000;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  animation: pulse-tag 2s ease-in-out infinite;
+}
+
+@keyframes pulse-tag {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+.preview-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.preview-cultura {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+}
+
+.preview-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-family: monospace;
+}
+
+.preview-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  transition: color 0.4s var(--ease);
+}
+
+.preview-risk-area {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.preview-risk-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-family: monospace;
+}
+
+.preview-risk-badge {
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: var(--primary);
+  transition: color 0.5s var(--ease);
+  margin-bottom: 16px;
+}
+
+.preview-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.preview-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 0.6s var(--ease), background 0.5s;
+}
+
+.preview-factors {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.preview-factor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preview-factor span {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mini-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  width: 15%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 0.55s var(--ease), background 0.4s;
+}
+
+.preview-hint {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.65;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 18px;
+  margin: 0;
+}
+
+/* =========================================
+   10. DASHBOARD FINAL (ESTÁGIO 7)
    ========================================= */
 .final-stage {
   position: relative;
@@ -1206,73 +1354,421 @@ label {
 
 
 /* =========================================
-   10. RESPONSIVIDADE (MOBILE)
+   10. CABEÇALHO INTERNO E MENU HAMBURGUER
    ========================================= */
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 110;
+  padding: 6px;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: transform 0.35s var(--ease), opacity 0.35s var(--ease), width 0.35s var(--ease);
+  transform-origin: center;
+}
+
+.menu-toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu-toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+  width: 0;
+}
+
+.menu-toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  transform: translateX(100%);
+  transition: transform 0.4s var(--ease);
+  pointer-events: none;
+}
+
+.mobile-menu.is-open {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.mobile-menu a {
+  color: #fff;
+  text-decoration: none;
+  font-size: clamp(22px, 5vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.mobile-menu a:hover,
+.mobile-menu a:focus {
+  opacity: 1;
+  transform: translateX(8px);
+  outline: none;
+}
+
+.mobile-menu a.highlighted-link-mobile {
+  color: var(--primary);
+  opacity: 1;
+}
+
+/* =========================================
+   11. RESPONSIVIDADE (MEDIA QUERIES)
+   ========================================= */
+
+/* Tablet e Mobile (≤1024px) */
 @media (max-width: 1024px) {
   .site-header { padding: 20px; }
   .hud-element { display: none; }
   .desktop-nav { display: none; }
-  
-  .menu-toggle { display: block; }
-  
-  .split-layout, 
-  .split-layout.reverse { 
-    grid-template-columns: 1fr; 
-    gap: 40px; 
+
+  .menu-toggle { display: flex; }
+
+  .split-layout,
+  .split-layout.reverse {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
-  
-  .crop-profile-row { 
-    flex-direction: column; 
-    align-items: center; 
-    text-align: center; 
+
+  .crop-profile-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
-  
-  .image-scanner-container { 
-    width: 250px; 
-    height: 250px; 
+
+  .image-scanner-container {
+    width: 250px;
+    height: 250px;
   }
-  
-  .monitoramento-stage { 
-    grid-template-columns: 1fr; 
-    grid-template-rows: auto; 
-    text-align: center; 
-    padding-top: 50px; 
+
+  .monitoramento-stage {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "sat    sat"
+      "left   right"
+      "bar    bar";
+    text-align: center;
+    padding-top: 50px;
+    gap: 24px;
   }
-  
-  .data-box { 
-    border-left: none; 
-    border-bottom: 3px solid var(--primary); 
-    padding-bottom: 20px; 
-    padding-left: 0; 
+
+  .satellite-viewer { grid-area: sat; }
+  .telemetry-left   { grid-area: left; }
+  .telemetry-right  { grid-area: right; }
+  .soil-info-bar    { grid-area: bar; }
+
+  .data-box {
+    border-left: none;
+    border-bottom: 3px solid var(--primary);
+    padding-bottom: 20px;
+    padding-left: 0;
   }
-  
-  #stage-chuva .data-box { 
-    border-bottom: 3px solid var(--blue); 
+
+  #stage-chuva .data-box {
+    border-bottom: 3px solid var(--blue);
   }
-  
-  .soil-info-bar { 
-    flex-direction: column; 
-    gap: 30px; 
+
+  .soil-info-bar {
+    flex-direction: column;
+    gap: 30px;
   }
-  
-  .info-item:not(:last-child) { 
-    border-right: none; 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
-    padding-bottom: 20px; 
+
+  .info-item:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 20px;
   }
-  
-  .hologram-beam, 
-  .hologram-base { 
-    display: none; 
+
+  .hologram-beam,
+  .hologram-base {
+    display: none;
   }
-  
-  .stage { 
-    height: auto; 
-    padding-top: 100px; 
-    padding-bottom: 100px; 
+
+  .stage {
+    height: auto;
+    padding-top: 100px;
+    padding-bottom: 100px;
   }
-  
-  .journey-container { 
-    scroll-snap-type: none; 
+
+  .journey-container {
+    scroll-snap-type: none;
+  }
+
+  .glass-card {
+    padding: 32px 24px;
+    max-width: 100%;
+  }
+
+  .split-layout {
+    padding: 0 20px;
+  }
+}
+
+/* Tablet (≤768px) */
+@media (max-width: 768px) {
+  .site-header {
+    padding: 16px 20px;
+  }
+
+  .brand-logo {
+    font-size: 24px;
+  }
+
+  .huge-data {
+    font-size: 48px;
+  }
+
+  .huge-data.small {
+    font-size: 36px;
+  }
+
+  .glass-card h2 {
+    font-size: 26px;
+  }
+
+  .stage {
+    padding: 80px 20px 60px;
+  }
+
+  .radio-cards {
+    flex-wrap: wrap;
+  }
+
+  .radio-card {
+    min-width: calc(50% - 4px);
+  }
+
+  .column-cards-mobile {
+    flex-direction: column;
+  }
+
+  .floating-corner {
+    width: 200px;
+  }
+
+  .top-left, .bottom-left { left: 4vw; }
+  .top-right, .bottom-right { right: 4vw; }
+
+  .viewer-border {
+    height: clamp(220px, 45vw, 320px);
+    border-radius: 14px;
+  }
+
+  .data-box .value {
+    font-size: 44px;
+  }
+
+  .result-card {
+    padding: 24px;
+  }
+}
+
+/* Mobile (≤480px) */
+@media (max-width: 480px) {
+  .site-header {
+    padding: 14px 16px;
+  }
+
+  .brand-logo {
+    font-size: 20px;
+  }
+
+  .stage {
+    padding: 70px 16px 50px;
+  }
+
+  .glass-card {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
+  .glass-card h2 {
+    font-size: 22px;
+  }
+
+  .glass-card p {
+    font-size: 14px;
+  }
+
+  .chip-group {
+    gap: 6px;
+  }
+
+  .chip {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    padding: 16px;
+    font-size: 13px;
+  }
+
+  .radio-card {
+    min-width: 100%;
+  }
+
+  .floating-corner {
+    display: none;
+  }
+
+  .monitoramento-stage {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "sat"
+      "left"
+      "right"
+      "bar";
+    gap: 18px;
+  }
+
+  .viewer-border {
+    height: clamp(180px, 55vw, 240px);
+    border-radius: 12px;
+  }
+
+  .data-box .value {
+    font-size: 36px;
+  }
+
+  .image-scanner-container {
+    width: 180px;
+    height: 180px;
+  }
+
+  .soil-info-bar {
+    padding: 20px 16px;
+  }
+
+  .pest-modal {
+    width: 95%;
+    border-radius: 14px;
+  }
+
+  .carousel-container {
+    height: 260px;
+  }
+}
+
+/* =========================================
+   11. RESULTADO MOBILE — CANTOS → GRADE
+   ========================================= */
+
+/* Tablet: converte os painéis flutuantes absolutos numa grade abaixo do card central */
+@media (max-width: 768px) {
+  .final-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 80px 20px 60px;
+  }
+
+  .result-card {
+    order: 1;
+    width: min(540px, 100%);
+  }
+
+  .corners-container {
+    order: 2;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: min(540px, 100%);
+    margin: 0;
+  }
+
+  .floating-corner {
+    position: static;
+    width: auto;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+  }
+
+  .is-active .floating-corner { transform: none; }
+  .top-left, .top-right, .bottom-left, .bottom-right {
+    top: auto; bottom: auto; left: auto; right: auto;
+  }
+
+  .top-right h4, .bottom-right h4 { text-align: left; }
+
+  /* Preview card no laudo: aparece abaixo do formulário em tablet */
+  .laudo-preview-card {
+    position: static;
+    width: min(540px, 100%);
+  }
+}
+
+/* Mobile: mostra cantos em coluna única, preview card compacto */
+@media (max-width: 480px) {
+  .floating-corner {
+    display: block;
+  }
+
+  .corners-container {
+    grid-template-columns: 1fr;
+  }
+
+  /* Preview card mais compacto no mobile */
+  .laudo-preview-card {
+    padding: 20px 16px;
+    gap: 16px;
+  }
+
+  .preview-risk-badge {
+    font-size: 26px;
+  }
+
+  .preview-value {
+    font-size: 15px;
+  }
+
+  /* Garante tap targets maiores nas radio-cards do laudo */
+  #stage-inspecao .radio-card {
+    min-height: 56px;
+    justify-content: center;
   }
 }

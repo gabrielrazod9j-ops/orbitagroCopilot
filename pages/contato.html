@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contato | OrbitAgro Copilot</title>
-    <link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contato | OrbitAgro Copilot</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
 </head>
-<body style="background:#050505;">
+<body class="sub-page">
+
   <div class="hud-element hud-top-left" aria-hidden="true">ORBIT.SYS // V.2.4.1_BETA</div>
-  <div class="hud-element hud-bottom-right" id="hud-location" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
+  <div class="hud-element hud-bottom-right" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
   <div class="hud-element hud-vertical" aria-hidden="true">DATA_STREAM_SYNC</div>
 
   <header class="site-header">
@@ -21,9 +23,10 @@
       <nav class="desktop-nav" aria-label="Navegação Principal">
         <a href="../index.html">Home</a>
         <a href="sobre.html">Sobre</a>
-        <a href="#stage-plantacao">Solução</a>
+        <a href="solucao.html">Solução</a>
+        <a href="como-funciona.html">Como Funciona</a>
         <a href="faq.html">FAQ</a>
-        <a href="contato.html">Contato</a>
+        <a href="contato.html" aria-current="page">Contato</a>
         <a href="integrantes.html" class="highlighted-link">Equipe</a>
       </nav>
       <button class="menu-toggle" type="button" aria-label="Abrir menu mobile" aria-expanded="false" aria-controls="mobileMenu">
@@ -35,77 +38,82 @@
   <nav class="mobile-menu" id="mobileMenu" aria-label="Navegação Mobile">
     <a href="../index.html">Home</a>
     <a href="sobre.html">Sobre</a>
-    <a href="#stage-plantacao">Solução</a>
+    <a href="solucao.html">Solução</a>
+    <a href="como-funciona.html">Como Funciona</a>
     <a href="faq.html">FAQ</a>
     <a href="contato.html">Contato</a>
     <a href="integrantes.html" class="highlighted-link-mobile">Equipe</a>
   </nav>
 
-  
   <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
-    <div class="layer-blur"></div>
+  <main class="sub-page-main">
 
-    <div class="conteiner">
-        <header>
-            <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-principal">
-                <span></span><span></span><span></span>
-            </button>
-            <nav class="main-menu" id="menu-principal" aria-label="Menu principal">
-                <a href="../index.html">INÍCIO</a>
-                <a href="sobre.html">SOBRE</a>
-                <a href="como-funciona.html">SOLUÇÃO</a>
-                <a href="faq.html">FAQ</a>
-                <a href="contato.html" class="active" style="color: var(--primary);">CONTATO</a>
-                <a href="integrantes.html">EQUIPE</a>
-            </nav>
-            <a href="../index.html#stage-plantacao" class="login-corner">ABRIR COPILOT</a>
-        </header>
+    <section class="page-hero">
+      <span class="page-tag">Suporte e Vendas</span>
+      <h1>Fale com a OrbitAgro</h1>
+      <p>Tem dúvidas sobre a implementação do monitoramento via satélite na sua lavoura? Nossa equipe de engenheiros agrônomos está pronta para ajudar.</p>
+    </section>
 
-        <main class="contato page-content">
-            <section class="page-hero">
-                <span class="page-tag" style="color: var(--primary); border-color: var(--primary);">Suporte e Vendas</span>
-                <h1>Fale com a OrbitAgro</h1>
-                <p>Tem dúvidas sobre a implementação do monitoramento via satélite na sua lavoura? Nossa equipe de engenheiros agrônomos está pronta para ajudar.</p>
-            </section>
+    <section class="contact-section" aria-label="Informações de contato e formulário">
 
-            <ul class="contato-lista" aria-label="Canais de contato">
-                <li><span class="contact-icon" style="color: var(--primary); border-color: var(--primary);">@</span><strong>Email Profissional</strong><a href="mailto:contato@orbitagro.com.br">contato@orbitagro.com.br</a></li>
-                <li><span class="contact-icon" style="color: var(--primary); border-color: var(--primary);">☎</span><strong>Telefone / WhatsApp</strong><a href="tel:+5511999999999">(11) 99999-9999</a></li>
-                <li><span class="contact-icon" style="color: var(--primary); border-color: var(--primary);">⌖</span><strong>Escritório Central</strong><span>São Paulo/SP - FIAP Paulista 1100</span></li>
-            </ul>
+      <aside class="contact-info-block">
+        <h2>Canais de Atendimento</h2>
+        <ul class="contato-lista" aria-label="Canais de contato">
+          <li>
+            <span class="contact-icon" aria-hidden="true">@</span>
+            <strong>Email Profissional</strong>
+            <a href="mailto:contato@orbitagro.com.br">contato@orbitagro.com.br</a>
+          </li>
+          <li>
+            <span class="contact-icon" aria-hidden="true">☎</span>
+            <strong>Telefone / WhatsApp</strong>
+            <a href="tel:+5511999999999">(11) 99999-9999</a>
+          </li>
+          <li>
+            <span class="contact-icon" aria-hidden="true">⌖</span>
+            <strong>Escritório Central</strong>
+            <span>São Paulo/SP — FIAP Paulista 1100</span>
+          </li>
+        </ul>
+      </aside>
 
-            <form id="contactForm" class="contact-form" novalidate>
-                <span class="form-tag" style="color: var(--primary); border-color: var(--primary);">Contato Direto</span>
-                <h2>Envie sua mensagem</h2>
-                <p class="form-helper">Preencha os dados da sua propriedade abaixo. Nossa inteligência fará a triagem inicial.</p>
-                
-                <div class="form-grid">
-                    <label class="form-field">
-                        Nome do Produtor / Empresa
-                        <input type="text" id="nome" placeholder="Ex: Fazenda Alvorada" required>
-                    </label>
-                    <label class="form-field">
-                        E-mail
-                        <input type="email" id="email" placeholder="seuemail@fazenda.com" required>
-                    </label>
-                    <label class="form-field form-field--full">
-                        Qual é o seu desafio atual?
-                        <textarea id="mensagem" placeholder="Ex: Preciso monitorar o déficit hídrico de 500 hectares de soja..." required></textarea>
-                    </label>
-                </div>
-                
-                <div id="formFeedback" style="font-size: 14px; font-weight: bold; margin-top: 10px; display: none;"></div>
-                
-                <button class="form-button" type="submit" style="background: var(--primary); color: #000; border: none; font-weight: bold; margin-top: 15px;">Enviar Solicitação</button>
-            </form>
-        </main>
+      <div class="contact-form-wrapper">
+        <form id="contactForm" class="contact-form" novalidate>
+          <span class="form-tag">Contato Direto</span>
+          <h2>Envie sua mensagem</h2>
+          <p class="form-helper">Preencha os dados abaixo. Nossa inteligência fará a triagem inicial e retornaremos em até 1 dia útil.</p>
 
-        <footer>
-            <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px;">© 2026 OrbitAgro Copilot - Todos os direitos reservados</p>
-        </footer>
-    </div>
+          <div class="form-grid">
+            <label class="form-field">
+              Nome do Produtor / Empresa
+              <input type="text" id="nome" name="nome" placeholder="Ex: Fazenda Alvorada" required autocomplete="name">
+            </label>
+            <label class="form-field">
+              E-mail para contato
+              <input type="email" id="email" name="email" placeholder="seuemail@fazenda.com" required autocomplete="email">
+            </label>
+            <label class="form-field">
+              Qual é o seu desafio atual?
+              <textarea id="mensagem" name="mensagem" placeholder="Ex: Preciso monitorar o déficit hídrico de 500 hectares de soja..." required></textarea>
+            </label>
+          </div>
 
-    <script src="../js/script.js"></script>
+          <div id="formFeedback" role="alert" aria-live="polite"></div>
+
+          <button class="form-button" type="submit">Enviar Solicitação</button>
+        </form>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 OrbitAgro Copilot — Todos os direitos reservados</p>
+  </footer>
+
+  <script src="../js/script.js"></script>
+  <script src="../js/pages.js"></script>
 </body>
 </html>
