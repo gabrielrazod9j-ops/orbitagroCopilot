@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sobre | OrbitAgro Copilot</title>
-    <link rel="stylesheet" href="../css/style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sobre | OrbitAgro Copilot</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
 </head>
-<body style="background:#050505;">
+<body class="sub-page">
+
   <div class="hud-element hud-top-left" aria-hidden="true">ORBIT.SYS // V.2.4.1_BETA</div>
-  <div class="hud-element hud-bottom-right" id="hud-location" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
+  <div class="hud-element hud-bottom-right" aria-hidden="true">LAT --°--'S LON --°--'W // SENSOR: BUSCANDO...</div>
   <div class="hud-element hud-vertical" aria-hidden="true">DATA_STREAM_SYNC</div>
 
   <header class="site-header">
@@ -20,8 +22,9 @@
       </h1>
       <nav class="desktop-nav" aria-label="Navegação Principal">
         <a href="../index.html">Home</a>
-        <a href="sobre.html">Sobre</a>
-        <a href="#stage-plantacao">Solução</a>
+        <a href="sobre.html" aria-current="page">Sobre</a>
+        <a href="solucao.html">Solução</a>
+        <a href="como-funciona.html">Como Funciona</a>
         <a href="faq.html">FAQ</a>
         <a href="contato.html">Contato</a>
         <a href="integrantes.html" class="highlighted-link">Equipe</a>
@@ -35,74 +38,62 @@
   <nav class="mobile-menu" id="mobileMenu" aria-label="Navegação Mobile">
     <a href="../index.html">Home</a>
     <a href="sobre.html">Sobre</a>
-    <a href="#stage-plantacao">Solução</a>
+    <a href="solucao.html">Solução</a>
+    <a href="como-funciona.html">Como Funciona</a>
     <a href="faq.html">FAQ</a>
     <a href="contato.html">Contato</a>
     <a href="integrantes.html" class="highlighted-link-mobile">Equipe</a>
   </nav>
 
   <canvas id="particleCanvas" aria-hidden="true"></canvas>
-  <main class="journey-container">
-    <!--Apresentação do projeto-->
-    <section class="stage" id="stage-apresentação sobre">
-      <div class="glass-card">
-        <h2>OrbitAgro Copilot</h2>
-        <p>
-          Inteligência climática e produtiva para pequenos e médios produtores.
-          Não é mais um app “de mapas”: é um copiloto que traduz dados de satélite, clima e sinais da lavoura em ações
-          práticas — em linguagem simples.
-        </p>
-      </div>
+
+  <main class="sub-page-main">
+
+    <section class="page-hero">
+      <span class="page-tag">O Projeto</span>
+      <h1>OrbitAgro Copilot</h1>
+      <p>Inteligência climática e produtiva para pequenos e médios produtores. Um copiloto que traduz dados de satélite, clima e sinais da lavoura em ações práticas — em linguagem simples.</p>
     </section>
 
-    <!-- Problema -->
-    <section class="stage" id="stage-problema">
+    <section class="sobre-section" aria-label="Descrição detalhada do projeto">
+
       <div class="glass-card">
         <h2>O que trava a produtividade</h2>
-        <p>
-          Pequenos e médios produtores enfrentam perdas quando o tempo certo de agir não fica claro.
-          Principalmente por:
-        </p>
-          <ul class="lista-ação">
-            <li>seca e chuva imprevisível (planejamento difícil)</li>
-            <li>atraso na identificação de pragas e estresse na planta</li>
-            <li>falta de leitura simples do que o clima realmente indica</li>
-            <li>dificuldade em interpretar dados de satélite e transformá-los em decisão</li>
-            <li>pouco acesso a ferramentas caras de agricultura de precisão</li>
-          </ul>
+        <p>Pequenos e médios produtores enfrentam perdas significativas quando o momento certo de agir não fica claro. Os principais fatores são:</p>
+        <ul class="lista-acao">
+          <li>Seca e chuva imprevisível, tornando o planejamento difícil</li>
+          <li>Atraso na identificação de pragas e estresse na planta</li>
+          <li>Falta de leitura simples do que o clima realmente indica</li>
+          <li>Dificuldade em interpretar dados de satélite e transformá-los em decisão</li>
+          <li>Pouco acesso a ferramentas caras de agricultura de precisão</li>
+        </ul>
       </div>
-    </section>
 
-    <!-- Solução -->
-    <section class="stage" id="stage-solucao">
-      <div class="glass-card">
+      <div class="glass-card sobre-card-secondary">
         <h2>O que o OrbitAgro faz</h2>
-        <p>
-          Ajuda você a registrar a lavoura e receber alertas simples.
-          O sistema combina: cultura, dias sem chuva, calor, chuva prevista, sinais observados e condições de solo.
-        </p>
-        <div class="recomendações" aria-label="Como funciona">
-          <ul class="lista-ação">
-            <li>Satélite + dados espaciais: indica variações e possíveis áreas com risco;</li>
-            <li>Clima: interpreta previsões e padrões para os próximos dias;</li>
-            <li>Sintomas no campo: o produtor registra o que percebe e melhora a precisão;</li>
-            <li>IA recomenda: ações práticas, priorizadas e fáceis de executar;</li>
-          </ul>
-        </div>
+        <p>Ajuda você a registrar a lavoura e receber orientações inteligentes. O sistema combina cultura selecionada, dias sem chuva, temperatura, chuva prevista, sinais observados e condições de solo:</p>
+        <ul class="lista-acao">
+          <li>Satélite + dados espaciais: indica variações e possíveis áreas com risco</li>
+          <li>Clima: interpreta previsões e padrões para os próximos dias</li>
+          <li>Sintomas no campo: o produtor registra o que percebe e melhora a precisão</li>
+          <li>IA recomenda: ações práticas, priorizadas e fáceis de executar</li>
+        </ul>
 
-        <!--exemplo de resposta:-->
-        <div style="margin-top: 22px;">
-          <p style="margin:0; color: rgba(255,255,255,0.9); font-weight: 650;">Exemplo de resposta:</p>
-          <p style="margin-top: 10px;">
-            “Sua lavoura está com risco alto de estresse hídrico nos próximos 5 dias.
-            Priorize irrigação no talhão X, evite adubação antes da chuva e monitore sinais de praga.”
-          </p>
+        <div class="exemplo-resposta">
+          <p>Exemplo de resposta do Copilot:</p>
+          <p>"Sua lavoura está com risco alto de estresse hídrico nos próximos 5 dias. Priorize irrigação no talhão X, evite adubação antes da chuva e monitore sinais de praga."</p>
         </div>
       </div>
+
     </section>
 
   </main>
-  <!--conectando a pagina HTML com o arquivo javascript-->
+
+  <footer class="site-footer">
+    <p>© 2026 OrbitAgro Copilot — Todos os direitos reservados</p>
+  </footer>
+
   <script src="../js/script.js"></script>
+  <script src="../js/pages.js"></script>
 </body>
-</html> 
+</html>

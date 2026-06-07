@@ -72,20 +72,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (gl) {
         // As mesmas constantes físicas da Home para o comportamento do rato
-        const config = { 
-            maxDesktop: 35000, maxMobile: 15000, 
-            pointDesktop: 2.2, pointMobile: 2.6, 
-            returnForce: 0.02, friction: 0.95, 
-            maxSpeed: 0.07, 
-            mouseFollowRadius: 180, mouseFollow: 0.0006, 
-            pathFollow: 0.007, pathEdgePull: 0.008, 
+        const config = {
+            maxDesktop: 50000, maxMobile: 22000,
+            pointDesktop: 2.5, pointMobile: 2.9,
+            returnForce: 0.02, friction: 0.95,
+            maxSpeed: 0.07,
+            mouseFollowRadius: 180, mouseFollow: 0.0006,
+            pathFollow: 0.007, pathEdgePull: 0.008,
             pathTube: 150, flow: 0.0015
         };
 
-        const state = { 
-            width: 1, height: 1, dpr: 1, mobile: false, count: 0, 
-            positions: null, velocities: null, angles: null, radii: null, speeds: null, alphas: null, colors: null,
-            trail: [], pointer: { active: false, px: 0, py: 0, lastX: 0, lastY: 0, lastTime: 0 } 
+        const state = {
+            width: 1, height: 1, dpr: 1, mobile: false, count: 0,
+            positions: null, velocities: null, angles: null, radii: null, speeds: null, alphas: null, colors: null, seeds: null,
+            trail: [], pointer: { active: false, px: 0, py: 0, lastX: 0, lastY: 0, lastTime: 0 }
         };
 
         const clamp = (v, min, max) => Math.max(min, Math.min(max, v)); 
@@ -94,21 +94,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const clipToPxX = x => (x + 1) * 0.5 * state.width; 
         const clipToPxY = y => (1 - y) * 0.5 * state.height;
 
-        // SHADERS OTIMIZADOS
+        // SHADERS — mesma qualidade visual da home page
         const vertexSource = `
             attribute vec3 aPosition;
             attribute float aAlpha;
             attribute vec3 aColor;
+            attribute float aSeed;
             uniform float uPointSize;
             uniform float uDpr;
             varying float vAlpha;
             varying vec3 vColor;
+            varying float vSeed;
             void main() {
                 vAlpha = aAlpha;
                 vColor = aColor;
+                vSeed  = aSeed;
                 gl_Position = vec4(aPosition, 1.0);
-                float depth = 1.0 + aPosition.z * 0.2;
-                gl_PointSize = uPointSize * uDpr * depth;
+                float depth = 1.0 + aPosition.z * 0.22;
+                gl_PointSize = uPointSize * uDpr * depth * 1.2;
             }
         `;
 
@@ -116,12 +119,16 @@ document.addEventListener('DOMContentLoaded', () => {
             precision highp float;
             varying float vAlpha;
             varying vec3 vColor;
+            varying float vSeed;
             void main() {
                 vec2 uv = gl_PointCoord - 0.5;
                 float d = length(uv);
-                float dotMask = smoothstep(0.48, 0.1, d);
-                float core = smoothstep(0.18, 0.0, d) * 0.5;
-                gl_FragColor = vec4(vColor, (dotMask + core) * vAlpha);
+                float dotMask = smoothstep(0.48, 0.075, d);
+                float core    = smoothstep(0.18,  0.0,   d) * 0.22;
+                float rim     = smoothstep(0.50,  0.26,  d) * 0.16;
+                float shimmer = 1.0 + sin(vSeed * 44.0) * 0.22;
+                float alpha   = (dotMask + core + rim) * vAlpha * shimmer;
+                gl_FragColor  = vec4(vColor, alpha);
             }
         `;
 
@@ -137,64 +144,119 @@ document.addEventListener('DOMContentLoaded', () => {
         gl.attachShader(program, createShader(gl.FRAGMENT_SHADER, fragmentSource)); 
         gl.linkProgram(program);
 
-        const locations = { 
-            position: gl.getAttribLocation(program, 'aPosition'), 
-            alpha: gl.getAttribLocation(program, 'aAlpha'), 
-            color: gl.getAttribLocation(program, 'aColor'), 
-            pointSize: gl.getUniformLocation(program, 'uPointSize'), 
-            dpr: gl.getUniformLocation(program, 'uDpr') 
+        const locations = {
+            position:  gl.getAttribLocation(program,  'aPosition'),
+            alpha:     gl.getAttribLocation(program,  'aAlpha'),
+            color:     gl.getAttribLocation(program,  'aColor'),
+            seed:      gl.getAttribLocation(program,  'aSeed'),
+            pointSize: gl.getUniformLocation(program, 'uPointSize'),
+            dpr:       gl.getUniformLocation(program, 'uDpr')
         };
-        
-        const bufs = { pos: gl.createBuffer(), alpha: gl.createBuffer(), color: gl.createBuffer() };
 
-        // CONSTRUÇÃO MATEMÁTICA DO BURACO NEGRO
-        function buildParticles() { 
-            state.mobile = window.innerWidth < 720; 
-            state.width = window.innerWidth; state.height = window.innerHeight; 
-            
-            const count = state.mobile ? config.maxMobile : config.maxDesktop; 
-            state.count = count; 
+        const bufs = { pos: gl.createBuffer(), alpha: gl.createBuffer(), color: gl.createBuffer(), seed: gl.createBuffer() };
 
-            state.positions = new Float32Array(count * 3); 
-            state.velocities = new Float32Array(count * 3); 
-            state.colors = new Float32Array(count * 3);
-            state.alphas = new Float32Array(count); 
-            
-            // Fatores orbitais
-            state.angles = new Float32Array(count); 
-            state.radii = new Float32Array(count); 
-            state.speeds = new Float32Array(count);
+        // CONSTRUÇÃO REALISTA DO BURACO NEGRO (física de disco de acreção)
+        function buildParticles() {
+            state.mobile = window.innerWidth < 720;
+            state.width  = canvas.parentElement.offsetWidth  || window.innerWidth;
+            state.height = canvas.parentElement.offsetHeight || window.innerHeight;
 
-            const aspect = state.width / state.height;
+            const count = state.mobile ? config.maxMobile : config.maxDesktop;
+            state.count = count;
 
-            for (let i = 0; i < count; i++) { 
-                const o = i * 3; 
-                state.angles[i] = Math.random() * Math.PI * 2; 
-                
-                // Distribuição não-linear: densidade monstruosa no centro, esparso nas pontas
-                const distribution = Math.pow(Math.random(), 4);
-                state.radii[i] = 0.22 + distribution * 1.5; // O vazio no centro é garantido pelo 0.22!
-                state.speeds[i] = (0.0015 / state.radii[i]) + 0.0002; 
+            state.positions  = new Float32Array(count * 3);
+            state.velocities = new Float32Array(count * 3);
+            state.colors     = new Float32Array(count * 3);
+            state.alphas     = new Float32Array(count);
+            state.seeds      = new Float32Array(count);
+            state.angles     = new Float32Array(count);
+            state.radii      = new Float32Array(count);
+            state.speeds     = new Float32Array(count);
 
-                state.positions[o] = (Math.cos(state.angles[i]) * state.radii[i]) / aspect; 
-                state.positions[o+1] = Math.sin(state.angles[i]) * state.radii[i] * 0.35; 
-                state.positions[o+2] = (Math.random() - 0.5) * 0.1; 
+            const aspect  = state.width / state.height;
+            const INCLINE = 0.26;   // Inclinação do disco
+            const EH      = 0.20;   // Event Horizon — vazio abaixo disso
+            const PS_END  = 0.30;   // Photon Sphere
+            const ID_END  = 0.70;   // Disco interno
+            // Beaming factor: gravitational + relativistic beaming
+            // Lado esquerdo (sin>0) se aproxima → fótons doppler-boosted → visualmente muito mais brilhante
+            const BEAM_BRIGHT = 1.85;  // factor multiplicador no lado que se aproxima
+            const BEAM_DIM    = 0.30;  // factor multiplicador no lado que se afasta
 
-                state.alphas[i] = 0.3 + Math.random() * 0.7; 
+            for (let i = 0; i < count; i++) {
+                const o     = i * 3;
+                const angle = Math.random() * Math.PI * 2;
+                state.angles[i] = angle;
 
-                // CORES DE INTERESTELAR (Quente para Frio)
-                let colorMix = Math.random();
-                if (colorMix > 0.8) {
-                    state.colors[o] = 1.0; state.colors[o+1] = 0.95; state.colors[o+2] = 0.8; // Branco Core
-                } else if (colorMix > 0.3) {
-                    state.colors[o] = 1.0; state.colors[o+1] = 0.6; state.colors[o+2] = 0.1; // Dourado
+                let r, cr, cg, cb, alpha;
+                const zone = Math.random();
+
+                if (zone < 0.30) {
+                    // PHOTON SPHERE — 30% — anel ultra-brilhante branco-azulado
+                    // r concentrado próximo do event horizon (pow 1.2 → mais partículas perto de EH)
+                    r = EH + (PS_END - EH) * Math.pow(Math.random(), 1.2);
+                    const heat = 1.0 - (r - EH) / (PS_END - EH);
+                    cr = 0.80 + heat * 0.20;
+                    cg = 0.86 + heat * 0.14;
+                    cb = 1.0;
+                    alpha = 0.50 + heat * 0.50;
+
+                } else if (zone < 0.62) {
+                    // DISCO INTERNO — 32% — branco-quente → laranja
+                    r = PS_END + Math.pow(Math.random(), 1.6) * (ID_END - PS_END);
+                    const t = (r - PS_END) / (ID_END - PS_END);
+                    cr = 1.0;
+                    cg = Math.max(0.10, 0.98 - t * 0.82);
+                    cb = Math.max(0.0,  0.30 - t * 0.28);
+                    alpha = (0.65 - t * 0.22) * (0.55 + Math.random() * 0.45);
+
+                } else if (zone < 0.88) {
+                    // DISCO EXTERNO — 26% — laranja-vermelho, esfriando
+                    r = ID_END + Math.pow(Math.random(), 1.1) * 0.95;
+                    const t = (r - ID_END) / 0.95;
+                    cr = Math.max(0.20, 0.88 - t * 0.55);
+                    cg = Math.max(0.0,  0.14 - t * 0.12);
+                    cb = 0.02;
+                    alpha = (0.24 - t * 0.20) * (0.35 + Math.random() * 0.65);
+
                 } else {
-                    state.colors[o] = 0.8; state.colors[o+1] = 0.2; state.colors[o+2] = 0.05; // Vermelho Quente
+                    // HALO — 12% — partículas capturadas na periferia
+                    r = 1.65 + Math.pow(Math.random(), 0.50) * 0.75;
+                    cr = 0.55; cg = 0.08; cb = 0.02;
+                    alpha = 0.02 + Math.random() * 0.06;
                 }
-            } 
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alpha); gl.bufferData(gl.ARRAY_BUFFER, state.alphas, gl.STATIC_DRAW); 
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.color); gl.bufferData(gl.ARRAY_BUFFER, state.colors, gl.STATIC_DRAW); 
+                state.radii[i]  = r;
+                state.seeds[i]  = Math.random();
+                state.speeds[i] = (0.0019 / Math.sqrt(r)) * (0.74 + Math.random() * 0.52);
+
+                state.positions[o]   = (Math.cos(angle) * r) / aspect;
+                state.positions[o+1] = Math.sin(angle) * r * INCLINE;
+                // Espessura vertical mínima do disco — simula espessura física real
+                state.positions[o+2] = (Math.random() - 0.5) * 0.04;
+
+                // EFEITO DOPPLER + BEAMING RELATIVÍSTICO:
+                // sin(angle) > 0 → lado esquerdo se aproxima → blueshift + brightening extremo
+                // sin(angle) < 0 → lado direito se afasta  → redshift + dimming extremo
+                const doppler = Math.sin(angle);
+
+                // Fator de beaming: mapeia [-1,1] para [BEAM_DIM, BEAM_BRIGHT]
+                const beamFactor = doppler > 0
+                    ? 1.0 + (BEAM_BRIGHT - 1.0) * doppler
+                    : 1.0 - (1.0 - BEAM_DIM)   * (-doppler);
+
+                // Blueshift: lado que se aproxima fica mais azul e mais brilhante
+                const blueShift = Math.max(0, doppler) * 0.50;
+
+                state.colors[o]   = clamp(cr * (1.0 - blueShift * 0.15) * beamFactor, 0, 1);
+                state.colors[o+1] = clamp(cg * (1.0 + blueShift * 0.10) * beamFactor, 0, 1);
+                state.colors[o+2] = clamp((cb + blueShift * 0.55)       * beamFactor, 0, 1);
+                state.alphas[i]   = clamp(alpha * beamFactor, 0.005, 1.0);
+            }
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alpha); gl.bufferData(gl.ARRAY_BUFFER, state.alphas, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.color); gl.bufferData(gl.ARRAY_BUFFER, state.colors, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.seed);  gl.bufferData(gl.ARRAY_BUFFER, state.seeds,  gl.STATIC_DRAW);
         }
 
         // LÓGICA DO RASTRO DO RATO (Exatamente a mesma física da Home)
@@ -267,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Órbita
                 state.angles[i] += state.speeds[i];
                 const hx = (Math.cos(state.angles[i]) * state.radii[i]) / aspect;
-                const hy = Math.sin(state.angles[i]) * state.radii[i] * 0.35; // Achata para o 3D
+                const hy = Math.sin(state.angles[i]) * state.radii[i] * 0.26;
 
                 vx += (hx - x) * config.returnForce; 
                 vy += (hy - y) * config.returnForce; 
@@ -328,13 +390,14 @@ document.addEventListener('DOMContentLoaded', () => {
             gl.bindBuffer(gl.ARRAY_BUFFER, bufs.pos); gl.bufferData(gl.ARRAY_BUFFER, state.positions, gl.DYNAMIC_DRAW); 
             gl.enableVertexAttribArray(locations.position); gl.vertexAttribPointer(locations.position, 3, gl.FLOAT, false, 0, 0); 
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alpha); gl.enableVertexAttribArray(locations.alpha); gl.vertexAttribPointer(locations.alpha, 1, gl.FLOAT, false, 0, 0); 
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.color); gl.enableVertexAttribArray(locations.color); gl.vertexAttribPointer(locations.color, 3, gl.FLOAT, false, 0, 0); 
+            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.alpha); gl.enableVertexAttribArray(locations.alpha); gl.vertexAttribPointer(locations.alpha, 1, gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.color); gl.enableVertexAttribArray(locations.color); gl.vertexAttribPointer(locations.color, 3, gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, bufs.seed);  gl.enableVertexAttribArray(locations.seed);  gl.vertexAttribPointer(locations.seed,  1, gl.FLOAT, false, 0, 0);
 
-            gl.uniform1f(locations.pointSize, state.mobile ? config.pointMobile : config.pointDesktop); 
-            gl.uniform1f(locations.dpr, state.dpr); 
+            gl.uniform1f(locations.pointSize, state.mobile ? config.pointMobile : config.pointDesktop);
+            gl.uniform1f(locations.dpr, state.dpr);
 
-            gl.drawArrays(gl.POINTS, 0, state.count); 
+            gl.drawArrays(gl.POINTS, 0, state.count);
             requestAnimationFrame(render); 
         }
 

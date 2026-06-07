@@ -15,7 +15,22 @@ const mobileMenu = document.getElementById('mobileMenu');
 
 if (menuToggle && mobileMenu) {
     menuToggle.addEventListener('click', () => {
-        mobileMenu.classList.toggle('is-open');
+        const isOpen = mobileMenu.classList.toggle('is-open');
+        menuToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.remove('is-open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) {
+            mobileMenu.classList.remove('is-open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
     });
 }
 
@@ -329,6 +344,7 @@ const getWeatherEmoji = (code) => {
 };
 
 async function fetchWeatherTelemetrics(lat, lon) {
+    if (!document.getElementById('rt-temp')) return;
     document.getElementById('rt-temp').innerText = `--°C`;
     document.getElementById('rt-aqi').innerText = `Buscando...`;
     document.getElementById('rt-chuva-chance').innerText = `--%`;
@@ -557,8 +573,7 @@ const pestModal = document.getElementById('pestModal');
 const carouselTrack = document.getElementById('carouselTrack');
 let currentPestIndex = 0;
 
-// O SEGREDO DO SCROLL: A layer geral NÃO bloqueia o rato. Pode rolar a página à vontade.
-hotspotLayer.style.pointerEvents = 'none';
+if (hotspotLayer) hotspotLayer.style.pointerEvents = 'none';
 
 /**
  * Cria os pontos de luz sobre as folhas baseados nas pragas da cultura
@@ -634,31 +649,73 @@ function updateCropInsights(cropKey) {
 document.querySelectorAll('.chip').forEach(chip => {
     const radio = chip.querySelector('input[type="radio"]');
     chip.addEventListener('click', function(e) {
-        e.preventDefault(); 
-        
+        e.preventDefault();
+
         if (activeCrop === radio.value) {
-            radio.checked = false; 
+            radio.checked = false;
             activeCrop = null;
             document.getElementById('panel-plantacao').classList.remove('visible');
             document.querySelectorAll('.ndvi-legend').forEach(el => el.classList.remove('visible'));
             hotspotLayer.innerHTML = '';
         } else {
-            radio.checked = true; 
+            radio.checked = true;
             activeCrop = radio.value;
             updateCropInsights(radio.value);
         }
+        updateLaudoPreview();
     });
 });
 
 // Stepper de Dias Secos
 const inputDias = document.getElementById('diasSeca');
-document.getElementById('btnMinus')?.addEventListener('click', () => { 
-    let v = parseInt(inputDias.value) || 0; 
-    if (v > 0) inputDias.value = v - 1; 
+document.getElementById('btnMinus')?.addEventListener('click', () => {
+    let v = parseInt(inputDias.value) || 0;
+    if (v > 0) inputDias.value = v - 1;
+    updateLaudoPreview();
 });
-document.getElementById('btnPlus')?.addEventListener('click', () => { 
-    inputDias.value = (parseInt(inputDias.value) || 0) + 1; 
+document.getElementById('btnPlus')?.addEventListener('click', () => {
+    inputDias.value = (parseInt(inputDias.value) || 0) + 1;
+    updateLaudoPreview();
 });
+
+// Atualiza a pré-visualização em tempo real ao mudar qualquer radio do laudo
+document.querySelectorAll('input[name="saudeFoliar"], input[name="stressHidrico"], input[name="nivelPragas"]').forEach(r => {
+    r.addEventListener('change', updateLaudoPreview);
+});
+
+// PRÉ-VISUALIZAÇÃO DO LAUDO EM TEMPO REAL
+function updateLaudoPreview() {
+    const sf = Number(document.querySelector('input[name="saudeFoliar"]:checked')?.value ?? 1);
+    const sh = Number(document.querySelector('input[name="stressHidrico"]:checked')?.value ?? 1);
+    const ds = parseInt(inputDias?.value) || 0;
+    const np = Number(document.querySelector('input[name="nivelPragas"]:checked')?.value ?? 1);
+
+    const ptsNDVI  = sf === 2 ? 3 : 0;
+    const ptsSeca  = sh === 2 ? 3 : (ds > 5 ? 1 : 0);
+    const ptsPraga = np === 3 ? 4 : (np === 2 ? 2 : 0);
+    const pontos   = ptsNDVI + ptsSeca + ptsPraga;
+
+    const nivel = pontos > 5 ? 'CRÍTICO' : pontos > 2 ? 'ATENÇÃO' : 'NOMINAL';
+    const cor   = pontos > 5 ? '#d32f2f' : pontos > 2 ? '#ff9800' : '#4caf50';
+
+    const badge   = document.getElementById('preview-risk-badge');
+    const fill    = document.getElementById('preview-bar-fill');
+    const cultEl  = document.getElementById('preview-cultura-nome');
+    const bNdvi   = document.getElementById('prev-bar-ndvi');
+    const bSeca   = document.getElementById('prev-bar-seca');
+    const bPraga  = document.getElementById('prev-bar-praga');
+
+    if (!badge) return;
+
+    if (cultEl) cultEl.textContent = activeCrop ? (agroDB[activeCrop]?.nome ?? activeCrop) : 'Nenhuma selecionada';
+    badge.textContent = nivel;
+    badge.style.color = cor;
+
+    if (fill) { fill.style.width = Math.min(100, (pontos / 10) * 100) + '%'; fill.style.background = cor; }
+    if (bNdvi)  { bNdvi.style.width = ptsNDVI ? '100%' : '15%'; bNdvi.style.background = ptsNDVI ? '#f44336' : '#4caf50'; }
+    if (bSeca)  { bSeca.style.width = ptsSeca > 2 ? '100%' : ptsSeca > 0 ? '50%' : '15%'; bSeca.style.background = ptsSeca > 2 ? '#f44336' : ptsSeca > 0 ? '#ff9800' : '#4caf50'; }
+    if (bPraga) { bPraga.style.width = ptsPraga > 2 ? '100%' : ptsPraga > 0 ? '50%' : '15%'; bPraga.style.background = ptsPraga > 2 ? '#f44336' : ptsPraga > 0 ? '#ff9800' : '#4caf50'; }
+}
 
 
 // Botão de Gerar o Laudo Final (Estágio 6 para 7)
@@ -750,38 +807,38 @@ document.getElementById('btnDiagnostico')?.addEventListener('click', () => {
 
     document.documentElement.style.setProperty('--primary', colorBadge);
     document.documentElement.style.setProperty('--glow', glowBadge);
-    document.querySelector('.journey-container').scrollTo({ top: document.getElementById('stage-resultado').offsetTop, behavior: 'smooth' });
+    document.querySelector('.journey-container')?.scrollTo({ top: document.getElementById('stage-resultado')?.offsetTop, behavior: 'smooth' });
 });
 
 document.getElementById('btnRecomecar')?.addEventListener('click', () => {
-    document.querySelector('.journey-container').scrollTo({ top: 0, behavior: 'smooth' });
-    
+    document.querySelector('.journey-container')?.scrollTo({ top: 0, behavior: 'smooth' });
+
     setTimeout(() => {
         document.getElementById('gaugeFill').style.strokeDashoffset = 126;
         document.querySelectorAll('.factor-fill').forEach(el => el.style.width = '0%');
         document.documentElement.style.setProperty('--primary', '#4caf50');
-        
+
         document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
         activeCrop = null;
-        document.getElementById('panel-plantacao').classList.remove('visible');
+        document.getElementById('panel-plantacao')?.classList.remove('visible');
         document.querySelectorAll('.ndvi-legend').forEach(el => el.classList.remove('visible'));
-        hotspotLayer.innerHTML = '';
+        if (hotspotLayer) hotspotLayer.innerHTML = '';
     }, 500);
 });
 
 // Controla visualização dos Hotspots baseado no Scroll (Apenas no Estágio 5 - Pragas)
-document.querySelector('.journey-container').addEventListener('scroll', (e) => {
-    // Calculo do scroll de 0 a 6 (os 7 estágios)
-    const scrollP = (e.target.scrollTop / (e.target.scrollHeight - window.innerHeight)) * 6.0;
-    
-    // O estágio de pragas é o índice 4 (entre 3.5 e 4.5 do scroll)
-    if(scrollP >= 3.5 && scrollP <= 4.5 && activeCrop) { 
-        hotspotLayer.style.opacity = '1';
-    } else {
-        hotspotLayer.style.opacity = '0';
-        pestModal.classList.remove('open');
-    }
-});
+const _journeyContainer = document.querySelector('.journey-container');
+if (_journeyContainer) {
+    _journeyContainer.addEventListener('scroll', (e) => {
+        const scrollP = (e.target.scrollTop / (e.target.scrollHeight - window.innerHeight)) * 6.0;
+        if (scrollP >= 3.5 && scrollP <= 4.5 && activeCrop) {
+            if (hotspotLayer) hotspotLayer.style.opacity = '1';
+        } else {
+            if (hotspotLayer) hotspotLayer.style.opacity = '0';
+            if (pestModal) pestModal.classList.remove('open');
+        }
+    });
+}
 
 
 // ==========================================
@@ -790,7 +847,8 @@ document.querySelector('.journey-container').addEventListener('scroll', (e) => {
 
 (() => {
     const canvas = document.getElementById('particleCanvas');
-    const gl = canvas.getContext('webgl', { 
+    if (!canvas) return;
+    const gl = canvas.getContext('webgl', {
         alpha: true, 
         antialias: false, 
         depth: false, 
