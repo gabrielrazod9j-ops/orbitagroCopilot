@@ -2065,15 +2065,24 @@ label {
   margin-bottom: 20px;
 }
 
-/* Label acima do viewer de satélite */
+/* Label sobreposto no topo do viewer de satélite */
 .viewer-stage-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
   font-family: monospace;
   font-size: 10px;
   letter-spacing: 0.2em;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.75);
   text-transform: uppercase;
-  margin-bottom: 8px;
   text-align: center;
+  padding: 7px 12px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Info-item-tag (substitui h4 simples no soil-info-bar) */
