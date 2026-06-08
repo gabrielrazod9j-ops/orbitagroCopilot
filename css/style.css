@@ -997,6 +997,10 @@ label {
 /* =========================================
    8. HOTSPOTS E MODAL DE PRAGAS (ESTÁGIO 5)
    ========================================= */
+.stage-relative {
+  position: relative;
+}
+
 .hotspot-layer {
   position: absolute;
   inset: 0;
@@ -2301,7 +2305,7 @@ label {
   .top-right, .bottom-right { right: 4vw; }
 
   .viewer-border {
-    height: clamp(220px, 45vw, 320px);
+    height: clamp(280px, 58vw, 400px);
     border-radius: 14px;
   }
 
@@ -2375,7 +2379,7 @@ label {
   }
 
   .viewer-border {
-    height: clamp(180px, 55vw, 240px);
+    height: clamp(260px, 72vw, 340px);
     border-radius: 12px;
   }
 
