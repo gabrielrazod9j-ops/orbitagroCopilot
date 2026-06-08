@@ -1627,6 +1627,164 @@ if (savedCrop && agroDB[savedCrop]) {
     window.addEventListener('resize', resize);
 
     const stageEl = document.getElementById('stage-chuva');
+    const particleCanvasEl = document.getElementById('particleCanvas');
+    if (stageEl) {
+        new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                start();
+                if (particleCanvasEl) particleCanvasEl.style.display = 'none';
+            } else {
+                stop();
+                if (particleCanvasEl) particleCanvasEl.style.display = '';
+            }
+        }, { threshold: 0.05 }).observe(stageEl);
+    }
+})();
+
+// ==========================================
+// 9. WEBGL RAIN DROPS (ETAPA CHUVA)
+// ==========================================
+(() => {
+    const canvas = document.getElementById('glRainCanvas');
+    if (!canvas) return;
+    const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false });
+    if (!gl) return;
+
+    const VS = `
+        attribute vec2  a_pos;
+        attribute float a_t;
+        varying   float v_t;
+        void main() {
+            gl_Position = vec4(a_pos, 0.0, 1.0);
+            v_t = a_t;
+        }
+    `;
+    const FS = `
+        precision mediump float;
+        varying float v_t;
+        void main() {
+            gl_FragColor = vec4(0.78, 0.93, 1.0, v_t * 0.52);
+        }
+    `;
+
+    function compileShader(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+    }
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, VS));
+    gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const aPosLoc = gl.getAttribLocation(prog, 'a_pos');
+    const aTLoc   = gl.getAttribLocation(prog, 'a_t');
+    const glBuf   = gl.createBuffer();
+
+    const N     = 280;
+    const VERTS = 6;
+    const STR   = 3;
+    const vData = new Float32Array(N * VERTS * STR);
+
+    const ANG  = 12 * Math.PI / 180;
+    const SINR = Math.sin(ANG);
+    const COSR = Math.cos(ANG);
+
+    let W = 1, H = 1;
+    const drops = [];
+
+    function makeDrop() {
+        return {
+            x:   Math.random() * W,
+            y:   Math.random() * H,
+            len: 22 + Math.random() * 52,
+            wid: 0.7 + Math.random() * 0.9,
+            spd: 9   + Math.random() * 16,
+            alp: 0.35 + Math.random() * 0.65,
+        };
+    }
+
+    function initDrops() {
+        drops.length = 0;
+        for (let i = 0; i < N; i++) drops.push(makeDrop());
+    }
+
+    function ndcX(x) { return  x / W * 2 - 1; }
+    function ndcY(y) { return  1 - y / H * 2; }
+
+    function buildVerts() {
+        let i = 0;
+        for (const d of drops) {
+            const hx = d.x + SINR * d.len * 0.5;
+            const hy = d.y + COSR * d.len * 0.5;
+            const tx = d.x - SINR * d.len * 0.5;
+            const ty = d.y - COSR * d.len * 0.5;
+            const hw = d.wid * 0.5;
+
+            const hrx = hx + COSR * hw, hry = hy - SINR * hw;
+            const hlx = hx - COSR * hw, hly = hy + SINR * hw;
+            const trx = tx + COSR * hw, trY = ty - SINR * hw;
+            const tlx = tx - COSR * hw, tly = ty + SINR * hw;
+            const a = d.alp;
+
+            vData[i++]=ndcX(hlx); vData[i++]=ndcY(hly); vData[i++]=a;
+            vData[i++]=ndcX(hrx); vData[i++]=ndcY(hry); vData[i++]=a;
+            vData[i++]=ndcX(tlx); vData[i++]=ndcY(tly); vData[i++]=0;
+            vData[i++]=ndcX(hrx); vData[i++]=ndcY(hry); vData[i++]=a;
+            vData[i++]=ndcX(trx); vData[i++]=ndcY(trY); vData[i++]=0;
+            vData[i++]=ndcX(tlx); vData[i++]=ndcY(tly); vData[i++]=0;
+        }
+    }
+
+    function resize() {
+        const p = canvas.parentElement;
+        W = canvas.width  = p ? p.offsetWidth  : window.innerWidth;
+        H = canvas.height = p ? p.offsetHeight : window.innerHeight;
+        gl.viewport(0, 0, W, H);
+        initDrops();
+    }
+
+    let animId, running = false;
+
+    function tick() {
+        for (const d of drops) {
+            d.x += SINR * d.spd;
+            d.y += COSR * d.spd;
+            if (d.y - d.len * 0.5 > H) {
+                const r = makeDrop();
+                Object.assign(d, r);
+                d.y = -d.len;
+            }
+        }
+        buildVerts();
+
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, glBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, vData, gl.DYNAMIC_DRAW);
+
+        const bytes = STR * 4;
+        gl.enableVertexAttribArray(aPosLoc);
+        gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, bytes, 0);
+        gl.enableVertexAttribArray(aTLoc);
+        gl.vertexAttribPointer(aTLoc,   1, gl.FLOAT, false, bytes, 8);
+
+        gl.drawArrays(gl.TRIANGLES, 0, N * VERTS);
+        animId = requestAnimationFrame(tick);
+    }
+
+    function start() { if (!running) { running = true;  tick(); } }
+    function stop()  { if (running)  { running = false; cancelAnimationFrame(animId); } }
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    const stageEl = document.getElementById('stage-chuva');
     if (stageEl) {
         new IntersectionObserver(entries => {
             entries[0].isIntersecting ? start() : stop();
@@ -1635,7 +1793,192 @@ if (savedCrop && agroDB[savedCrop]) {
 })();
 
 // ==========================================
-// 9. SATELLITE LIGHTBOX
+// 10. WEBGL LEAF PARTICLES (STAGE PRAGAS)
+// ==========================================
+(() => {
+    const canvas = document.getElementById('leafCanvas');
+    if (!canvas) return;
+    const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false });
+    if (!gl) return;
+
+    const VS = `
+        attribute vec2  a_pos;
+        attribute float a_size;
+        attribute float a_rot;
+        attribute float a_alpha;
+        attribute vec3  a_col;
+        varying   float v_rot;
+        varying   float v_alpha;
+        varying   vec3  v_col;
+        void main() {
+            gl_Position = vec4(a_pos, 0.0, 1.0);
+            gl_PointSize = a_size;
+            v_rot   = a_rot;
+            v_alpha = a_alpha;
+            v_col   = a_col;
+        }
+    `;
+    const FS = `
+        precision mediump float;
+        varying float v_rot;
+        varying float v_alpha;
+        varying vec3  v_col;
+        void main() {
+            vec2  uv   = gl_PointCoord - 0.5;
+            float cosA = cos(v_rot);
+            float sinA = sin(v_rot);
+            vec2  r    = vec2(cosA * uv.x - sinA * uv.y,
+                              sinA * uv.x + cosA * uv.y);
+            float H    = 0.44;
+            float W    = 0.17;
+            if (abs(r.y) > H) discard;
+            float t     = abs(r.y) / H;
+            float halfW = W * pow(1.0 - t, 0.55);
+            if (abs(r.x) > halfW) discard;
+            float edge = smoothstep(halfW, halfW * 0.5, abs(r.x));
+            float vein = smoothstep(0.012, 0.0, abs(r.x));
+            vec3  col  = mix(v_col, v_col * 1.55, vein * 0.35);
+            gl_FragColor = vec4(col, v_alpha * edge);
+        }
+    `;
+
+    function compileShader(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+    }
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, VS));
+    gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const locs = {
+        pos:  gl.getAttribLocation(prog, 'a_pos'),
+        size: gl.getAttribLocation(prog, 'a_size'),
+        rot:  gl.getAttribLocation(prog, 'a_rot'),
+        alp:  gl.getAttribLocation(prog, 'a_alpha'),
+        col:  gl.getAttribLocation(prog, 'a_col'),
+    };
+    const glBuf = gl.createBuffer();
+
+    const N      = 65;
+    const STRIDE = 8;
+    const data   = new Float32Array(N * STRIDE);
+
+    const LEAF_COLS = [
+        [0.07, 0.36, 0.09],
+        [0.11, 0.50, 0.11],
+        [0.17, 0.58, 0.13],
+        [0.05, 0.28, 0.07],
+        [0.19, 0.46, 0.08],
+        [0.09, 0.40, 0.05],
+        [0.22, 0.52, 0.10],
+    ];
+
+    let W = 1, H = 1;
+    const leaves = [];
+
+    function randLeaf(startY) {
+        const col = LEAF_COLS[Math.floor(Math.random() * LEAF_COLS.length)];
+        return {
+            x:     Math.random() * W,
+            y:     startY !== undefined ? startY : -20,
+            vx:    (Math.random() - 0.5) * 0.45,
+            vy:    0.25 + Math.random() * 0.65,
+            rot:   Math.random() * Math.PI * 2,
+            rotS:  (Math.random() - 0.5) * 0.024,
+            size:  32 + Math.random() * 42,
+            alpha: 0.55 + Math.random() * 0.38,
+            col:   col,
+            sway:  Math.random() * Math.PI * 2,
+            swayS: 0.008 + Math.random() * 0.018,
+            swayA: 0.18  + Math.random() * 0.45,
+        };
+    }
+
+    function initLeaves() {
+        leaves.length = 0;
+        for (let i = 0; i < N; i++) leaves.push(randLeaf(Math.random() * H));
+    }
+
+    function buildData() {
+        let i = 0;
+        for (const l of leaves) {
+            data[i++] = l.x / W * 2 - 1;
+            data[i++] = 1 - l.y / H * 2;
+            data[i++] = l.size;
+            data[i++] = l.rot;
+            data[i++] = l.alpha;
+            data[i++] = l.col[0];
+            data[i++] = l.col[1];
+            data[i++] = l.col[2];
+        }
+    }
+
+    function resize() {
+        const p = canvas.parentElement;
+        W = canvas.width  = p ? p.offsetWidth  : window.innerWidth;
+        H = canvas.height = p ? p.offsetHeight : window.innerHeight;
+        gl.viewport(0, 0, W, H);
+        initLeaves();
+    }
+
+    let animId, running = false;
+
+    function tick() {
+        for (const l of leaves) {
+            l.sway += l.swayS;
+            l.x    += l.vx + Math.sin(l.sway) * l.swayA;
+            l.y    += l.vy;
+            l.rot  += l.rotS;
+            if (l.y > H + l.size)     { Object.assign(l, randLeaf()); l.x = Math.random() * W; }
+            if (l.x < -(l.size + 20)) l.x = W + l.size;
+            if (l.x >   W + l.size)   l.x = -(l.size);
+        }
+        buildData();
+
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, glBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+
+        const bytes = STRIDE * 4;
+        gl.enableVertexAttribArray(locs.pos);
+        gl.vertexAttribPointer(locs.pos,  2, gl.FLOAT, false, bytes,  0);
+        gl.enableVertexAttribArray(locs.size);
+        gl.vertexAttribPointer(locs.size, 1, gl.FLOAT, false, bytes,  8);
+        gl.enableVertexAttribArray(locs.rot);
+        gl.vertexAttribPointer(locs.rot,  1, gl.FLOAT, false, bytes, 12);
+        gl.enableVertexAttribArray(locs.alp);
+        gl.vertexAttribPointer(locs.alp,  1, gl.FLOAT, false, bytes, 16);
+        gl.enableVertexAttribArray(locs.col);
+        gl.vertexAttribPointer(locs.col,  3, gl.FLOAT, false, bytes, 20);
+
+        gl.drawArrays(gl.POINTS, 0, N);
+        animId = requestAnimationFrame(tick);
+    }
+
+    function start() { if (!running) { running = true;  tick(); } }
+    function stop()  { if (running)  { running = false; cancelAnimationFrame(animId); } }
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    const stageEl = document.getElementById('stage-pragas-interativas');
+    if (stageEl) {
+        new IntersectionObserver(entries => {
+            entries[0].isIntersecting ? start() : stop();
+        }, { threshold: 0.05 }).observe(stageEl);
+    }
+})();
+
+// ==========================================
+// 11. SATELLITE LIGHTBOX
 // ==========================================
 (() => {
     const lightbox   = document.getElementById('satelliteLightbox');
