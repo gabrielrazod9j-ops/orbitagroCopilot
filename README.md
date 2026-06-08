@@ -12,7 +12,7 @@ FIAP — Global Solution 2026/1 | Disciplina: Front-End Design Engineering | Tur
 
 1. [Visao Geral](#visao-geral)
 2. [Como Rodar Localmente](#como-rodar-localmente)
-   - [⚠️ Pre-requisito — Extensao CORS](#️-pre-requisito-obrigatorio--extensao-cors-para-imagens-de-satelite)
+   - [Pre-requisito — Extensao CORS](#pre-requisito-obrigatorio--extensao-cors)
 3. [Tecnologias Utilizadas](#tecnologias-utilizadas)
 4. [Arquitetura do Projeto](#arquitetura-do-projeto)
 5. [Funcionalidades por Pagina](#funcionalidades-por-pagina)
@@ -20,7 +20,9 @@ FIAP — Global Solution 2026/1 | Disciplina: Front-End Design Engineering | Tur
 7. [Integracoes com APIs Externas](#integracoes-com-apis-externas)
 8. [Responsividade](#responsividade)
 9. [Boas Praticas Aplicadas](#boas-praticas-aplicadas)
-10. [Equipe](#equipe)
+10. [Screenshots](#screenshots)
+11. [Equipe](#equipe)
+12. [Contato](#contato)
 
 ---
 
@@ -61,7 +63,7 @@ cd orbitagroCopilot
 
 ---
 
-### ⚠️ Pre-requisito obrigatorio — Extensao CORS para imagens de satelite
+### Pre-requisito Obrigatorio — Extensao CORS
 
 As imagens NDVI e NDMI do satelite Sentinel-2 sao carregadas diretamente da API da ESA (European Space Agency). O navegador bloqueia essas requisicoes por padrao (politica de seguranca CORS — Cross-Origin Resource Sharing). **Sem a extensao, as imagens de satelite nao aparecem.**
 
@@ -722,6 +724,40 @@ O disco de acrecao e construido com 4 zonas que refletem fisica real de buracos 
 
 A particula nao teleporta — ela tem uma "casa" (posicao alvo) e uma velocidade de retorno (`returnForce = 0.024`) que a puxa suavemente para a posicao correta a cada frame.
 
+### Stage Chuva (script.js) — Chuva WebGL + Matrix Rain
+
+Dois sistemas de particulas sobrepostos criam o visual do estagio hidrico:
+
+| Sistema | Canvas | Tecnica | Detalhes |
+|---|---|---|---|
+| Matrix Rain | `#rainCanvas` | Canvas 2D | Colunas de caracteres com rastro de fade, classico efeito "Matrix" |
+| Chuva WebGL | `#glRainCanvas` | WebGL — `gl.TRIANGLES` | 320 gotas renderizadas como quads com gradiente alpha cabeca-cauda |
+
+**Geometria da gota WebGL:**
+
+Cada gota e representada por 2 triangulos (6 vertices). A cabeca da gota tem alpha maximo e a cauda vai a zero, simulando a perspectiva de uma gota em queda. O shader usa `blendFunc(SRC_ALPHA, ONE)` para blending aditivo — gotas sobrepostas ficam mais brilhantes.
+
+```glsl
+/* Fragment shader da chuva — cor azulada com transparencia variavel */
+gl_FragColor = vec4(0.82, 0.95, 1.0, v_t * 0.72);
+```
+
+**Interacao com `particleCanvas`:** O `IntersectionObserver` do stage-chuva também oculta o canvas global de estrelas (`particleCanvas`) via `display: none` ao entrar no viewport, evitando poluicao visual.
+
+### Stage Pragas (script.js) — Folhas WebGL
+
+65 folhas botanicamente corretas renderizadas com `GL_POINTS` e shader de forma no fragment:
+
+```glsl
+/* Forma de folha no fragment shader via gl_PointCoord */
+float H    = 0.44;            /* meia-altura */
+float W    = 0.20;            /* meia-largura maxima */
+float halfW = W * pow(1.0 - t, 0.55); /* afila nas pontas */
+float edge = 1.0 - smoothstep(halfW * 0.55, halfW, abs(r.x));
+```
+
+Cada folha tem: posicao (x, y), tamanho (42–88 px), rotacao, alpha (0.70–0.98) e cor de 7 variacoes de verde. A animacao usa movimento sinusoidal (sway) para simular folhas flutuando ao vento.
+
 ---
 
 ## Integracoes com APIs Externas
@@ -810,8 +846,6 @@ Turma **1TDSPF** — FIAP Sao Paulo — Global Solution 2026/1
 | <img src="assets/Matheus_Rodrigues.jpeg" width="80" alt="Matheus Rodrigues Serrão"> | **Matheus Rodrigues Serrão** | 570469 | Relational Database | [GitHub](https://github.com/MatheusRodriguesSerrao) · [LinkedIn](https://www.linkedin.com/in/matheus-rodrigues-06060a3a6/) |
 | <img src="assets/LuizHenrique572727.jpeg" width="80" alt="Luiz Henrique Alves Albarello"> | **Luiz Henrique Alves Albarello** | 572727 | Computational Thinking | [GitHub](https://github.com/LuizHenriqueAAlbarello) · [LinkedIn](https://www.linkedin.com/in/luiz-henrique-alves-albarello-82297b410/) |
 | <img src="assets/razo.01.jpeg" width="80" alt="Gabriel Razo Dantas"> | **Gabriel Razo Dantas** | 572244 | AI & Chatbot | [GitHub](https://github.com/gabrielrazod9j-ops) · [LinkedIn](https://www.linkedin.com/in/gabriel-razo-dantas-34724b301) |
-
----
 
 ---
 
