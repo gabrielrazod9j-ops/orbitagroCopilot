@@ -446,6 +446,100 @@ body.sub-page #particleCanvas {
 /* =========================================
    8. PÁGINA COMO FUNCIONA
    ========================================= */
+
+.cors-notice {
+  margin: 0 8vw 56px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 28px 32px;
+  border: 1px solid rgba(255, 200, 60, 0.35);
+  border-left: 4px solid rgba(255, 200, 60, 0.9);
+  border-radius: 12px;
+  background: rgba(255, 200, 60, 0.05);
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.cors-notice__icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.cors-notice__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cors-notice__tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 60, 0.9);
+}
+
+.cors-notice__title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.cors-notice__text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 0;
+}
+
+.cors-notice__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255, 200, 60, 0.12);
+  border: 1px solid rgba(255, 200, 60, 0.30);
+  color: rgba(255, 210, 80, 1);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  width: fit-content;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.cors-notice__link:hover {
+  background: rgba(255, 200, 60, 0.22);
+  border-color: rgba(255, 200, 60, 0.55);
+}
+
+.cors-notice__steps {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.cors-notice__steps li::marker {
+  color: rgba(255, 200, 60, 0.7);
+}
+
+@media (max-width: 768px) {
+  .cors-notice {
+    margin: 0 24px 40px;
+    padding: 20px 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
 .steps-section {
   padding: 0 8vw 80px;
   max-width: 1200px;

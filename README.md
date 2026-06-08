@@ -12,6 +12,7 @@ FIAP — Global Solution 2026/1 | Disciplina: Front-End Design Engineering | Tur
 
 1. [Visao Geral](#visao-geral)
 2. [Como Rodar Localmente](#como-rodar-localmente)
+   - [⚠️ Pre-requisito — Extensao CORS](#️-pre-requisito-obrigatorio--extensao-cors-para-imagens-de-satelite)
 3. [Tecnologias Utilizadas](#tecnologias-utilizadas)
 4. [Arquitetura do Projeto](#arquitetura-do-projeto)
 5. [Funcionalidades por Pagina](#funcionalidades-por-pagina)
@@ -57,6 +58,25 @@ cd orbitagroCopilot
 ```
 
 **Atencao:** Para que as APIs de geolocalizacao e clima funcionem corretamente, e recomendado usar um servidor local (como o Live Server do VS Code) em vez de abrir o arquivo diretamente (`file://`), pois navegadores modernos restringem acesso a APIs de localizacao em contextos inseguros.
+
+---
+
+### ⚠️ Pre-requisito obrigatorio — Extensao CORS para imagens de satelite
+
+As imagens NDVI e NDMI do satelite Sentinel-2 sao carregadas diretamente da API da ESA (European Space Agency). O navegador bloqueia essas requisicoes por padrao (politica de seguranca CORS — Cross-Origin Resource Sharing). **Sem a extensao, as imagens de satelite nao aparecem.**
+
+**Solucao:** Instale a extensao gratuita **Allow CORS: Access-Control-Allow-Origin** no Google Chrome:
+
+> 🔗 [Instalar Allow CORS — Chrome Web Store](https://chromewebstore.google.com/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf?hl=pt-PT&utm_source=ext_sidebar)
+
+**Como ativar:**
+
+1. Acesse o link acima e clique em **Usar no Chrome**
+2. Apos instalada, clique no icone da extensao (canto superior direito do Chrome)
+3. Ative o toggle para habilitar
+4. Recarregue o OrbitAgro Copilot — as imagens do satelite carregarao normalmente
+
+> **Obs:** A extensao so precisa estar ativa durante o uso do site. Pode ser desativada a qualquer momento pelo mesmo icone.
 
 ---
 
@@ -715,12 +735,14 @@ Fluxo de dados ao iniciar o Copilot:
 2. fetch('https://api.open-meteo.com/...')
       |
       v (temperatura, vento, chuva, AQI)
-3. URL Sentinel-2/NDVI  -->  <img> do mapa NDVI da regiao
-4. URL Sentinel-2/NDMI  -->  <img> do mapa hidrico da regiao
+3. Sentinel Hub OAuth  -->  token de acesso  -->  URL NDVI do Sentinel-2
+4. Sentinel Hub OAuth  -->  token de acesso  -->  URL NDMI do Sentinel-2
 5. agroDB[cultura].pragas  -->  hotspots calculados localmente (sem API)
 ```
 
 Todos os dados sao exibidos nos paineis flutuantes da home e atualizados a cada selecao de cultura pelo usuario.
+
+> **Importante — CORS:** As requisicoes ao Sentinel Hub passam por um proxy CORS (`corsproxy.io`) pois o browser bloqueia chamadas cross-origin por padrao. Alem disso, o usuario precisa ter a extensao **Allow CORS** ativa no Chrome para que as imagens sejam exibidas. Veja a secao [Pre-requisito](#️-pre-requisito-obrigatorio--extensao-cors-para-imagens-de-satelite) acima.
 
 ---
 
