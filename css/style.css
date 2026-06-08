@@ -2700,6 +2700,7 @@ label {
 #stage-chuva {
   position: relative;
   isolation: isolate;
+  background: #020408;
 }
 
 #rainCanvas {
