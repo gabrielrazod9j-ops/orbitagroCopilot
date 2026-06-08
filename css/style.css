@@ -2285,6 +2285,22 @@ label {
     padding: 80px 20px 60px;
   }
 
+  #stage-satelite,
+  #stage-chuva {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  #stage-satelite .telemetry-left,
+  #stage-satelite .telemetry-right,
+  #stage-satelite .soil-info-bar,
+  #stage-chuva .telemetry-left,
+  #stage-chuva .telemetry-right,
+  #stage-chuva .soil-info-bar {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
   .radio-cards {
     flex-wrap: wrap;
   }
