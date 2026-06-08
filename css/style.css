@@ -2305,7 +2305,7 @@ label {
   .top-right, .bottom-right { right: 4vw; }
 
   .viewer-border {
-    height: clamp(280px, 58vw, 400px);
+    height: 360px;
     border-radius: 14px;
   }
 
@@ -2378,9 +2378,14 @@ label {
     gap: 18px;
   }
 
+  .satellite-viewer {
+    width: 100vw;
+    margin-left: -16px;
+  }
+
   .viewer-border {
-    height: clamp(260px, 72vw, 340px);
-    border-radius: 12px;
+    height: 320px;
+    border-radius: 0;
   }
 
   .data-box .value {
