@@ -179,6 +179,173 @@ body.sub-page #particleCanvas {
   font-size: 15px;
 }
 
+<<<<<<< HEAD
+=======
+/* — Sobre: Badge Row ——————————————————————————— */
+.sobre-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.sobre-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.sobre-badge--green {
+  background: rgba(76, 175, 80, 0.12);
+  border-color: rgba(76, 175, 80, 0.28);
+  color: rgba(100, 220, 104, 0.9);
+}
+
+.sobre-badge--blue {
+  background: rgba(3, 169, 244, 0.10);
+  border-color: rgba(3, 169, 244, 0.28);
+  color: rgba(80, 195, 255, 0.9);
+}
+
+/* — Sobre: Manifesto ———————————————————————— */
+.sobre-manifesto {
+  padding: 80px 8vw;
+  background: rgba(76, 175, 80, 0.04);
+  border-top: 1px solid rgba(76, 175, 80, 0.10);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.10);
+}
+
+.sobre-manifesto__inner {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.sobre-manifesto__label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 24px;
+}
+
+.sobre-manifesto__quote {
+  font-size: clamp(1.3rem, 2.8vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text);
+  border: none;
+  margin: 0 0 28px;
+  padding: 0;
+  quotes: none;
+}
+
+.sobre-manifesto__quote::before,
+.sobre-manifesto__quote::after {
+  content: '';
+}
+
+.sobre-manifesto__body {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--muted);
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* — Sobre: Contexto Acadêmico ————————————————— */
+.sobre-context {
+  padding: 0 8vw 100px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sobre-context__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.sobre-context__card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.sobre-context__card--accent {
+  border-color: rgba(76, 175, 80, 0.22);
+  background: rgba(76, 175, 80, 0.04);
+}
+
+.sobre-context__label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--primary);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.sobre-context__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 14px;
+}
+
+.sobre-context__text {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--muted);
+  margin: 0;
+}
+
+.sobre-context__text + .sobre-context__text {
+  margin-top: 12px;
+}
+
+.sobre-context__card .lista-acao {
+  margin-top: 16px;
+}
+
+.sobre-context__stat-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(76, 175, 80, 0.12);
+}
+
+.sobre-context__stat-value {
+  display: block;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.sobre-context__stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  display: block;
+}
+
+>>>>>>> upstream/main
 /* =========================================
    6. PÁGINA FAQ (ACORDEÃO)
    ========================================= */
@@ -446,6 +613,103 @@ body.sub-page #particleCanvas {
 /* =========================================
    8. PÁGINA COMO FUNCIONA
    ========================================= */
+<<<<<<< HEAD
+=======
+
+.cors-notice {
+  margin: 0 8vw 56px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 28px 32px;
+  border: 1px solid rgba(255, 200, 60, 0.35);
+  border-left: 4px solid rgba(255, 200, 60, 0.9);
+  border-radius: 12px;
+  background: rgba(255, 200, 60, 0.05);
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.cors-notice__icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.cors-notice__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cors-notice__tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 60, 0.9);
+}
+
+.cors-notice__title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.cors-notice__text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 0;
+}
+
+.cors-notice__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255, 200, 60, 0.12);
+  border: 1px solid rgba(255, 200, 60, 0.30);
+  color: rgba(255, 210, 80, 1);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  width: fit-content;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.cors-notice__link:hover {
+  background: rgba(255, 200, 60, 0.22);
+  border-color: rgba(255, 200, 60, 0.55);
+}
+
+.cors-notice__steps {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.cors-notice__steps li::marker {
+  color: rgba(255, 200, 60, 0.7);
+}
+
+@media (max-width: 768px) {
+  .cors-notice {
+    margin: 0 24px 40px;
+    padding: 20px 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+>>>>>>> upstream/main
 .steps-section {
   padding: 0 8vw 80px;
   max-width: 1200px;
@@ -1048,6 +1312,26 @@ body.sub-page #particleCanvas {
     padding: 60px 24px 40px;
   }
 
+<<<<<<< HEAD
+=======
+  .sobre-manifesto {
+    padding: 60px 24px;
+  }
+
+  .sobre-context {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .sobre-context__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sobre-context__stat-row {
+    gap: 20px;
+  }
+
+>>>>>>> upstream/main
   .faq-section,
   .solution-section,
   .tech-section,
@@ -1096,6 +1380,22 @@ body.sub-page #particleCanvas {
     padding: 50px 16px 32px;
   }
 
+<<<<<<< HEAD
+=======
+  .sobre-manifesto {
+    padding: 48px 16px;
+  }
+
+  .sobre-context {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .sobre-badge-row {
+    gap: 8px;
+  }
+
+>>>>>>> upstream/main
   .page-hero h1,
   .page-hero h2 {
     font-size: 2rem;
