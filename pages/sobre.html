@@ -49,43 +49,185 @@
 
   <main class="sub-page-main">
 
+    <!-- 1. Hero -->
     <section class="page-hero">
       <span class="page-tag">O Projeto</span>
       <h2>OrbitAgro Copilot</h2>
-      <!-- Apresentação da ideia do projeto -->
       <p>Inteligência climática e produtiva para pequenos e médios produtores. Um copiloto que traduz dados de satélite, clima e sinais da lavoura em ações práticas — em linguagem simples.</p>
+      <div class="sobre-badge-row" aria-label="Tecnologias do projeto">
+        <span class="sobre-badge sobre-badge--green">HTML5</span>
+        <span class="sobre-badge sobre-badge--green">CSS3</span>
+        <span class="sobre-badge sobre-badge--green">JavaScript ES6+</span>
+        <span class="sobre-badge sobre-badge--green">WebGL / GLSL</span>
+        <span class="sobre-badge sobre-badge--blue">Sentinel Hub</span>
+        <span class="sobre-badge sobre-badge--blue">OpenWeather</span>
+        <span class="sobre-badge sobre-badge--blue">Gemini AI</span>
+        <span class="sobre-badge sobre-badge--blue">Geolocation API</span>
+        <span class="sobre-badge">FIAP GS 2026/1</span>
+      </div>
     </section>
 
-    <section class="sobre-section" aria-label="Descrição detalhada do projeto">
-      <!-- Problema -->
-      <div class="glass-card">
-        <h2>O que trava a produtividade</h2>
-        <p>Pequenos e médios produtores enfrentam perdas significativas quando o momento certo de agir não fica claro. Os principais fatores são:</p>
-        <ul class="lista-acao">
-          <li>Seca e chuva imprevisível, tornando o planejamento difícil</li>
-          <li>Atraso na identificação de pragas e estresse na planta</li>
-          <li>Falta de leitura simples do que o clima realmente indica</li>
-          <li>Dificuldade em interpretar dados de satélite e transformá-los em decisão</li>
-          <li>Pouco acesso a ferramentas caras de agricultura de precisão</li>
-        </ul>
+    <!-- 2. Manifesto / Missão -->
+    <section class="sobre-manifesto" aria-label="Nossa missão">
+      <div class="sobre-manifesto__inner">
+        <span class="sobre-manifesto__label">Nossa Missão</span>
+        <blockquote class="sobre-manifesto__quote">
+          "O campo brasileiro não precisa de mais dados — precisa de dados que falem a língua de quem planta."
+        </blockquote>
+        <p class="sobre-manifesto__body">
+          O OrbitAgro Copilot foi criado para fechar a lacuna entre a agricultura de precisão e o produtor rural que não tem acesso a consultores ou equipamentos caros. Combinamos imagens de satélite, previsão climática e inteligência artificial para entregar uma orientação que qualquer produtor consiga entender e agir — em menos de dois minutos.
+        </p>
       </div>
-      <!-- Solução -->
-      <div class="glass-card sobre-card-secondary">
-        <h2>O que o OrbitAgro faz</h2>
-        <p>Ajuda você a registrar a lavoura e receber orientações inteligentes. O sistema combina cultura selecionada, dias sem chuva, temperatura, chuva prevista, sinais observados e condições de solo:</p>
-        <ul class="lista-acao">
-          <li>Satélite + dados espaciais: indica variações e possíveis áreas com risco</li>
-          <li>Clima: interpreta previsões e padrões para os próximos dias</li>
-          <li>Sintomas no campo: o produtor registra o que percebe e melhora a precisão</li>
-          <li>IA recomenda: ações práticas, priorizadas e fáceis de executar</li>
-        </ul>
-        <!-- exemplo de uma resposta -->
-        <div class="exemplo-resposta">
-          <p>Exemplo de resposta do Copilot:</p>
-          <p>"Sua lavoura está com risco alto de estresse hídrico nos próximos 5 dias. Priorize irrigação no talhão X, evite adubação antes da chuva e monitore sinais de praga."</p>
-        </div>
-      </div>
+    </section>
 
+    <!-- 3. Números de Impacto -->
+    <section class="impact-section" aria-label="Dimensão do problema">
+      <h2 class="section-title">Por que isso importa</h2>
+      <p class="section-sub">O agronegócio brasileiro é gigante. As ferramentas de precisão, ainda inacessíveis para a maioria.</p>
+
+      <div class="impact-grid">
+        <article class="impact-card">
+          <p class="impact-number">4.9M</p>
+          <p>estabelecimentos agropecuários no Brasil que podem se beneficiar do monitoramento por satélite</p>
+        </article>
+        <article class="impact-card">
+          <p class="impact-number">30%</p>
+          <p>redução potencial em perdas de produção quando pragas são detectadas antes dos sintomas visuais</p>
+        </article>
+        <article class="impact-card">
+          <p class="impact-number">5 dias</p>
+          <p>frequência de atualização das imagens Sentinel-2, permitindo monitoramento contínuo da lavoura</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 4. Problema e Solução -->
+    <section class="solution-section" aria-label="Problema e proposta do OrbitAgro">
+      <div class="solution-grid">
+
+        <article class="solution-card">
+          <span class="card-icon" aria-hidden="true">⚠️</span>
+          <h2>O que trava a produtividade</h2>
+          <p>Pequenos e médios produtores enfrentam perdas significativas quando o momento certo de agir não fica claro. Os principais fatores:</p>
+          <ul>
+            <li>Seca e chuva imprevisível, tornando o planejamento difícil</li>
+            <li>Atraso na identificação de pragas e estresse hídrico</li>
+            <li>Falta de leitura simples do que o clima realmente indica</li>
+            <li>Dificuldade em interpretar dados de satélite sem especialistas</li>
+            <li>Exclusão das ferramentas de precisão por custo elevado</li>
+          </ul>
+        </article>
+
+        <article class="solution-card accent">
+          <span class="card-icon" aria-hidden="true">🛰️</span>
+          <h2>O que o OrbitAgro entrega</h2>
+          <p>Combinando cultura selecionada, dados climáticos, imagens de satélite e sintomas observados, o sistema entrega orientações práticas e priorizadas:</p>
+          <ul>
+            <li>NDVI e NDMI via satélite: identifica variações e áreas em risco</li>
+            <li>Clima em tempo real: interpreta previsões para os próximos dias</li>
+            <li>Catálogo de pragas: identificação visual por cultura</li>
+            <li>Copilot de IA: recomendações claras geradas pelo Gemini</li>
+            <li>Interface acessível: sem necessidade de treinamento técnico</li>
+          </ul>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- 5. Stack Tecnológico -->
+    <section class="tech-section" aria-label="Tecnologias utilizadas">
+      <h2 class="section-title">Stack Tecnológico</h2>
+      <p class="section-sub">100% front-end, sem frameworks. HTML semântico, CSS modular e JavaScript puro integrados a APIs de classe mundial.</p>
+
+      <div class="tech-grid">
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">🌐</span>
+          <h3>Frontend</h3>
+          <p>HTML5 semântico, CSS3 modular e JavaScript ES6+. Nenhum framework externo — layout responsivo construído do zero com Grid e Flexbox nativos.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">✨</span>
+          <h3>WebGL + Canvas</h3>
+          <p>Motor de partículas e animações em WebGL com shaders GLSL customizados. Chuva, folhas e estrelas renderizadas sem Three.js ou bibliotecas externas.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">🧠</span>
+          <h3>Gemini AI</h3>
+          <p>Google Gemini 1.5 Flash para o Copilot agronômico. Processa dados de satélite, clima e pragas e gera diagnósticos em linguagem acessível ao produtor.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">🌦️</span>
+          <h3>OpenWeather API</h3>
+          <p>Dados climáticos em tempo real — temperatura, umidade, precipitação e previsão de 5 dias para a coordenada exata da lavoura do produtor.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">🛰️</span>
+          <h3>Sentinel Hub</h3>
+          <p>Imagens multiespectrais dos satélites Sentinel-2 da ESA. Resolução de 10 m/pixel para mapas NDVI (vegetação) e NDMI (umidade foliar) em tempo real.</p>
+        </article>
+
+        <article class="tech-card">
+          <span class="tech-icon" aria-hidden="true">📍</span>
+          <h3>Geolocation API</h3>
+          <p>API nativa do navegador para capturar latitude e longitude do dispositivo. Geolocalização automática da lavoura sem configuração manual pelo produtor.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- 6. Contexto Acadêmico -->
+    <section class="sobre-context" aria-label="Contexto acadêmico do projeto">
+      <h2 class="section-title">Contexto Acadêmico</h2>
+      <p class="section-sub">Desenvolvido na FIAP como resposta ao desafio semestral de maior escala da instituição.</p>
+
+      <div class="sobre-context__grid">
+
+        <div class="sobre-context__card sobre-context__card--accent">
+          <span class="sobre-context__label">Global Solution 2026/1</span>
+          <h3 class="sobre-context__title">O Desafio</h3>
+          <p class="sobre-context__text">
+            A FIAP Global Solution é um hackathon semestral onde turmas de diferentes cursos desenvolvem soluções tecnológicas para problemas reais de alta complexidade. No primeiro semestre de 2026, o tema central é segurança alimentar e agricultura sustentável — desafios críticos para o Brasil e o mundo.
+          </p>
+          <p class="sobre-context__text">
+            O OrbitAgro Copilot é a resposta da turma 1TDSPF ao desafio: como democratizar o acesso à agricultura de precisão para quem mais precisa?
+          </p>
+          <div class="sobre-context__stat-row">
+            <div class="sobre-context__stat">
+              <span class="sobre-context__stat-value">2026</span>
+              <span class="sobre-context__stat-label">1º Semestre</span>
+            </div>
+            <div class="sobre-context__stat">
+              <span class="sobre-context__stat-value">1T</span>
+              <span class="sobre-context__stat-label">Turma 1TDSPF</span>
+            </div>
+            <div class="sobre-context__stat">
+              <span class="sobre-context__stat-value">GS</span>
+              <span class="sobre-context__stat-label">Global Solution</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sobre-context__card">
+          <span class="sobre-context__label">Critérios de Entrega</span>
+          <h3 class="sobre-context__title">Regras do Projeto</h3>
+          <p class="sobre-context__text">
+            A FIAP exige que toda a solução seja construída com tecnologias fundamentais — sem Bootstrap, jQuery, React ou Vue. Cada linha de CSS e JavaScript foi escrita do zero, comprovando domínio real das bases da web moderna.
+          </p>
+          <ul class="lista-acao">
+            <li>Frontend puro: sem frameworks ou bibliotecas de UI</li>
+            <li>CSS modular com variáveis nativas e custom properties</li>
+            <li>JavaScript ES6+ sem dependências externas de terceiros</li>
+            <li>APIs reais integradas com fetch e tratamento de erros</li>
+            <li>Deploy estático funcional em ambiente de produção</li>
+          </ul>
+        </div>
+
+      </div>
     </section>
 
   </main>

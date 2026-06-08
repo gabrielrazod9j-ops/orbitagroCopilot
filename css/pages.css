@@ -179,6 +179,170 @@ body.sub-page #particleCanvas {
   font-size: 15px;
 }
 
+/* — Sobre: Badge Row ——————————————————————————— */
+.sobre-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.sobre-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.sobre-badge--green {
+  background: rgba(76, 175, 80, 0.12);
+  border-color: rgba(76, 175, 80, 0.28);
+  color: rgba(100, 220, 104, 0.9);
+}
+
+.sobre-badge--blue {
+  background: rgba(3, 169, 244, 0.10);
+  border-color: rgba(3, 169, 244, 0.28);
+  color: rgba(80, 195, 255, 0.9);
+}
+
+/* — Sobre: Manifesto ———————————————————————— */
+.sobre-manifesto {
+  padding: 80px 8vw;
+  background: rgba(76, 175, 80, 0.04);
+  border-top: 1px solid rgba(76, 175, 80, 0.10);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.10);
+}
+
+.sobre-manifesto__inner {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.sobre-manifesto__label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 24px;
+}
+
+.sobre-manifesto__quote {
+  font-size: clamp(1.3rem, 2.8vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text);
+  border: none;
+  margin: 0 0 28px;
+  padding: 0;
+  quotes: none;
+}
+
+.sobre-manifesto__quote::before,
+.sobre-manifesto__quote::after {
+  content: '';
+}
+
+.sobre-manifesto__body {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--muted);
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* — Sobre: Contexto Acadêmico ————————————————— */
+.sobre-context {
+  padding: 0 8vw 100px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sobre-context__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.sobre-context__card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.sobre-context__card--accent {
+  border-color: rgba(76, 175, 80, 0.22);
+  background: rgba(76, 175, 80, 0.04);
+}
+
+.sobre-context__label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--primary);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.sobre-context__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 14px;
+}
+
+.sobre-context__text {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--muted);
+  margin: 0;
+}
+
+.sobre-context__text + .sobre-context__text {
+  margin-top: 12px;
+}
+
+.sobre-context__card .lista-acao {
+  margin-top: 16px;
+}
+
+.sobre-context__stat-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(76, 175, 80, 0.12);
+}
+
+.sobre-context__stat-value {
+  display: block;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.sobre-context__stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  display: block;
+}
+
 /* =========================================
    6. PÁGINA FAQ (ACORDEÃO)
    ========================================= */
@@ -1142,6 +1306,23 @@ body.sub-page #particleCanvas {
     padding: 60px 24px 40px;
   }
 
+  .sobre-manifesto {
+    padding: 60px 24px;
+  }
+
+  .sobre-context {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .sobre-context__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sobre-context__stat-row {
+    gap: 20px;
+  }
+
   .faq-section,
   .solution-section,
   .tech-section,
@@ -1188,6 +1369,19 @@ body.sub-page #particleCanvas {
 @media (max-width: 480px) {
   .page-hero {
     padding: 50px 16px 32px;
+  }
+
+  .sobre-manifesto {
+    padding: 48px 16px;
+  }
+
+  .sobre-context {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .sobre-badge-row {
+    gap: 8px;
   }
 
   .page-hero h1,
