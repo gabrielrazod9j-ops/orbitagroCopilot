@@ -2305,7 +2305,7 @@ label {
   .top-right, .bottom-right { right: 4vw; }
 
   .viewer-border {
-    height: clamp(280px, 58vw, 400px);
+    height: 360px;
     border-radius: 14px;
   }
 
@@ -2379,7 +2379,7 @@ label {
   }
 
   .viewer-border {
-    height: clamp(260px, 72vw, 340px);
+    height: 320px;
     border-radius: 12px;
   }
 
