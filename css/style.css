@@ -2378,9 +2378,14 @@ label {
     gap: 18px;
   }
 
+  .satellite-viewer {
+    width: 100vw;
+    margin-left: -16px;
+  }
+
   .viewer-border {
     height: 320px;
-    border-radius: 12px;
+    border-radius: 0;
   }
 
   .data-box .value {
