@@ -1566,64 +1566,65 @@ if (savedCrop && agroDB[savedCrop]) {
     const canvas = document.getElementById('rainCanvas');
     if (!canvas) return;
 
-    const ctx   = canvas.getContext('2d');
-    const COUNT = 60;
-    const drops = [];
-    let   animId, running = false;
+    const ctx    = canvas.getContext('2d');
+    const CHARS  = '01%°~·×▪01%'.split('');
+    const FS     = 13;
+    const TRAIL  = 7;
+    let cols = [], animId, running = false;
+
+    function randChar() { return CHARS[Math.floor(Math.random() * CHARS.length)]; }
 
     function resize() {
-        const parent = canvas.parentElement;
-        canvas.width  = parent ? parent.offsetWidth  : window.innerWidth;
-        canvas.height = parent ? parent.offsetHeight : window.innerHeight;
+        const p = canvas.parentElement;
+        canvas.width  = p ? p.offsetWidth  : window.innerWidth;
+        canvas.height = p ? p.offsetHeight : window.innerHeight;
+        init();
     }
 
-    function initDrops() {
-        drops.length = 0;
-        for (let i = 0; i < COUNT; i++) {
-            drops.push({
-                x:       Math.random() * canvas.width,
-                y:       Math.random() * canvas.height,
-                speed:   3.5 + Math.random() * 3.5,
-                len:     12  + Math.random() * 24,
-                opacity: 0.06 + Math.random() * 0.22,
+    function init() {
+        const spacing = Math.max(28, Math.floor(canvas.width / 14));
+        const count   = Math.floor(canvas.width / spacing);
+        cols = [];
+        for (let i = 0; i < count; i++) {
+            cols.push({
+                x:     spacing * i + spacing / 2,
+                y:     -Math.random() * canvas.height,
+                speed: 1.2 + Math.random() * 1.4,
+                head:  randChar(),
             });
         }
     }
 
     function tick() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const sinA = Math.sin(-0.18);
-        const cosA = Math.cos(-0.18);
+        ctx.font = `bold ${FS}px monospace`;
 
-        drops.forEach(d => {
-            ctx.beginPath();
-            ctx.moveTo(d.x, d.y);
-            ctx.lineTo(d.x + sinA * d.len, d.y + cosA * d.len);
-            ctx.strokeStyle = `rgba(148, 202, 255, ${d.opacity})`;
-            ctx.lineWidth   = 0.75;
-            ctx.stroke();
-
-            d.x += sinA * d.speed * 0.55;
-            d.y += cosA * d.speed;
-
-            if (d.y > canvas.height + d.len) {
-                d.y = -d.len;
-                d.x = Math.random() * (canvas.width + 40) - 20;
-                d.speed   = 3.5 + Math.random() * 3.5;
-                d.len     = 12  + Math.random() * 24;
-                d.opacity = 0.06 + Math.random() * 0.22;
+        cols.forEach(col => {
+            for (let t = TRAIL; t >= 0; t--) {
+                const yy = col.y - t * FS;
+                if (yy < -FS || yy > canvas.height) continue;
+                const alpha = t === 0 ? 0.80 : ((TRAIL - t) / TRAIL) * 0.22;
+                ctx.fillStyle = t === 0
+                    ? `rgba(190, 240, 255, ${alpha})`
+                    : `rgba(30, 160, 255, ${alpha})`;
+                ctx.fillText(t === 0 ? col.head : randChar(), col.x, yy);
+            }
+            col.y += col.speed;
+            if (Math.random() < 0.06) col.head = randChar();
+            if (col.y - TRAIL * FS > canvas.height) {
+                col.y     = -FS * 2;
+                col.speed = 1.2 + Math.random() * 1.4;
+                col.head  = randChar();
             }
         });
         animId = requestAnimationFrame(tick);
     }
 
-    function start() { if (!running) { running = true;  tick();                           } }
-    function stop()  { if (running)  { running = false; cancelAnimationFrame(animId);     } }
+    function start() { if (!running) { running = true;  tick(); } }
+    function stop()  { if (running)  { running = false; cancelAnimationFrame(animId); } }
 
     resize();
-    initDrops();
-
-    window.addEventListener('resize', () => { resize(); initDrops(); });
+    window.addEventListener('resize', resize);
 
     const stageEl = document.getElementById('stage-chuva');
     if (stageEl) {
