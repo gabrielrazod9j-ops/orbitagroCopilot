@@ -2378,9 +2378,22 @@ label {
     gap: 18px;
   }
 
+  #stage-satelite,
+  #stage-chuva {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   .satellite-viewer {
-    width: 100vw;
-    margin-left: -16px;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .telemetry-left,
+  .telemetry-right,
+  .soil-info-bar {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .viewer-border {
