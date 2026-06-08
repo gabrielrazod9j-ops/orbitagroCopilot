@@ -179,6 +179,8 @@ body.sub-page #particleCanvas {
   font-size: 15px;
 }
 
+<<<<<<< HEAD
+=======
 /* — Sobre: Badge Row ——————————————————————————— */
 .sobre-badge-row {
   display: flex;
@@ -343,6 +345,7 @@ body.sub-page #particleCanvas {
   display: block;
 }
 
+>>>>>>> upstream/main
 /* =========================================
    6. PÁGINA FAQ (ACORDEÃO)
    ========================================= */
@@ -610,6 +613,8 @@ body.sub-page #particleCanvas {
 /* =========================================
    8. PÁGINA COMO FUNCIONA
    ========================================= */
+<<<<<<< HEAD
+=======
 
 .cors-notice {
   margin: 0 8vw 56px;
@@ -704,6 +709,7 @@ body.sub-page #particleCanvas {
   }
 }
 
+>>>>>>> upstream/main
 .steps-section {
   padding: 0 8vw 80px;
   max-width: 1200px;
@@ -1306,6 +1312,8 @@ body.sub-page #particleCanvas {
     padding: 60px 24px 40px;
   }
 
+<<<<<<< HEAD
+=======
   .sobre-manifesto {
     padding: 60px 24px;
   }
@@ -1323,6 +1331,7 @@ body.sub-page #particleCanvas {
     gap: 20px;
   }
 
+>>>>>>> upstream/main
   .faq-section,
   .solution-section,
   .tech-section,
@@ -1371,6 +1380,8 @@ body.sub-page #particleCanvas {
     padding: 50px 16px 32px;
   }
 
+<<<<<<< HEAD
+=======
   .sobre-manifesto {
     padding: 48px 16px;
   }
@@ -1384,6 +1395,7 @@ body.sub-page #particleCanvas {
     gap: 8px;
   }
 
+>>>>>>> upstream/main
   .page-hero h1,
   .page-hero h2 {
     font-size: 2rem;
