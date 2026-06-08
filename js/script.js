@@ -84,7 +84,7 @@ const agroDB = {
     "soja": { 
         nome: "Soja", 
         ranking: "1º Liderança Nacional", 
-        imagem: "assets/soja.png", 
+        imagem: "assets/Soja.png",
         solo: "Solos profundos e bem drenados. Ph ideal 6.0 a 6.5.", 
         manejo: "Requer inoculação bacteriana. Plantio direto.",
         lat: -13.06, 
@@ -157,7 +157,7 @@ const agroDB = {
     "milho": { 
         nome: "Milho", 
         ranking: "3º Commodity no Brasil", 
-        imagem: "assets/milho.png", 
+        imagem: "assets/Milho.png",
         solo: "Solos férteis, de textura média e ricos em matéria orgânica.", 
         manejo: "Sucessão de culturas (soja/milho) é crucial.",
         lat: -17.79, 
