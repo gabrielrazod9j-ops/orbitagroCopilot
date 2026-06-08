@@ -12,10 +12,7 @@ FIAP — Global Solution 2026/1 | Disciplina: Front-End Design Engineering | Tur
 
 1. [Visao Geral](#visao-geral)
 2. [Como Rodar Localmente](#como-rodar-localmente)
-<<<<<<< HEAD
-=======
    - [⚠️ Pre-requisito — Extensao CORS](#️-pre-requisito-obrigatorio--extensao-cors-para-imagens-de-satelite)
->>>>>>> upstream/main
 3. [Tecnologias Utilizadas](#tecnologias-utilizadas)
 4. [Arquitetura do Projeto](#arquitetura-do-projeto)
 5. [Funcionalidades por Pagina](#funcionalidades-por-pagina)
