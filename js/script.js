@@ -1663,7 +1663,7 @@ if (savedCrop && agroDB[savedCrop]) {
         precision mediump float;
         varying float v_t;
         void main() {
-            gl_FragColor = vec4(0.78, 0.93, 1.0, v_t * 0.52);
+            gl_FragColor = vec4(0.82, 0.95, 1.0, v_t * 0.72);
         }
     `;
 
@@ -1683,7 +1683,7 @@ if (savedCrop && agroDB[savedCrop]) {
     const aTLoc   = gl.getAttribLocation(prog, 'a_t');
     const glBuf   = gl.createBuffer();
 
-    const N     = 280;
+    const N     = 320;
     const VERTS = 6;
     const STR   = 3;
     const vData = new Float32Array(N * VERTS * STR);
@@ -1699,10 +1699,10 @@ if (savedCrop && agroDB[savedCrop]) {
         return {
             x:   Math.random() * W,
             y:   Math.random() * H,
-            len: 22 + Math.random() * 52,
-            wid: 0.7 + Math.random() * 0.9,
+            len: 28 + Math.random() * 60,
+            wid: 1.5 + Math.random() * 2.5,
             spd: 9   + Math.random() * 16,
-            alp: 0.35 + Math.random() * 0.65,
+            alp: 0.45 + Math.random() * 0.55,
         };
     }
 
@@ -1830,14 +1830,14 @@ if (savedCrop && agroDB[savedCrop]) {
             vec2  r    = vec2(cosA * uv.x - sinA * uv.y,
                               sinA * uv.x + cosA * uv.y);
             float H    = 0.44;
-            float W    = 0.17;
+            float W    = 0.20;
             if (abs(r.y) > H) discard;
             float t     = abs(r.y) / H;
             float halfW = W * pow(1.0 - t, 0.55);
             if (abs(r.x) > halfW) discard;
-            float edge = smoothstep(halfW, halfW * 0.5, abs(r.x));
-            float vein = smoothstep(0.012, 0.0, abs(r.x));
-            vec3  col  = mix(v_col, v_col * 1.55, vein * 0.35);
+            float edge = 1.0 - smoothstep(halfW * 0.55, halfW, abs(r.x));
+            float vein = 1.0 - smoothstep(0.0, 0.015, abs(r.x));
+            vec3  col  = mix(v_col, v_col * 1.6, vein * 0.4);
             gl_FragColor = vec4(col, v_alpha * edge);
         }
     `;
@@ -1868,13 +1868,13 @@ if (savedCrop && agroDB[savedCrop]) {
     const data   = new Float32Array(N * STRIDE);
 
     const LEAF_COLS = [
-        [0.07, 0.36, 0.09],
-        [0.11, 0.50, 0.11],
-        [0.17, 0.58, 0.13],
-        [0.05, 0.28, 0.07],
-        [0.19, 0.46, 0.08],
-        [0.09, 0.40, 0.05],
-        [0.22, 0.52, 0.10],
+        [0.10, 0.48, 0.12],
+        [0.16, 0.64, 0.15],
+        [0.22, 0.70, 0.16],
+        [0.08, 0.38, 0.10],
+        [0.24, 0.58, 0.10],
+        [0.13, 0.52, 0.08],
+        [0.28, 0.65, 0.13],
     ];
 
     let W = 1, H = 1;
@@ -1889,8 +1889,8 @@ if (savedCrop && agroDB[savedCrop]) {
             vy:    0.25 + Math.random() * 0.65,
             rot:   Math.random() * Math.PI * 2,
             rotS:  (Math.random() - 0.5) * 0.024,
-            size:  32 + Math.random() * 42,
-            alpha: 0.55 + Math.random() * 0.38,
+            size:  42 + Math.random() * 46,
+            alpha: 0.70 + Math.random() * 0.28,
             col:   col,
             sway:  Math.random() * Math.PI * 2,
             swayS: 0.008 + Math.random() * 0.018,
