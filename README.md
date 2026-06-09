@@ -81,7 +81,6 @@ As imagens NDVI e NDMI do satelite Sentinel-2 sao carregadas diretamente da API 
 > **Obs:** A extensao so precisa estar ativa durante o uso do site. Pode ser desativada a qualquer momento pelo mesmo icone.
 
 ---
-
 ## Tecnologias Utilizadas
 
 ### HTML5 — A Estrutura Semantica
@@ -778,7 +777,8 @@ Fluxo de dados ao iniciar o Copilot:
 
 Todos os dados sao exibidos nos paineis flutuantes da home e atualizados a cada selecao de cultura pelo usuario.
 
-> **Importante — CORS:** As requisicoes ao Sentinel Hub passam por um proxy CORS (`corsproxy.io`) pois o browser bloqueia chamadas cross-origin por padrao. Alem disso, o usuario precisa ter a extensao **Allow CORS** ativa no Chrome para que as imagens sejam exibidas. Veja a secao [Pre-requisito](#️-pre-requisito-obrigatorio--extensao-cors-para-imagens-de-satelite) acima.
+
+> **Importante — CORS:** As requisicoes ao Sentinel Hub passam por um proxy CORS (`corsproxy.io`) pois o browser bloqueia chamadas cross-origin por padrao. Alem disso, o usuario precisa ter a extensao **Allow CORS** ativa no Chrome para que as imagens sejam exibidas. Veja a secao [Pre-requisito](#pre-requisito-obrigatorio--extensao-cors) acima.
 
 ---
 
